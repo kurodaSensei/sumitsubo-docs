@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,200..800&family=Spline+Sans:wght@300..700&family=Martian+Mono:wdth,wght@75..112,100..800&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:var(--accent,#80AE67);text-decoration:underline;text-underline-offset:3px}
+a:hover{color:var(--text,#EDE7DD)}
+::selection{background:#80AE67;color:#0E1107}
+</style>
+</helmet>
+<div style="{{ rootStyle }}">
+<a href="#main" style="position:absolute;left:-9999px;top:8px;padding:12px 16px;background:var(--accent);color:var(--accentC);font-family:'Martian Mono',monospace;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.08em;z-index:10" style-focus="left:8px;outline:2px solid var(--focus);outline-offset:2px">{{ s.skip }}</a>
+
+<header style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:12px clamp(1rem,4vw,2.5rem);border-bottom:1px solid var(--divider)">
+  <button onClick="{{ goLanding }}" style="display:flex;align-items:baseline;gap:12px;background:none;border:0;padding:8px 0;min-height:44px;cursor:pointer;color:var(--text)" style-focus="outline:2px solid var(--focus);outline-offset:2px">
+    <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-variation-settings:'wdth' 85;font-size:1.3rem;letter-spacing:0.06em">SUMITSUBO</span>
+    <span style="font-family:'Martian Mono',monospace;font-size:0.75rem;color:var(--muted)">墨壺</span>
+  </button>
+  <nav aria-label="Principal" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+    <button onClick="{{ goLanding }}" aria-current="{{ navHomeCur }}" style="min-height:44px;padding:0 16px;background:none;border:0;border-bottom:2px solid {{ navHomeLine }};color:var(--text);font-family:'Martian Mono',monospace;font-weight:500;font-size:0.75rem;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer" style-focus="outline:2px solid var(--focus);outline-offset:2px">{{ s.navHome }}</button>
+    <button onClick="{{ goReference }}" aria-current="{{ navRefCur }}" style="min-height:44px;padding:0 16px;background:none;border:0;border-bottom:2px solid {{ navRefLine }};color:var(--text);font-family:'Martian Mono',monospace;font-weight:500;font-size:0.75rem;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer" style-focus="outline:2px solid var(--focus);outline-offset:2px">{{ s.navRef }}</button>
+    <div role="group" aria-label="Idioma" style="display:flex">
+      <button onClick="{{ setEs }}" aria-pressed="{{ isEs }}" style="min-width:44px;min-height:44px;background:{{ esBg }};color:{{ esFg }};border:1px solid var(--border);font-family:'Martian Mono',monospace;font-weight:600;font-size:0.75rem;letter-spacing:0.08em;cursor:pointer" style-focus="outline:2px solid var(--focus);outline-offset:2px">ES</button>
+      <button onClick="{{ setEn }}" aria-pressed="{{ isEn }}" style="min-width:44px;min-height:44px;background:{{ enBg }};color:{{ enFg }};border:1px solid var(--border);border-left:0;font-family:'Martian Mono',monospace;font-weight:600;font-size:0.75rem;letter-spacing:0.08em;cursor:pointer" style-focus="outline:2px solid var(--focus);outline-offset:2px">EN</button>
+    </div>
+    <button onClick="{{ toggleTheme }}" aria-label="{{ s.themeLabel }}" style="min-width:44px;min-height:44px;padding:0 12px;background:none;color:var(--text);border:1px solid var(--border);font-family:'Martian Mono',monospace;font-weight:500;font-size:0.75rem;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;gap:8px" style-focus="outline:2px solid var(--focus);outline-offset:2px">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="3" width="14" height="14"></rect><path d="M10 3v14"></path></svg>
+      <span>{{ s.themeName }}</span>
+    </button>
+  </nav>
+</header>
+
+<main id="main" style="max-width:90rem;margin:0 auto;padding:0 clamp(1rem,4vw,2.5rem) clamp(4rem,9vh,8rem)">
+
+<sc-if value="{{ isLanding }}" hint-placeholder-val="{{ true }}">
+<section aria-labelledby="manifesto" data-screen-label="01 Landing" style="padding-top:clamp(3rem,9vh,7rem)">
+  <p style="margin:0 0 32px;font-family:'Martian Mono',monospace;font-weight:500;font-size:0.75rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);font-variation-settings:'wdth' 100">{{ s.meta }}</p>
+  <h1 id="manifesto" style="margin:0;font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-variation-settings:'wdth' 85;font-size:clamp(3.25rem,9vw,7.5rem);line-height:0.92;letter-spacing:-0.03em;max-width:12ch;text-wrap:balance">It marks the true line before any cut is made.</h1>
+  <div style="margin-top:clamp(2.5rem,6vh,4.5rem);height:1px;background:var(--divider)"></div>
+
+  <div style="position:relative;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));row-gap:2px;margin-top:2px">
+    <div style="{{ seamStyle }}"></div>
+    <div data-reveal="intro" style="{{ introStyle }}">
+      <div style="padding:clamp(1.5rem,3vw,2.5rem);background:var(--raised);clip-path:polygon(0 0,calc(100% - 20px) 0,100% 20px,100% 100%,0 100%)">
+        <p style="margin:0;max-width:68ch;font-family:'Spline Sans',sans-serif;font-size:1.0625rem;line-height:1.65;text-wrap:pretty">Sumitsubo is the Japanese carpenter's ink line. This framework does the same — direction first, then the work. It encodes how a senior design engineer works: process that scales with the request, code quality without slop, accessibility and performance as acceptance criteria, and — above all — design that doesn't look like every other AI-generated site.</p>
+      </div>
+    </div>
+    <div data-reveal="install" style="{{ installStyle }}">
+      <div style="padding:clamp(1.5rem,3vw,2.5rem);background:var(--raised2);clip-path:polygon(0 0,calc(100% - 20px) 0,100% 20px,100% 100%,0 100%);display:flex;flex-direction:column;gap:24px">
+        <div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap">
+          <button onClick="{{ copyInstall }}" style="min-height:48px;padding:0 28px;background:var(--accent);color:var(--accentC);border:0;font-family:'Spline Sans',sans-serif;font-weight:600;font-size:1.0625rem;cursor:pointer;clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,0 100%)" style-hover="filter:brightness(1.1)" style-focus="clip-path:none;outline:2px solid var(--focus);outline-offset:2px">{{ s.install }}</button>
+          <button onClick="{{ goReference }}" style="min-height:44px;padding:0;background:none;border:0;border-bottom:1px solid var(--text);color:var(--text);font-family:'Spline Sans',sans-serif;font-weight:500;font-size:1.0625rem;cursor:pointer" style-hover="color:var(--accent);border-bottom-color:var(--accent)" style-focus="outline:2px solid var(--focus);outline-offset:4px">{{ s.seeSkills }}</button>
+        </div>
+        <div style="display:flex;align-items:stretch;border:1px solid var(--border);background:var(--sunk)">
+          <code style="flex:1;min-width:0;overflow-x:auto;padding:14px 16px;font-family:'Martian Mono',monospace;font-weight:400;font-variation-settings:'wdth' 75;font-size:0.9375rem;line-height:1.6;white-space:nowrap">/plugin marketplace add &lt;user&gt;/sumitsubo</code>
+          <button onClick="{{ copyInstall }}" aria-label="{{ s.copy }}" style="min-width:44px;background:none;border:0;border-left:1px solid var(--border);color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center" style-hover="color:var(--accent)" style-focus="outline:2px solid var(--focus);outline-offset:-4px">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="6" y="6" width="10" height="10"></rect><path d="M4 13V4h9"></path></svg>
+          </button>
+        </div>
+        <p role="status" aria-live="polite" style="margin:0;min-height:1.2em;font-family:'Martian Mono',monospace;font-weight:500;font-size:0.75rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent)">{{ copiedMsg }}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section aria-labelledby="compose-h" data-screen-label="02 Composición" style="margin-top:clamp(4rem,9vh,8rem)">
+  <p style="margin:0 0 12px;font-family:'Martian Mono',monospace;font-weight:500;font-size:0.75rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted)">{{ s.composeLabel }}</p>
+  <h2 id="compose-h" style="margin:0 0 12px;font-family:'Bricolage Grotesque',sans-serif;font-weight:600;font-variation-settings:'wdth' 90;font-size:clamp(1.625rem,2.6vw,2rem);line-height:1.18;letter-spacing:-0.01em;max-width:28ch;text-wrap:balance">{{ s.composeTitle }}</h2>
+  <p style="margin:0 0 32px;max-width:68ch;font-size:1.0625rem;line-height:1.65;color:var(--muted);text-wrap:pretty">{{ s.composeLead }}</p>
+
+  <div style="position:relative;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));row-gap:2px">
+    <div style="{{ seamStyle }}"></div>
+    <sc-for list="{{ composeGroups }}" as="g" hint-placeholder-count="2">
+      <div data-reveal="{{ g.key }}" style="{{ g.wrap }}">
+        <section aria-label="{{ g.aria }}" style="padding:clamp(1.5rem,3vw,2.5rem);background:{{ g.bg }};clip-path:polygon(0 0,calc(100% - 20px) 0,100% 20px,100% 100%,0 100%);height:100%;box-sizing:border-box">
+          <p style="margin:0 0 4px;font-family:'Martian Mono',monospace;font-weight:600;font-size:0.75rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent)">{{ g.rule }}</p>
+          <p style="margin:0 0 24px;font-size:0.9375rem;line-height:1.55;color:var(--muted)">{{ g.note }}</p>
+          <ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column">
+            <sc-for list="{{ g.rows }}" as="r" hint-placeholder-count="4">
+              <li style="padding:16px 0;border-top:1px solid var(--divider)">
+                <p style="margin:0 0 8px;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap">
+                  <span style="font-family:'Martian Mono',monospace;font-weight:500;font-size:0.75rem;letter-spacing:0.08em;color:var(--muted)">{{ r.id }}</span>
+                  <span style="font-family:'Martian Mono',monospace;font-weight:500;font-variation-settings:'wdth' 75;font-size:1.0625rem;color:var(--accent)">{{ r.name }}</span>
+                  <span style="font-family:'Martian Mono',monospace;font-weight:500;font-size:0.75rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);font-variant-numeric:tabular-nums">{{ r.count }}</span>
+                </p>
+                <p style="margin:0;font-family:'Martian Mono',monospace;font-weight:400;font-variation-settings:'wdth' 75;font-size:0.8125rem;line-height:1.7;color:var(--muted);overflow-wrap:anywhere">{{ r.skills }}</p>
+              </li>
+            </sc-for>
+          </ul>
+        </section>
+      </div>
+    </sc-for>
+  </div>
+</section>
+
+<section aria-labelledby="plugins-h" data-screen-label="03 Plugins" style="margin-top:clamp(4rem,9vh,8rem)">
+  <h2 id="plugins-h" style="margin:0 0 32px;font-family:'Bricolage Grotesque',sans-serif;font-weight:600;font-variation-settings:'wdth' 90;font-size:clamp(1.625rem,2.6vw,2rem);line-height:1.18;letter-spacing:-0.01em">{{ s.pluginsTitle }}</h2>
+  <div style="position:relative;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));row-gap:2px">
+    <div style="{{ seamStyle }}"></div>
+    <sc-for list="{{ plugins }}" as="p" hint-placeholder-count="6">
+      <div data-reveal="{{ p.key }}" style="{{ p.wrap }}">
+        <article style="padding:clamp(1.5rem,3vw,2.5rem);background:{{ p.bg }};clip-path:polygon(0 0,calc(100% - 20px) 0,100% 20px,100% 100%,0 100%);display:flex;flex-direction:column;gap:16px;height:100%;box-sizing:border-box">
+          <p style="margin:0;font-family:'Martian Mono',monospace;font-weight:500;font-size:0.75rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted)">{{ p.id }} · {{ p.counts }}</p>
+          <h3 style="margin:0;font-family:'Martian Mono',monospace;font-weight:400;font-variation-settings:'wdth' 75;font-size:1.3rem;line-height:1.3;color:var(--accent)">{{ p.name }}</h3>
+          <p style="margin:0;font-family:'Spline Sans',sans-serif;font-size:1.0625rem;line-height:1.65;text-wrap:pretty">{{ p.desc }}</p>
+        </article>
+      </div>
+    </sc-for>
+  </div>
+</section>
+</sc-if>
+
+<sc-if value="{{ isReference }}" hint-placeholder-val="{{ false }}">
+<section data-screen-label="04 Reference" style="padding-top:clamp(2.5rem,7vh,5rem)">
+  <p style="margin:0 0 16px;font-family:'Martian Mono',monospace;font-weight:500;font-size:0.75rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted)">{{ s.refMeta }}</p>
+  <h1 style="margin:0 0 32px;font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-variation-settings:'wdth' 85;font-size:clamp(2.25rem,4.5vw,3.25rem);line-height:1.08;letter-spacing:-0.02em">{{ s.refTitle }}</h1>
+  <label for="q" style="display:block;margin-bottom:8px;font-family:'Martian Mono',monospace;font-weight:500;font-size:0.75rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted)">{{ s.filterLabel }}</label>
+  <div style="display:flex;align-items:center;gap:12px;border:1px solid var(--border);background:var(--raised);padding:0 16px;max-width:44rem" style-focus-within="outline:2px solid var(--focus);outline-offset:2px">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="var(--muted)" stroke-width="1.5" aria-hidden="true"><rect x="3" y="3" width="10" height="10"></rect><path d="M13 13l4 4"></path></svg>
+    <input id="q" type="search" value="{{ query }}" onInput="{{ onQuery }}" placeholder="{{ s.filterPh }}" style="flex:1;min-width:0;min-height:52px;background:none;border:0;outline:0;color:var(--text);font-family:'Spline Sans',sans-serif;font-size:1.0625rem">
+  </div>
+  <p role="status" aria-live="polite" style="margin:12px 0 0;font-family:'Martian Mono',monospace;font-weight:500;font-size:0.75rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);font-variant-numeric:tabular-nums">{{ resultCount }}</p>
+
+  <sc-if value="{{ noResults }}" hint-placeholder-val="{{ false }}">
+  <div style="margin-top:32px;max-width:44rem;padding:clamp(1.5rem,3vw,2.5rem);background:var(--raised);clip-path:polygon(0 0,calc(100% - 20px) 0,100% 20px,100% 100%,0 100%)">
+    <p style="margin:0 0 20px;font-size:1.0625rem;line-height:1.65">{{ noResultsMsg }}</p>
+    <button onClick="{{ clearQuery }}" style="min-height:44px;padding:0 20px;background:none;color:var(--text);border:1px solid var(--border);font-family:'Spline Sans',sans-serif;font-weight:500;font-size:1.0625rem;cursor:pointer" style-hover="border-color:var(--accent);color:var(--accent)" style-focus="outline:2px solid var(--focus);outline-offset:2px">{{ s.clear }}</button>
+  </div>
+  </sc-if>
+
+  <div style="position:relative;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));row-gap:2px;margin-top:48px">
+    <div style="{{ seamStyle }}"></div>
+    <sc-for list="{{ groups }}" as="g" hint-placeholder-count="7">
+      <div style="{{ g.wrap }}">
+        <section aria-label="{{ g.title }}" style="padding:clamp(1.5rem,3vw,2.5rem);background:{{ g.bg }};clip-path:polygon(0 0,calc(100% - 20px) 0,100% 20px,100% 100%,0 100%);height:100%;box-sizing:border-box">
+          <h2 style="margin:0 0 20px;font-family:'Martian Mono',monospace;font-weight:500;font-size:0.75rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);font-variant-numeric:tabular-nums">{{ g.title }} · {{ g.count }}</h2>
+          <ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column">
+            <sc-for list="{{ g.entries }}" as="e" hint-placeholder-count="5">
+              <li style="border-top:1px solid var(--divider)">
+                <sc-if value="{{ e.page }}" hint-placeholder-val="{{ false }}">
+                  <a href="#" onClick="{{ e.go }}" style="display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:44px;color:var(--text);text-decoration:none;font-family:'Martian Mono',monospace;font-weight:400;font-variation-settings:'wdth' 75;font-size:0.9375rem" style-hover="color:var(--accent)" style-focus="outline:2px solid var(--focus);outline-offset:-2px"><span>{{ e.label }}</span><span style="color:var(--accent)" aria-hidden="true">→</span></a>
+                </sc-if>
+                <sc-if value="{{ e.nopage }}" hint-placeholder-val="{{ true }}">
+                  <span style="display:flex;align-items:center;min-height:44px;color:var(--muted);font-family:'Martian Mono',monospace;font-weight:400;font-variation-settings:'wdth' 75;font-size:0.9375rem">{{ e.label }}</span>
+                </sc-if>
+              </li>
+            </sc-for>
+          </ul>
+        </section>
+      </div>
+    </sc-for>
+  </div>
+  <p style="margin:32px 0 0;font-family:'Martian Mono',monospace;font-size:0.75rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted)">{{ s.protoNote }}</p>
+</section>
+</sc-if>
+
+<sc-if value="{{ isSkill }}" hint-placeholder-val="{{ false }}">
+<article data-screen-label="05 Skill" style="padding-top:clamp(2rem,6vh,4rem)">
+  <nav aria-label="Breadcrumb" style="display:flex;gap:8px;align-items:center;margin-bottom:32px;font-family:'Martian Mono',monospace;font-weight:500;font-size:0.75rem;letter-spacing:0.08em;text-transform:uppercase">
+    <a href="#" onClick="{{ goReference }}" style-focus="outline:2px solid var(--focus);outline-offset:2px">{{ s.navRef }}</a><span style="color:var(--muted)" aria-hidden="true">/</span><span style="color:var(--muted)">sumi</span><span style="color:var(--muted)" aria-hidden="true">/</span><span aria-current="page">workflow</span>
+  </nav>
+  <p style="margin:0 0 16px;font-family:'Martian Mono',monospace;font-weight:500;font-size:0.75rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted)">SKILL · SUMI · v0.4.0</p>
+  <h1 style="margin:0 0 32px;font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-variation-settings:'wdth' 85;font-size:clamp(2.25rem,4.5vw,3.25rem);line-height:1.08;letter-spacing:-0.02em">workflow</h1>
+
+  <div style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));row-gap:2px;position:relative">
+    <div style="{{ seamStyle }}"></div>
+    <div style="{{ colA }}">
+      <div style="padding:clamp(1.5rem,3vw,2.5rem);background:var(--raised);clip-path:polygon(0 0,calc(100% - 20px) 0,100% 20px,100% 100%,0 100%)">
+        <p style="margin:0;max-width:68ch;font-size:1.0625rem;line-height:1.65;text-wrap:pretty">The Sumitsubo adaptive workflow — how to scale process to the size and uncertainty of a request. Tiers (direct, delegated, feature file), refuting uncertainty before acting, the single feature file with acceptance criteria and evidence, the ~400-line budget per slice, pre-commit risk assessment and chained PRs.</p>
+        <p style="margin:20px 0 0;max-width:68ch;font-size:1.0625rem;line-height:1.65;color:var(--muted)">{{ s.proseBefore }} <code style="font-family:'Martian Mono',monospace;font-weight:400;font-variation-settings:'wdth' 75;font-size:0.9375rem;background:var(--sunk);border:1px solid var(--divider);padding:1px 6px;color:var(--text)">ponytail:</code> {{ s.proseAfter }}</p>
+      </div>
+    </div>
+    <div style="{{ colB }}">
+      <div style="padding:clamp(1.5rem,3vw,2.5rem);background:var(--raised2);clip-path:polygon(0 0,calc(100% - 20px) 0,100% 20px,100% 100%,0 100%);height:100%;box-sizing:border-box">
+        <p style="margin:0 0 12px;font-family:'Martian Mono',monospace;font-weight:500;font-size:0.75rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted)">{{ s.toc }}</p>
+        <ol style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;font-size:0.9375rem">
+          <li><a href="#tiers" style="display:block;padding:10px 0;min-height:24px" style-focus="outline:2px solid var(--focus);outline-offset:2px">{{ s.tocTiers }}</a></li>
+          <li style="border-top:1px solid var(--divider)"><a href="#config" style="display:block;padding:10px 0;min-height:24px" style-focus="outline:2px solid var(--focus);outline-offset:2px">{{ s.tocConfig }}</a></li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <h2 id="tiers" style="margin:clamp(3rem,7vh,5rem) 0 20px;font-family:'Bricolage Grotesque',sans-serif;font-weight:600;font-variation-settings:'wdth' 90;font-size:clamp(1.625rem,2.6vw,2rem);line-height:1.18;letter-spacing:-0.01em;max-width:24ch;text-wrap:balance">{{ s.tiersH }}</h2>
+  <div tabindex="0" role="region" aria-label="{{ s.tableAria }}" style="overflow-x:auto;border:1px solid var(--border)" style-focus="outline:2px solid var(--focus);outline-offset:2px">
+    <table style="width:100%;min-width:40rem;border-collapse:collapse;font-size:0.9375rem;line-height:1.55;font-variant-numeric:tabular-nums">
+      <thead><tr>
+        <th scope="col" style="text-align:left;padding:12px 16px;border-bottom:1px solid var(--border);font-family:'Martian Mono',monospace;font-weight:500;font-size:0.75rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted)">Tier</th>
+        <th scope="col" style="text-align:left;padding:12px 16px;border-bottom:1px solid var(--border);font-family:'Martian Mono',monospace;font-weight:500;font-size:0.75rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted)">{{ s.when }}</th>
+        <th scope="col" style="text-align:left;padding:12px 16px;border-bottom:1px solid var(--border);font-family:'Martian Mono',monospace;font-weight:500;font-size:0.75rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted)">{{ s.produces }}</th>
+      </tr></thead>
+      <tbody>
+        <sc-for list="{{ tiers }}" as="t" hint-placeholder-count="3">
+          <tr>
+            <th scope="row" style="text-align:left;padding:14px 16px;border-top:1px solid var(--divider)"><span style="display:inline-flex;align-items:center;gap:8px;font-family:'Martian Mono',monospace;font-weight:600;font-size:0.75rem;letter-spacing:0.08em;color:{{ t.color }};border:1px solid {{ t.color }};padding:3px 8px"><span aria-hidden="true">{{ t.shape }}</span>{{ t.id }}</span></th>
+            <td style="padding:14px 16px;border-top:1px solid var(--divider)">{{ t.when }}</td>
+            <td style="padding:14px 16px;border-top:1px solid var(--divider)">{{ t.out }}</td>
+          </tr>
+        </sc-for>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 id="config" style="margin:clamp(3rem,7vh,5rem) 0 20px;font-family:'Bricolage Grotesque',sans-serif;font-weight:600;font-variation-settings:'wdth' 90;font-size:clamp(1.625rem,2.6vw,2rem);line-height:1.18;letter-spacing:-0.01em">{{ s.configH }}</h2>
+  <div style="border:1px solid var(--border);background:var(--sunk)">
+    <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)">
+      <span style="padding:0 16px;font-family:'Martian Mono',monospace;font-weight:500;font-size:0.75rem;letter-spacing:0.08em;color:var(--muted)">.sumi/config.json</span>
+      <button onClick="{{ copyConfig }}" style="min-height:44px;padding:0 16px;background:none;border:0;border-left:1px solid var(--border);color:var(--text);font-family:'Martian Mono',monospace;font-weight:500;font-size:0.75rem;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;gap:8px" style-hover="color:var(--accent)" style-focus="outline:2px solid var(--focus);outline-offset:-4px">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="6" y="6" width="10" height="10"></rect><path d="M4 13V4h9"></path></svg>{{ configBtn }}
+      </button>
+    </div>
+    <span role="status" aria-live="polite" style="position:absolute;width:1px;height:1px;overflow:hidden">{{ configBtn }}</span>
+    <pre tabindex="0" style="margin:0;padding:16px 0;overflow-x:auto;font-family:'Martian Mono',monospace;font-weight:400;font-variation-settings:'wdth' 75;font-size:0.9375rem;line-height:1.6" style-focus="outline:2px solid var(--focus);outline-offset:-2px"><sc-for list="{{ codeLines }}" as="l" hint-placeholder-count="8"><div style="display:flex;background:{{ l.bg }}"><span aria-hidden="true" style="flex:none;width:3rem;padding-right:16px;text-align:right;color:var(--muted);user-select:none">{{ l.n }}</span><span style="white-space:pre;padding-right:16px">{{ l.t }}</span></div></sc-for></pre>
+  </div>
+
+  <div style="display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:clamp(3rem,7vh,5rem);padding-top:16px;border-top:1px solid var(--divider)">
+    <a href="#" onClick="{{ goReference }}" style="display:inline-flex;align-items:center;min-height:44px;font-family:'Martian Mono',monospace;font-weight:500;font-size:0.75rem;letter-spacing:0.08em;text-transform:uppercase" style-focus="outline:2px solid var(--focus);outline-offset:2px">← {{ s.navRef }}</a>
+    <a href="#" onClick="{{ goCommand }}" style="display:inline-flex;align-items:center;min-height:44px;font-family:'Martian Mono',monospace;font-weight:500;font-size:0.75rem;letter-spacing:0.08em;text-transform:uppercase" style-focus="outline:2px solid var(--focus);outline-offset:2px">/sumi:feature →</a>
+  </div>
+</article>
+</sc-if>
+
+<sc-if value="{{ isCommand }}" hint-placeholder-val="{{ false }}">
+<article data-screen-label="06 Command" style="padding-top:clamp(2rem,6vh,4rem)">
+  <nav aria-label="Breadcrumb" style="display:flex;gap:8px;align-items:center;margin-bottom:32px;font-family:'Martian Mono',monospace;font-weight:500;font-size:0.75rem;letter-spacing:0.08em;text-transform:uppercase">
+    <a href="#" onClick="{{ goReference }}" style-focus="outline:2px solid var(--focus);outline-offset:2px">{{ s.navRef }}</a><span style="color:var(--muted)" aria-hidden="true">/</span><span style="color:var(--muted)">{{ s.commands }}</span><span style="color:var(--muted)" aria-hidden="true">/</span><span aria-current="page">/sumi:feature</span>
+  </nav>
+  <p style="margin:0 0 16px;display:flex;align-items:center;gap:12px;font-family:'Martian Mono',monospace;font-weight:500;font-size:0.75rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted)">{{ s.cmdLabel }} <span style="display:inline-flex;gap:8px;font-weight:600;color:var(--warning);border:1px solid var(--warning);padding:3px 8px"><span aria-hidden="true">■</span>T2</span></p>
+  <h1 style="margin:0 0 32px;font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-variation-settings:'wdth' 85;font-size:clamp(2.25rem,4.5vw,3.25rem);line-height:1.08;letter-spacing:-0.02em">/sumi:feature</h1>
+
+  <div style="display:flex;align-items:stretch;border:1px solid var(--border);background:var(--sunk);max-width:44rem">
+    <code style="flex:1;min-width:0;overflow-x:auto;padding:18px 20px;font-family:'Martian Mono',monospace;font-weight:400;font-variation-settings:'wdth' 75;font-size:1.0625rem;white-space:nowrap">/sumi:feature &lt;idea&gt;</code>
+    <button onClick="{{ copyCmd }}" aria-label="{{ s.copy }}" style="min-width:44px;background:none;border:0;border-left:1px solid var(--border);color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center" style-hover="color:var(--accent)" style-focus="outline:2px solid var(--focus);outline-offset:-4px">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="6" y="6" width="10" height="10"></rect><path d="M4 13V4h9"></path></svg>
+    </button>
+  </div>
+  <p role="status" aria-live="polite" style="margin:8px 0 0;min-height:1.2em;font-family:'Martian Mono',monospace;font-weight:500;font-size:0.75rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent)">{{ cmdMsg }}</p>
+
+  <div style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));row-gap:2px;position:relative;margin-top:32px">
+    <div style="{{ seamStyle }}"></div>
+    <div style="{{ colA }}">
+      <div style="padding:clamp(1.5rem,3vw,2.5rem);background:var(--raised);clip-path:polygon(0 0,calc(100% - 20px) 0,100% 20px,100% 100%,0 100%);height:100%;box-sizing:border-box">
+        <p style="margin:0;max-width:68ch;font-size:1.0625rem;line-height:1.65;text-wrap:pretty">Start (or resume) a T2 feature — explore, refute uncertainty, ask the decision-level questions, forecast lines and slices, and write the single feature file in .sumi/tasks/.</p>
+      </div>
+    </div>
+    <div style="{{ colB }}">
+      <div style="padding:clamp(1.5rem,3vw,2.5rem);background:var(--raised2);clip-path:polygon(0 0,calc(100% - 20px) 0,100% 20px,100% 100%,0 100%);height:100%;box-sizing:border-box">
+        <h2 style="margin:0 0 16px;font-family:'Martian Mono',monospace;font-weight:500;font-size:0.75rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted)">{{ s.spec }}</h2>
+        <dl style="margin:0;display:grid;grid-template-columns:max-content minmax(0,1fr);column-gap:24px">
+          <sc-for list="{{ spec }}" as="f" hint-placeholder-count="4">
+            <dt style="padding:12px 0;border-top:1px solid var(--divider);font-family:'Martian Mono',monospace;font-weight:500;font-size:0.75rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted)">{{ f.k }}</dt>
+            <dd style="margin:0;padding:12px 0;border-top:1px solid var(--divider);font-family:'Martian Mono',monospace;font-weight:400;font-variation-settings:'wdth' 75;font-size:0.9375rem;line-height:1.6;overflow-wrap:anywhere">{{ f.v }}</dd>
+          </sc-for>
+        </dl>
+      </div>
+    </div>
+  </div>
+  <div style="margin-top:clamp(3rem,7vh,5rem);padding-top:16px;border-top:1px solid var(--divider)">
+    <a href="#" onClick="{{ goReference }}" style="display:inline-flex;align-items:center;min-height:44px;font-family:'Martian Mono',monospace;font-weight:500;font-size:0.75rem;letter-spacing:0.08em;text-transform:uppercase" style-focus="outline:2px solid var(--focus);outline-offset:2px">← {{ s.navRef }}</a>
+  </div>
+</article>
+</sc-if>
+</main>
+
+<footer style="border-top:1px solid var(--divider);padding:24px clamp(1rem,4vw,2.5rem);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-family:'Martian Mono',monospace;font-weight:500;font-size:0.75rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted)">
+  <span>SUMITSUBO 墨壺 · MIT</span><span>v0.4.0</span>
+</footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+// Skill names are the real directory names in the framework repo (plugins/*/skills/*).
+// Counts are derived from this map — never hardcoded — so a name added here updates
+// the plugin cards, the composition figure and the reference index at once.
+const SKILLS = {
+  'sumi': ['workflow', 'code-quality', 'a11y', 'performance', 'css-architecture', 'html', 'js-ts', 'model-routing'],
+  'sumi-design': ['design-direction', 'design-tokens', 'design-ledger', 'anti-slop', 'motion', 'claude-design-bridge'],
+  'sumi-nuxt': ['nuxt-architecture', 'nuxt-data-ssr', 'vue-components', 'firebase-firestore', 'tailwind-craft'],
+  'sumi-react': ['next-app-router', 'next-data-caching', 'react-components', 'react-performance', 'react-testing'],
+  'sumi-shopify': ['shopify-theme-architecture', 'shopify-sections-blocks', 'shopify-liquid', 'shopify-storefront-js', 'shopify-performance-a11y'],
+  'sumi-wordpress': ['wp-block-theme', 'wp-custom-blocks', 'wp-native-features', 'wp-performance-audit']
+};
+const COMMANDS = ['/sumi:init', '/sumi:feature', '/sumi:review', '/sumi:ship', '/sumi:models', '/sumi:sync', '/sumi-design:direction', '/sumi-design:critique', '/sumi-design:deps'];
+const PLUGIN_META = [
+  ['01', 'sumi', 6, 'core', 'Engineering core: adaptive workflow (trivial → delegated → feature file), line budgets, risk gates, context-free review lenses, HTML/CSS/JS/a11y/performance standards and safety hooks.'],
+  ['02', 'sumi-design', 3, 'core', 'Anti-slop design direction: brief, anti-references, three divergent directions, cross-project repetition ledger, DESIGN.md tokens and motion rules.'],
+  ['03', 'sumi-nuxt', 0, 'stack', 'Nuxt 3/4 + Vue 3 + Firebase/Firestore stack pack: composables, SSR/hydration safety, data modeling, security rules, Tailwind.'],
+  ['04', 'sumi-react', 0, 'stack', 'React 19 + Next.js App Router stack pack: server/client boundaries, data fetching and caching, forms and actions, component architecture.'],
+  ['05', 'sumi-shopify', 0, 'stack', 'Shopify Online Store 2.0 stack pack: Liquid, sections, blocks, schemas, snippets, theme performance and CLI workflow.'],
+  ['06', 'sumi-wordpress', 0, 'stack', 'Native WordPress block themes (FSE, Gutenberg) with no build step: theme.json as the design system, HTML templates and PHP patterns, custom dynamic blocks.']
+];
+const TOTAL_SKILLS = Object.values(SKILLS).reduce((n, a) => n + a.length, 0);
+const TOTAL_PAGES = TOTAL_SKILLS + COMMANDS.length;
+
+class Component extends DCLogic {
+  state = { screen: 'landing', theme: 'dark', lang: 'es', query: '', copied: '', seen: {}, narrow: false };
+  componentDidMount() {
+    this.onResize = () => this.setState({ narrow: window.innerWidth < 768 });
+    this.onResize();
+    window.addEventListener('resize', this.onResize);
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    this.reduced = mq.matches;
+    if (window.matchMedia('(prefers-color-scheme: light)').matches) this.setState({ theme: 'light' });
+    this.io = new IntersectionObserver((es) => {
+      const add = {};
+      es.forEach((e) => { if (e.isIntersecting) { add[e.target.getAttribute('data-reveal')] = true; this.io.unobserve(e.target); } });
+      if (Object.keys(add).length) this.setState((s) => ({ seen: { ...s.seen, ...add } }));
+    }, { threshold: 0.12 });
+    this.observe();
+    this.fallback = setTimeout(() => this.setState({ seen: new Proxy({}, { get: () => true }) }), 2500);
+  }
+  componentDidUpdate() { this.observe(); }
+  componentWillUnmount() { window.removeEventListener('resize', this.onResize); this.io && this.io.disconnect(); clearTimeout(this.fallback); }
+  observe() {
+    document.querySelectorAll('[data-reveal]').forEach((el) => {
+      if (!el.__o) { el.__o = 1; this.io.observe(el); }
+    });
+  }
+  go(screen) { this.setState({ screen }); window.scrollTo(0, 0); }
+  copy(text, key) {
+    try { navigator.clipboard && navigator.clipboard.writeText(text); } catch (e) {}
+    this.setState({ copied: key });
+    clearTimeout(this.ct);
+    this.ct = setTimeout(() => this.setState({ copied: '' }), 1800);
+  }
+  renderVals() {
+    const st = this.state, es = st.lang === 'es', dark = st.theme === 'dark', narrow = st.narrow;
+    const T = es ? {
+      skip: 'Saltar al contenido', navHome: 'Inicio', navRef: 'Referencia', themeLabel: dark ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro', themeName: dark ? 'Oscuro' : 'Claro',
+      meta: `v0.4.0 · MIT · 6 PLUGINS · ${COMMANDS.length} COMANDOS · ${TOTAL_SKILLS} SKILLS`, install: 'Instalar el plugin', seeSkills: `Ver los ${TOTAL_SKILLS} skills`, copy: 'Copiar', copied: 'Copiado',
+      composeLabel: 'CÓMO SE COMPONE', composeTitle: 'Dos plugins siempre, uno según tu stack',
+      composeLead: 'Cada skill pertenece a un solo plugin. Lo que decides no es qué skills quieres, sino qué stack usas: el núcleo y la dirección van en todos los proyectos, y encima encaja una pieza.',
+      always: 'SIEMPRE', alwaysNote: 'En todos los proyectos, sea cual sea el stack.', pick: 'ELIGE UNO', pickNote: 'La pieza que encaja con el stack del proyecto.',
+      pluginsTitle: 'Seis plugins que encajan entre sí',
+      refMeta: `${COMMANDS.length} COMANDOS · ${TOTAL_SKILLS} SKILLS · 6 PLUGINS`, refTitle: 'Referencia', filterLabel: 'Filtrar', filterPh: `Buscar entre las ${TOTAL_PAGES} páginas`, clear: 'Limpiar el filtro',
+      protoNote: 'Prototipo: solo /sumi:feature y workflow tienen página.',
+      when: 'Cuándo', produces: 'Qué produce', toc: 'En esta página', tocTiers: 'Tiers', tocConfig: 'Configuración', tiersH: 'Tres tiers según la incertidumbre del cambio', configH: 'El presupuesto de líneas', tableAria: 'Tabla de tiers, desplazable', commands: 'Comandos',
+      proseBefore: 'Los comentarios', proseAfter: 'marcan en el código las decisiones que el modelo debe respetar.', cmdLabel: 'COMANDO · SUMI ·', spec: 'Ficha'
+    } : {
+      skip: 'Skip to content', navHome: 'Home', navRef: 'Reference', themeLabel: dark ? 'Switch to light theme' : 'Switch to dark theme', themeName: dark ? 'Dark' : 'Light',
+      meta: `v0.4.0 · MIT · 6 PLUGINS · ${COMMANDS.length} COMMANDS · ${TOTAL_SKILLS} SKILLS`, install: 'Install the plugin', seeSkills: `See the ${TOTAL_SKILLS} skills`, copy: 'Copy', copied: 'Copied',
+      composeLabel: 'HOW IT COMPOSES', composeTitle: 'Two plugins always, one for your stack',
+      composeLead: 'Every skill belongs to exactly one plugin. What you choose is not which skills you want but which stack you are on: the core and the direction ship in every project, and one piece fits on top.',
+      always: 'ALWAYS', alwaysNote: 'In every project, whatever the stack.', pick: 'PICK ONE', pickNote: 'The piece that fits the project’s stack.',
+      pluginsTitle: 'Six plugins that fit into one another',
+      refMeta: `${COMMANDS.length} COMMANDS · ${TOTAL_SKILLS} SKILLS · 6 PLUGINS`, refTitle: 'Reference', filterLabel: 'Filter', filterPh: `Search the ${TOTAL_PAGES} pages`, clear: 'Clear the filter',
+      protoNote: 'Prototype: only /sumi:feature and workflow have a page.',
+      when: 'When', produces: 'Produces', toc: 'On this page', tocTiers: 'Tiers', tocConfig: 'Configuration', tiersH: 'Three tiers by the uncertainty of the change', configH: 'The line budget', tableAria: 'Tiers table, scrollable', commands: 'Commands',
+      proseBefore: 'Comments tagged', proseAfter: 'mark the decisions in code that the model must respect.', cmdLabel: 'COMMAND · SUMI ·', spec: 'Spec'
+    };
+    // Tokens mirror DESIGN.md exactly. --seam is the signature joint (moss, solid —
+    // never accent at reduced opacity); --divider is the structural hairline.
+    const D = {
+      '--surface': 'oklch(0.19 0.015 55)', '--sunk': 'oklch(0.15 0.014 55)', '--raised': 'oklch(0.235 0.016 55)', '--raised2': 'oklch(0.28 0.017 55)',
+      '--text': 'oklch(0.93 0.015 80)', '--muted': 'oklch(0.72 0.018 75)', '--seam': 'oklch(0.52 0.08 135)', '--divider': 'oklch(0.40 0.018 58)', '--border': 'oklch(0.58 0.018 58)',
+      '--accent': 'oklch(0.70 0.11 135)', '--accentC': 'oklch(0.17 0.02 120)', '--focus': 'oklch(0.86 0.14 120)', '--warning': 'oklch(0.78 0.13 75)', '--danger': 'oklch(0.70 0.17 28)'
+    };
+    const L = {
+      '--surface': 'oklch(0.965 0.012 85)', '--sunk': 'oklch(0.895 0.016 82)', '--raised': 'oklch(0.99 0.008 85)', '--raised2': 'oklch(0.935 0.014 83)',
+      '--text': 'oklch(0.24 0.02 55)', '--muted': 'oklch(0.44 0.022 58)', '--seam': 'oklch(0.56 0.10 135)', '--divider': 'oklch(0.72 0.020 80)', '--border': 'oklch(0.56 0.022 80)',
+      '--accent': 'oklch(0.46 0.12 135)', '--accentC': 'oklch(0.985 0.01 90)', '--focus': 'oklch(0.40 0.11 135)', '--warning': 'oklch(0.49 0.105 70)', '--danger': 'oklch(0.48 0.18 28)'
+    };
+    const rootStyle = { ...(dark ? D : L), background: 'var(--surface)', color: 'var(--text)', minHeight: '100vh', fontFamily: "'Spline Sans', 'Segoe UI', sans-serif", transition: 'background 180ms, color 180ms' };
+
+    // grid helpers
+    const colA = { gridColumn: narrow ? '1 / -1' : '1 / 8', minWidth: 0 };
+    const colB = { gridColumn: narrow ? '1 / -1' : '6 / 13', minWidth: 0 };
+    const seamStyle = narrow ? { display: 'none' } : { position: 'absolute', top: 0, bottom: 0, left: 'calc(100% * 5 / 12)', width: 1, background: 'var(--seam)', zIndex: 1, pointerEvents: 'none' };
+    const rv = (id, col) => {
+      const on = !!st.seen[id];
+      const dx = col === 'A' ? -24 : 24;
+      const out = { ...(col === 'A' ? colA : colB), opacity: on ? 1 : 0, transition: this.reduced ? 'opacity 100ms linear' : 'opacity 360ms cubic-bezier(0.16,1,0.3,1), transform 360ms cubic-bezier(0.16,1,0.3,1)' };
+      if (!this.reduced) out.transform = on ? 'translateX(0)' : (narrow ? 'translateY(24px)' : `translateX(${dx}px)`);
+      return out;
+    };
+    const nSkills = (name) => SKILLS[name].length;
+
+    const plugins = PLUGIN_META.map((p, i) => ({
+      key: 'p' + i, id: p[0], name: p[1], desc: p[4],
+      counts: (p[2] ? p[2] + (es ? ' COMANDOS · ' : ' COMMANDS · ') : '') + nSkills(p[1]) + ' SKILLS',
+      bg: i % 2 ? 'var(--raised2)' : 'var(--raised)',
+      wrap: { ...rv('p' + i, i % 2 ? 'B' : 'A'), display: 'block' }
+    }));
+
+    // Composition figure. Replaces the 6 x 33 matrix, which encoded only each
+    // plugin's skill count — a number already printed on every plugin card.
+    // This shows the one thing stated nowhere else: core + direction + one stack pack.
+    const row = (name) => {
+      const m = PLUGIN_META.find((p) => p[1] === name);
+      return { id: m[0], name, count: nSkills(name) + ' SKILLS', skills: SKILLS[name].join(' · ') };
+    };
+    const composeGroups = [
+      { key: 'c0', rule: T.always, note: T.alwaysNote, aria: T.always, col: 'A', names: PLUGIN_META.filter((p) => p[3] === 'core').map((p) => p[1]) },
+      { key: 'c1', rule: T.pick, note: T.pickNote, aria: T.pick, col: 'B', names: PLUGIN_META.filter((p) => p[3] === 'stack').map((p) => p[1]) }
+    ].map((g, i) => ({
+      key: g.key, rule: g.rule, note: g.note, aria: g.aria,
+      bg: i % 2 ? 'var(--raised2)' : 'var(--raised)',
+      wrap: { ...rv(g.key, g.col), display: 'block' },
+      rows: g.names.map(row)
+    }));
+
+    // reference index — every plugin group, built from the same SKILLS map
+    const q = st.query.trim().toLowerCase();
+    const G = [[es ? 'Comandos' : 'Commands', COMMANDS]].concat(PLUGIN_META.map((p) => [p[1], SKILLS[p[1]]]));
+    const groups = [];
+    let gi = 0, shown = 0;
+    G.forEach(([title, list]) => {
+      const hits = list.filter((l) => !q || l.toLowerCase().includes(q));
+      if (!hits.length) return;
+      shown += hits.length;
+      groups.push({
+        title, count: hits.length, bg: gi % 2 ? 'var(--raised2)' : 'var(--raised)',
+        wrap: gi % 2 ? colB : colA,
+        entries: hits.map((l) => {
+          const isF = l === '/sumi:feature', isW = l === 'workflow';
+          return { label: l, page: isF || isW, nopage: !(isF || isW), go: (e) => { e.preventDefault(); this.go(isF ? 'command' : 'skill'); } };
+        })
+      });
+      gi++;
+    });
+
+    const tiers = [
+      { id: 'T0', shape: '○', color: 'var(--accent)', when: es ? 'cambio trivial, sin incertidumbre' : 'trivial change, no uncertainty', out: es ? 'el cambio, directo' : 'the change, directly' },
+      { id: 'T1', shape: '◇', color: 'var(--warning)', when: es ? 'tarea acotada, delegable' : 'bounded, delegable task', out: es ? 'un brief y una slice verificada' : 'a brief and one verified slice' },
+      { id: 'T2', shape: '■', color: 'var(--text)', when: es ? 'feature con incertidumbre real' : 'feature with real uncertainty', out: es ? 'un feature file en .sumi/tasks/' : 'a feature file in .sumi/tasks/' }
+    ];
+    const code = ['{', '  "version": "0.4.0",', '  "workflow": {', '    "tiers": ["T0", "T1", "T2"],', '    "lineBudget": 400,', '    "riskGate": true,', '    "chainedPRs": true', '  },', '  "review": {', '    "lenses": "context-free"', '  }', '}'];
+    const codeLines = code.map((t, i) => ({ n: i + 1, t, bg: t.includes('lineBudget') ? 'var(--raised2)' : 'transparent' }));
+    const spec = [
+      { k: 'TIER', v: 'T2' }, { k: 'PLUGIN', v: 'sumi' },
+      { k: es ? 'ESCRIBE' : 'WRITES', v: '.sumi/tasks/<slug>.md' }, { k: es ? 'LEE' : 'READS', v: '.sumi/config.json, CLAUDE.md' }
+    ];
+
+    const s = st.screen, c = st.copied;
+    const cur = (on) => (on ? 'page' : undefined);
+    return {
+      rootStyle, s: T, seamStyle, colA, colB, plugins, composeGroups, groups, tiers, codeLines, spec,
+      isLanding: s === 'landing', isReference: s === 'reference', isSkill: s === 'skill', isCommand: s === 'command',
+      navHomeCur: cur(s === 'landing'), navRefCur: cur(s !== 'landing'),
+      navHomeLine: s === 'landing' ? 'var(--accent)' : 'transparent', navRefLine: s !== 'landing' ? 'var(--accent)' : 'transparent',
+      isEs: es, isEn: !es, esBg: es ? 'var(--accent)' : 'transparent', esFg: es ? 'var(--accentC)' : 'var(--text)', enBg: !es ? 'var(--accent)' : 'transparent', enFg: !es ? 'var(--accentC)' : 'var(--text)',
+      introStyle: rv('intro', 'A'), installStyle: rv('install', 'B'),
+      query: st.query, noResults: groups.length === 0,
+      resultCount: q ? `${shown} / ${TOTAL_PAGES}` : `${TOTAL_PAGES} ${es ? 'PÁGINAS' : 'PAGES'}`,
+      noResultsMsg: es ? `Sin resultados para «${st.query}»` : `No results for «${st.query}»`,
+      onQuery: (e) => this.setState({ query: e.target.value }), clearQuery: () => this.setState({ query: '' }),
+      goLanding: () => this.go('landing'), goReference: (e) => { e && e.preventDefault && e.preventDefault(); this.go('reference'); }, goCommand: (e) => { e.preventDefault(); this.go('command'); },
+      setEs: () => this.setState({ lang: 'es' }), setEn: () => this.setState({ lang: 'en' }),
+      toggleTheme: () => this.setState({ theme: dark ? 'light' : 'dark' }),
+      copyInstall: () => this.copy('/plugin marketplace add <user>/sumitsubo', 'install'),
+      copyConfig: () => this.copy(code.join('\n'), 'config'), copyCmd: () => this.copy('/sumi:feature <idea>', 'cmd'),
+      copiedMsg: c === 'install' ? T.copied : '', cmdMsg: c === 'cmd' ? T.copied : '', configBtn: c === 'config' ? T.copied : T.copy
+    };
+  }
+}
+</script>
+</body>
+</html>
