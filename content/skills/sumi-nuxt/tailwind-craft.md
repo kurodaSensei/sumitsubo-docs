@@ -1,0 +1,274 @@
+---
+title: "tailwind-craft"
+description: "Tailwind CSS v4 in Nuxt/Vue projects - CSS-first @theme configuration fed by DESIGN.md tokens, semantic token layers, component extraction instead of @apply sprawl, variant APIs, spacing and type scale discipline, dark mode, container queries, and avoiding arbitrary-value spam and class soup. Use when styling *.vue templates, editing app/assets/css/*.css, main.css, tailwind setup in nuxt.config.ts, adding design tokens, theming or dark mode, or reviewing long class lists."
+plugin: "sumi-nuxt"
+kind: "skill"
+references: 1
+source: "plugins/sumi-nuxt/skills/tailwind-craft/SKILL.md"
+---
+
+# Tailwind Craft
+
+Tailwind is a constraint system. Its value comes from a small, named set of tokens applied
+consistently. Arbitrary values, one-off colors and 40-class strings are the signal that the
+constraints were abandoned. Tokens come from `DESIGN.md` (sumi-design); CSS layering and naming
+rules come from `sumi:css-architecture`.
+
+## Core principles
+
+1. **Tokens first.** Every color, font, radius, shadow and spacing step in the UI maps to a token in
+   `@theme`. If a value is not in the theme, add it to `DESIGN.md` and the theme, or do not use it.
+2. **Semantic over raw.** Components use `bg-surface`, `text-fg-muted`, `border-line`, not
+   `bg-zinc-50 dark:bg-zinc-900`. Raw palette steps exist only to define semantic tokens.
+3. **Extract components, not classes.** Repetition is solved with a Vue component (or a variant
+   function), not with `@apply` copies of utility strings.
+4. **One scale.** Spacing, type and radius follow the scale. No `mt-[13px]`.
+5. **Accessible by construction.** Focus-visible styles, contrast-checked token pairs, reduced motion.
+
+## Setup in Nuxt (v4)
+
+```ts
+// nuxt.config.ts
+import tailwindcss from '@tailwindcss/vite'
+export default defineNuxtConfig({
+  css: ['~/assets/css/main.css'],
+  vite: { plugins: [tailwindcss()] },
+})
+```
+
+The `@nuxtjs/tailwindcss` module is an alternative; verify its Tailwind v4 support before choosing it.
+There is no `tailwind.config.js` by default in v4; configuration lives in CSS.
+
+## Theme from DESIGN.md
+
+```css
+/* app/assets/css/main.css */
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* raw tokens copied from DESIGN.md */
+  --font-sans: "<Body family from DESIGN.md>", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Fraunces Variable", ui-serif, serif;
+  --color-ink-950: oklch(0.18 0.02 260);
+  --color-ink-50:  oklch(0.98 0.005 260);
+  --color-brand-600: oklch(0.55 0.17 35);
+  --radius-container: 0.75rem;
+  --ease-enter: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* semantic layer: switches with theme, consumed by components */
+@theme inline {
+  --color-surface: var(--surface);
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+}
+
+:root  { --surface: var(--color-ink-50);  --fg: var(--color-ink-950); --fg-muted: oklch(0.45 0.02 260);
+         --line: oklch(0.9 0.01 260); --accent: var(--color-brand-600); }
+.dark  { --surface: var(--color-ink-950); --fg: var(--color-ink-50);  --fg-muted: oklch(0.75 0.02 260);
+         --line: oklch(0.3 0.02 260); --accent: oklch(0.7 0.15 35); }
+```
+
+- Replace default namespaces deliberately (`--color-*: initial;`) when the brand palette should be the
+  only palette; this stops stray `bg-blue-500` from compiling.
+- Every fg/surface pair must meet WCAG 2.2 AA contrast (4.5:1 text, 3:1 large text/UI). Check both themes.
+- Token names mirror `DESIGN.md` roles through the Tailwind alias table in `sumi-design:design-tokens` (`text`→`fg`, `text-muted`→`fg-muted`, `border`→`line`, `accent-contrast`→`accent-fg`, so utilities read `text-fg`, not `text-text`); never invent names in components. Details: `references/tokens-and-variants.md`.
+
+## Class discipline
+
+```vue
+<!-- BAD: class soup, raw colors, arbitrary values, duplicated in 6 places -->
+<button class="inline-flex items-center justify-center gap-[6px] rounded-[10px] bg-[#e4572e]
+  px-[18px] py-[9px] text-[15px] font-semibold text-white shadow-[0_2px_8px_rgba(0,0,0,.15)]
+  hover:bg-[#c94a25] dark:bg-[#ff7a50] focus:outline-none">Save</button>
+
+<!-- GOOD: one component owns the recipe, tokens only -->
+<UiButton variant="primary" size="md">Save</UiButton>
+```
+
+- Order classes consistently (layout, box, typography, visual, state); use the Prettier Tailwind plugin.
+- More than ~12 utilities on one element, repeated in 2+ places: extract a component.
+- Variants via a typed function (`cva` or `tailwind-variants`) inside the component; merge consumer
+  classes with `tailwind-merge` so overrides win predictably.
+- `@apply` only for styling markup you do not control (CMS/markdown content, third-party widgets).
+  In SFC `<style>` blocks, use `@reference "~/assets/css/main.css";` before `@apply`.
+- Custom utilities with `@utility` for genuinely reusable single-purpose rules
+  (e.g. `@utility text-balance-safe { ... }`), not for component recipes.
+- Arbitrary values (`w-[37rem]`) are allowed once for a true one-off with a comment; a second use
+  means it is a token.
+- Dynamic classes must be complete strings in source (`variant === 'primary' ? 'bg-accent' : 'bg-surface'`).
+  Never build class names by concatenation (`bg-${color}-500`); the scanner cannot see them.
+
+## Layout and responsiveness
+
+- Mobile-first: base classes for small screens, `md:`/`lg:` add complexity upward.
+- Prefer container queries for components that live in different column widths:
+  `@container` on the wrapper, `@md:grid-cols-2` on children. Viewport breakpoints for page layout.
+- Use `gap` over margins between siblings; `space-*` only for simple stacks.
+- Fluid type with `clamp()` defined as tokens (`--text-display`), not ad-hoc in templates.
+- Respect the content: `max-w-prose`/`ch`-based widths for reading text.
+
+## States, motion and dark mode
+
+- Every interactive element: `hover:`, `focus-visible:` (visible ring with offset), `active:`,
+  `disabled:`/`aria-disabled:` styles. Never strip outlines without replacement.
+- Style off state attributes: `aria-expanded:`, `aria-selected:`, `data-[state=open]:` (headless libs).
+- `motion-safe:` for transitions/animations; durations and easings from tokens.
+- Dark mode via the class strategy with the preference stored in a cookie or `@nuxtjs/color-mode`
+  (avoids hydration flash, see `nuxt-data-ssr`). Semantic tokens mean components need no `dark:` classes.
+
+## Anti-patterns (AI slop tells)
+
+- Hex codes and arbitrary values everywhere (`text-[#333]`, `p-[13px]`, `shadow-[...]`).
+- The generic purple-to-blue gradient hero, `rounded-2xl shadow-xl` on every card, glassmorphism
+  by default - style that ignores `DESIGN.md`.
+- `dark:` duplicates on every element instead of semantic tokens.
+- `@apply` re-creating Bootstrap (`.btn`, `.card`, `.container`) for markup you own.
+- 30-class strings copy-pasted across files; string-concatenated class names.
+- Mixed spacing (`p-3`, `p-[14px]`, `p-3.5`, `p-4`) in sibling components.
+- `focus:outline-none` with no `focus-visible` replacement; low-contrast `text-gray-400` body copy.
+- Keeping a v3 `tailwind.config.js` with JS theme alongside v4 CSS config "just in case".
+
+## Done checklist
+
+- [ ] All colors, fonts, radii, shadows and easings come from `@theme` tokens traceable to `DESIGN.md`.
+- [ ] Components use semantic tokens; dark mode works without per-element `dark:` classes.
+- [ ] No arbitrary values except documented one-offs; no concatenated class names.
+- [ ] Repeated recipes extracted into components with typed variants; `@apply` only for foreign markup.
+- [ ] Focus-visible, hover, disabled and reduced-motion states present; AA contrast verified in both themes.
+- [ ] Layout uses container queries where components are reused across widths.
+- [ ] CSS output size checked; no unused palettes shipped (`sumi:performance`).
+
+## Tokens and variant components
+
+### Mapping DESIGN.md to @theme
+
+`DESIGN.md` (produced by sumi-design) is the source of truth. Mirror its token groups into Tailwind
+namespaces so utilities are generated automatically:
+
+| DESIGN.md group | @theme namespace | Generates |
+| --- | --- | --- |
+| Colors (raw) | `--color-*` | `bg-*`, `text-*`, `border-*`, `fill-*`... |
+| Font families | `--font-*` | `font-*` |
+| Type scale | `--text-*` (+ `--text-*--line-height`) | `text-*` |
+| Spacing base | `--spacing` | `p-4`, `gap-6` = multiples of the base |
+| Radii | `--radius-*` | `rounded-*` |
+| Shadows / elevation | `--shadow-*` | `shadow-*` |
+| Easing | `--ease-*` | `ease-*` |
+| Breakpoints | `--breakpoint-*` | `sm:`, `md:`... |
+| Container sizes | `--container-*` | `@sm:`, `max-w-*` |
+
+Namespace names above reflect Tailwind v4 conventions; verify against current docs when adding a
+less common group.
+
+Rules:
+- Keep the raw palette small (brand, neutral ramp, feedback colors). Semantic tokens reference it.
+- If the design needs a value not in `DESIGN.md`, update `DESIGN.md` first, then the theme.
+- Naming: semantic tokens describe role (`surface`, `surface-raised`, `fg`, `fg-muted`, `line`,
+  `accent`, `accent-fg`, `danger`, `focus`), not appearance (`light-gray`).
+
+### Type scale with line heights
+
+```css
+@theme {
+  --text-body: 1rem;
+  --text-body--line-height: 1.6;
+  --text-h2: clamp(1.5rem, 1.2rem + 1.2vw, 2.125rem);
+  --text-h2--line-height: 1.2;
+  --text-h2--letter-spacing: -0.01em;
+}
+```
+
+Usage: `text-h2`, `text-body`. Headings get their size from tokens, never `text-[34px]`.
+
+### Variant component with cva + tailwind-merge
+
+```ts
+// app/utils/cn.ts
+import { twMerge } from 'tailwind-merge'
+import { clsx, type ClassValue } from 'clsx'
+export const cn = (...inputs: ClassValue[]) => twMerge(clsx(inputs))
+```
+
+```vue
+<!-- app/components/ui/Button.vue -> <UiButton> -->
+<script setup lang="ts">
+import { cva, type VariantProps } from 'class-variance-authority'
+
+const button = cva(
+  'inline-flex items-center justify-center gap-2 rounded-card font-medium transition-colors ' +
+  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus ' +
+  'disabled:pointer-events-none disabled:opacity-50 motion-reduce:transition-none',
+  {
+    variants: {
+      variant: {
+        primary: 'bg-accent text-accent-fg hover:bg-accent/90',
+        secondary: 'border border-line bg-surface text-fg hover:bg-surface-raised',
+        ghost: 'text-fg hover:bg-surface-raised',
+      },
+      size: { sm: 'h-8 px-3 text-sm', md: 'h-10 px-4', lg: 'h-12 px-6 text-lg' },
+    },
+    defaultVariants: { variant: 'primary', size: 'md' },
+  },
+)
+type ButtonVariants = VariantProps<typeof button>
+
+const { variant, size, class: className, type = 'button' } = defineProps<{
+  variant?: ButtonVariants['variant']
+  size?: ButtonVariants['size']
+  class?: string
+  type?: 'button' | 'submit' | 'reset'
+}>()
+</script>
+
+<template>
+  <button :type="type" :class="cn(button({ variant, size }), className)">
+    <slot />
+  </button>
+</template>
+```
+
+Notes:
+- Assumes semantic tokens `accent-fg`, `surface-raised` and `focus` exist in the `@theme inline`
+  layer alongside the ones shown in SKILL.md.
+- `h-10` gives a 40px target; WCAG 2.2 AA (2.5.8) requires at least 24x24 CSS px or adequate
+  spacing - larger is better for touch.
+- If the button can render as a link, accept an `as`/`to` prop and render `<NuxtLink>`; never put a
+  `<button>` inside an `<a>`.
+
+### Styling foreign content
+
+```css
+/* Prose from CMS / markdown */
+.prose-content {
+  @apply text-body text-fg;
+  & h2 { @apply mt-12 mb-4 font-display text-h2; }
+  & a  { @apply text-accent underline underline-offset-4 hover:no-underline; }
+}
+```
+
+Or use `@tailwindcss/typography` customized with your tokens. This is the legitimate home of `@apply`.
+
+### Container queries
+
+```vue
+<article class="@container rounded-card border border-line bg-surface p-4">
+  <div class="grid gap-4 @md:grid-cols-[8rem_1fr]">
+    <NuxtImg ... class="aspect-square w-full rounded-card object-cover" />
+    <div>...</div>
+  </div>
+</article>
+```
+
+The card adapts to its slot (sidebar vs main column) without knowing the viewport.
+
+### Migrating v3 projects (summary)
+
+- Move `theme.extend` values to `@theme` variables; delete the JS config when done.
+- Check renamed utilities (several shadow, radius, blur and outline utilities shifted one step or were
+  renamed in v4) and default border/ring color changes - verify with the official upgrade guide and
+  run the upgrade tool, then review the diff visually.

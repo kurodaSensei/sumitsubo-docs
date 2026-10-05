@@ -51,7 +51,30 @@ Experienced web developers and design engineers already using Claude Code. Skept
 
 ## Content truth
 
-Reference content is **generated at build time from the framework repo's `SKILL.md` and command files** — a single source of truth that never drifts. The design must survive copy it does not control: terse technical register, 3–6 column tables, long code fences, defined terms (T0/T1/T2, the ~400-line slice budget, review receipts, context-free lenses, `ponytail:` comments).
+Reference content comes from the framework repo's `SKILL.md` and command files — a single source of truth. The design must survive copy it does not control: terse technical register, 3–6 column tables, long code fences, defined terms (T0/T1/T2, the ~400-line slice budget, review receipts, context-free lenses, `ponytail:` comments).
+
+### How the content gets here — decided 2026-10-05
+
+`sumitsubo-docs` is a **separate repo** from `kurodaSensei/sumitsubo` (public). The content is **vendored, not fetched at build**:
+
+```
+npm run sync   # shallow-clones the framework at its default branch,
+               # transforms it, writes content/, records the source SHA
+```
+
+You then commit `content/`. The consequences are the point:
+
+- **The build is hermetic.** `nuxt generate` never touches the network, so it cannot fail because GitHub is slow and it works offline.
+- **Every content change is a reviewable diff.** When the framework adds a skill or rewrites a description, the sync PR shows exactly what moves on the site. Nothing changes under you silently.
+- **The committed content *is* the pin.** There is no lockfile to keep honest, because the build has nothing to resolve. `content/_meta.json` records the framework SHA for provenance.
+
+The cost is one manual command when the framework changes. For a repo that moves a few times a year, that is the right trade against a build that can break for reasons outside this repo.
+
+Rejected: an **npm git dependency** (the framework has no `package.json`, and adding one purely to serve the docs inverts the relationship); a **git submodule** (same pinning, more friction on clone, no reviewable content diff); **fetching at build** (makes every deploy depend on GitHub being up).
+
+The decision splits cleanly in two: *acquisition* (above) and *transform* (`scripts/sync-framework.mjs`). The transform is the real work and is identical under any acquisition strategy, so swapping the strategy later costs almost nothing.
+
+**The 42 reference pages are English only.** The framework's files are written in English on purpose; the site chrome is bilingual, the generated content is not. A reader on the Spanish site gets Spanish navigation around English reference text. `references/*.md` are inlined into their parent skill page rather than getting routes of their own.
 
 There is **no photography, no product shots, no logo and no illustration**, and there will be none. Visual content is made from type, rules and orthographic joint diagrams.
 
