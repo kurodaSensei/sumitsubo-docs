@@ -180,6 +180,29 @@ Slot-home reveal: module translates 24 px along its interlock axis into place, 3
 
 ## 5. Screens
 
+### Content inventory — the real 42 pages
+
+Every screen below draws from this list. It is the complete surface: **9 commands + 33 skills**. These are the actual directory names in the framework repo (`plugins/*/skills/*` and the command files), verified against it on 2026-10-05. Re-verify with:
+
+```
+ls -d "<framework-repo>/plugins/"*/skills/*/ | xargs -n1 basename
+```
+
+**Commands (9)** — `/sumi:init` · `/sumi:feature` · `/sumi:review` · `/sumi:ship` · `/sumi:models` · `/sumi:sync` · `/sumi-design:direction` · `/sumi-design:critique` · `/sumi-design:deps`
+
+**Skills (33), by plugin:**
+
+| Plugin | n | Skills |
+|---|---|---|
+| `sumi` | 8 | `workflow` · `code-quality` · `a11y` · `performance` · `css-architecture` · `html` · `js-ts` · `model-routing` |
+| `sumi-design` | 6 | `design-direction` · `design-tokens` · `design-ledger` · `anti-slop` · `motion` · `claude-design-bridge` |
+| `sumi-nuxt` | 5 | `nuxt-architecture` · `nuxt-data-ssr` · `vue-components` · `firebase-firestore` · `tailwind-craft` |
+| `sumi-react` | 5 | `next-app-router` · `next-data-caching` · `react-components` · `react-performance` · `react-testing` |
+| `sumi-shopify` | 5 | `shopify-theme-architecture` · `shopify-sections-blocks` · `shopify-liquid` · `shopify-storefront-js` · `shopify-performance-a11y` |
+| `sumi-wordpress` | 4 | `wp-block-theme` · `wp-custom-blocks` · `wp-native-features` · `wp-performance-audit` |
+
+**Derive every count from this table — never hardcode one.** The first prototype hardcoded counts in three places and ended up crediting `sumi-design` with 6 skills in one component and 0 in another. One list, and the plugin cards, the composition figure, the reference index, the header metadata and the filter placeholder all follow from it.
+
 ### Screen 1 — Landing (`/`) · mode: Persuade
 
 **Purpose:** a skeptical senior developer understands the thesis and installs. One focal point: **the manifesto sentence**. The install command is the single action.
