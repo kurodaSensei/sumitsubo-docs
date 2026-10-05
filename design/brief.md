@@ -2,7 +2,7 @@
 
 ## Business
 - Offer: Sumitsubo (墨壺) — an opinionated AI framework for web design and development with Claude Code. 6 plugins, 9 commands, 33 skills. MIT, free, installed via the Claude Code plugin marketplace.
-- Primary conversion or task: a senior developer or design engineer lands here, understands the thesis in under 30 seconds, and runs `/plugin marketplace add <user>/sumitsubo`.
+- Primary conversion or task: a senior developer or design engineer lands here, understands the thesis in under 30 seconds, and runs `/plugin marketplace add kurodaSensei/sumitsubo`.
 - Secondary goals: serve as the day-to-day reference for the 42 commands/skills; stand as evidence of the author's design judgement (the site is itself a work sample).
 
 ## Audience

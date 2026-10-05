@@ -36,7 +36,7 @@ Experienced web developers and design engineers already using Claude Code. Skept
 
 ## Success
 
-- Primary: the visitor runs `/plugin marketplace add <user>/sumitsubo`.
+- Primary: the visitor runs `/plugin marketplace add kurodaSensei/sumitsubo`.
 - Secondary: the site becomes the author's own daily reference for the 42 pages.
 - Tertiary: the site stands as evidence of the author's design judgement — it is itself a work sample.
 

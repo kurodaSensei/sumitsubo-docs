@@ -10,7 +10,7 @@
 
 - **Client:** Sumitsubo (墨壺) — an opinionated AI framework for web design and development with Claude Code. Free, MIT, v0.4.0, by Alfredo Rodríguez.
 - **Audience:** experienced web developers and design engineers already using Claude Code. Skeptical of AI tooling, allergic to marketing language, able to tell craft from template at a glance.
-- **Primary task:** understand the thesis in under 30 seconds and run `/plugin marketplace add <user>/sumitsubo`. Secondary: find one fact in one of 42 reference pages, fast.
+- **Primary task:** understand the thesis in under 30 seconds and run `/plugin marketplace add kurodaSensei/sumitsubo`. Secondary: find one fact in one of 42 reference pages, fast.
 - **Platform:** Nuxt 4, prerendered static. WCAG 2.2 AA. LCP ≤ 2.5 s, INP ≤ 200 ms, CLS ≤ 0.1, initial JS ≤ 170 KB gzip.
 - **Content reality:** no photography, no logo, no illustration exists or will exist. Bilingual EN/ES — Spanish runs ~20% longer. Reference pages are generated from the framework repo at build time, so the design must survive copy it does not control: terse technical prose, 3–6 column tables, long code fences.
 
@@ -212,7 +212,7 @@ ls -d "<framework-repo>/plugins/"*/skills/*/ | xargs -n1 basename
 - Wordmark: `SUMITSUBO` · subtitle `墨壺`
 - Manifesto (display type, full bleed, the focal point): **"It marks the true line before any cut is made."**
 - Supporting paragraph directly below, body type, max 68ch: "Sumitsubo is the Japanese carpenter's ink line. This framework does the same — direction first, then the work. It encodes how a senior design engineer works: process that scales with the request, code quality without slop, accessibility and performance as acceptance criteria, and — above all — design that doesn't look like every other AI-generated site."
-- Primary button: `Instalar el plugin` → below it, in code type: `/plugin marketplace add <user>/sumitsubo`
+- Primary button: `Instalar el plugin` → below it, in code type: `/plugin marketplace add kurodaSensei/sumitsubo`
 - Secondary link: `Ver los 33 skills`
 - Metadata line in label type: `v0.4.0 · MIT · 6 PLUGINS · 9 COMANDOS · 33 SKILLS`
 
