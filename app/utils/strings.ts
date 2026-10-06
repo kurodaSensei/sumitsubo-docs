@@ -38,6 +38,7 @@ export interface Strings {
   commandsLabel: string
 
   refTitle: string
+  tocLabel: string
   refSeoDescription: (c: { commands: number, skills: number, plugins: number }) => string
   filterLabel: string
   filterPlaceholder: string
@@ -83,6 +84,7 @@ const en: Strings = {
   commandsLabel: 'commands',
 
   refTitle: 'Reference',
+  tocLabel: 'On this page',
   refSeoDescription: (c) =>
     `${c.commands} commands and ${c.skills} skills across ${c.plugins} plugins.`,
   filterLabel: 'Filter',
@@ -131,6 +133,7 @@ const es: Strings = {
   commandsLabel: 'comandos',
 
   refTitle: 'Referencia',
+  tocLabel: 'En esta página',
   refSeoDescription: (c) =>
     `${c.commands} comandos y ${c.skills} skills repartidos en ${c.plugins} plugins.`,
   filterLabel: 'Filtrar',

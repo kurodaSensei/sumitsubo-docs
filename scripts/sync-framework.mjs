@@ -66,11 +66,33 @@ const esc = (v) => (typeof v === 'number' || typeof v === 'boolean' ? String(v) 
 // control and that stops being true.
 marked.use({ gfm: true, breaks: false });
 
+/** Heading text -> fragment id. Collisions are resolved, never allowed. */
+function slugify(text, taken) {
+  const base = text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '') || 'section';
+  let id = base, n = 2;
+  while (taken.has(id)) id = `${base}-${n++}`;
+  taken.add(id);
+  return id;
+}
+
+/** Strip the inline markup marked leaves inside a heading, and decode it. */
+function headingText(inner) {
+  return inner
+    .replace(/<[^>]+>/g, '')
+    .replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>').replace(/&amp;/g, '&')
+    .trim();
+}
+
 /**
- * Post-process the rendered HTML.
+ * Post-process the rendered HTML: scroll regions, the security gate, and the
+ * heading ids the table of contents links to.
  *
- * Both of these have to happen here rather than in the component: the body is
- * injected with `v-html`, so the SFC never sees these elements as nodes.
+ * All of it has to happen here rather than in the component, because the body
+ * is injected with `v-html` and the SFC never sees these elements as nodes.
  */
 function postProcess(html, where) {
   let n = 0;
@@ -110,7 +132,26 @@ function postProcess(html, where) {
         `     Sanitise it upstream, or add a sanitiser here if raw HTML is genuinely wanted.`);
   }
 
-  return wrapped;
+  // Fragment targets for the table of contents, and the contents themselves.
+  // Only h2: these pages run up to 14 of them and adding the h3s would make the
+  // list longer than the viewport it has to fit beside.
+  // ponytail: flat h2 list; nest the h3s when a page shows up where the h2
+  // titles alone are not enough to find a section.
+  //
+  // These ids already exist on the page — the <main> landmark the skip link
+  // targets, the reference filter input, and the heading that names the table
+  // of contents. A content heading that slugified to any of them would be
+  // shadowed in getElementById and its link would silently jump elsewhere.
+  const taken = new Set(['main', 'q', 'toc-title']);
+  const toc = [];
+  wrapped = wrapped.replace(/<h2>([\s\S]*?)<\/h2>/g, (_m, inner) => {
+    const text = headingText(inner);
+    const id = slugify(text, taken);
+    toc.push({ id, text });
+    return `<h2 id="${id}">${inner}</h2>`;
+  });
+
+  return { html: wrapped, toc };
 }
 
 /** The body's own `# Title` duplicates the page heading, so lift it out. */
@@ -169,9 +210,10 @@ function emit(path, meta, body) {
   // is what the index and the breadcrumb identify the page by.
   const { heading, rest } = splitHeading(body)
 
+  const { html, toc } = postProcess(marked.parse(rest), path);
   const page = writeAbs(
     join(PUB, path.replace(/\.md$/, '.json')),
-    JSON.stringify({ ...meta, heading, html: postProcess(marked.parse(rest), path) })
+    JSON.stringify({ ...meta, heading, toc, html })
   );
   // The .md keeps the body intact — it is the reviewable mirror of upstream,
   // not the render input.

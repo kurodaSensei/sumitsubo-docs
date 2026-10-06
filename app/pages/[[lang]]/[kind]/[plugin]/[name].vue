@@ -21,6 +21,8 @@ interface Page {
   kind: string
   references: number
   source: string
+  /** One entry per `h2`, with the fragment id the sync script put on it. */
+  toc: { id: string, text: string }[]
   html: string
 }
 
@@ -92,7 +94,28 @@ useSeoMeta({
       </div>
     </div>
 
-    <PageBody :src="src" />
+    <div class="doc__layout">
+      <!-- Before the body in the DOM, to the right of it on screen. A reader on
+           a keyboard should reach a navigation aid before the thing it helps
+           navigate; placed after <PageBody> it sat behind the entire article,
+           which is where it is least useful.
+           Three entries is where a list starts beating a scroll — below that the
+           headings are already on one screen. The 9 command pages have no h2 at
+           all and get nothing.
+           Labelled *by* its heading rather than with a copy of it: an aria-label
+           duplicating a visible <h2> is what made the reference groups' region
+           landmarks worthless. -->
+      <nav v-if="page.toc.length >= 3" class="toc" aria-labelledby="toc-title">
+        <h2 id="toc-title" class="u-label toc__title">{{ t.tocLabel }}</h2>
+        <ol class="toc__list" role="list">
+          <li v-for="h in page.toc" :key="h.id">
+            <a :href="`#${h.id}`" :lang="foreign">{{ h.text }}</a>
+          </li>
+        </ol>
+      </nav>
+
+      <PageBody :src="src" />
+    </div>
 
     <footer class="doc__foot">
       <NuxtLink :to="path('/reference')" class="u-label">← {{ t.navRef }}</NuxtLink>
@@ -104,6 +127,79 @@ useSeoMeta({
 .doc {
   padding-block-start: clamp(2rem, 6vh, 4rem);
   max-width: var(--measure-wide);
+  /* DESIGN.md §6: the contents sizes to this column, not the viewport. The two
+     differ by the gutter, which is itself fluid. */
+  container-type: inline-size;
+}
+
+.doc__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* The contents is a wide-screen affordance (DESIGN.md §6). Below this it is not
+   rendered at all rather than stacked above the body: on the worst page that
+   would put 14 links between the reader and the first paragraph, to reach
+   headings that are in the document anyway. The ids stay on the headings at
+   every width, so a deep link still works. */
+@container (width >= 60rem) {
+  .doc__layout {
+    grid-template-columns: minmax(0, 1fr) var(--measure-toc);
+    column-gap: var(--space-7);
+  }
+
+  /* Explicit placement, because the DOM order is nav-then-body and the visual
+     order is body-then-nav. */
+  .toc { grid-column: 2; grid-row: 1; }
+  .doc__layout > :not(.toc) { grid-column: 1; grid-row: 1; }
+}
+
+@container (width < 60rem) {
+  .toc {
+    display: none;
+  }
+}
+
+.toc {
+  position: sticky;
+  /* Breathing room only — the header is not sticky, so nothing overlays the
+     headings either and they need no scroll-margin. */
+  top: var(--space-7);
+  align-self: start;
+  max-height: calc(100svh - var(--space-7) * 2);
+  overflow-y: auto;
+  padding-inline-start: var(--space-5);
+  border-inline-start: var(--divider-width) solid var(--color-divider);
+}
+
+.toc__title {
+  color: var(--color-text-muted);
+  margin-block-end: var(--space-4);
+}
+
+.toc__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.toc__list a {
+  display: block;
+  color: var(--color-text-muted);
+  text-decoration: none;
+  /* --text-small, not --text-meta: §2 declares that one mono-only, and these
+     entries are prose set in the body face. */
+  font-size: var(--text-small);
+  line-height: var(--text-small-lh);
+  text-wrap: pretty;
+  transition: color var(--motion-quick) var(--ease-move);
+}
+
+.toc__list a:hover {
+  color: var(--color-accent);
 }
 
 .crumb {

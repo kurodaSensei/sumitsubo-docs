@@ -91,6 +91,7 @@
     --measure-wide: 78rem;
     --measure-grid: 90rem;
     --measure-control: 44rem;
+    --measure-toc: 16rem;
 
     /* A module spanning cols 1–7 is 7/12 of the grid; the seam sits at 5/12 of
      * the grid, i.e. 5/7 = 71.43% across that module. Pad the remaining 28.57%
