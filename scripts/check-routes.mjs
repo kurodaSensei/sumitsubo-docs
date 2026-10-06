@@ -112,6 +112,19 @@ check('every translation keeps its English anchors', () => {
       const tr = JSON.parse(readFileSync(file, 'utf8'));
       assert.deepEqual(tr.toc.map((h) => h.id), en.toc.map((h) => h.id),
         `${loc}/${rel}: anchors differ from the English source`);
+
+      // Code is not prose. Holding every <pre> and every <code> byte-identical
+      // across locales is what makes "no identifier was translated" a fact
+      // about all 42 pages rather than a promise about each one. It also costs
+      // the odd judgment call — marking `width`/`height` as code where the
+      // English left them plain is an improvement, and still not worth giving
+      // up a mechanical guarantee for.
+      const blocks = (h) => h.match(/<pre\b[\s\S]*?<\/pre>/g) ?? [];
+      const spans = (h) => h.match(/<code>[\s\S]*?<\/code>/g) ?? [];
+      assert.deepEqual(blocks(tr.html), blocks(en.html),
+        `${loc}/${rel}: a code block differs from the English source`);
+      assert.deepEqual(spans(tr.html), spans(en.html),
+        `${loc}/${rel}: an inline code span differs from the English source`);
       checked += 1;
     }
   }
