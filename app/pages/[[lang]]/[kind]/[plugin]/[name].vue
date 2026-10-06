@@ -114,7 +114,20 @@ useSeoMeta({
         </ol>
       </nav>
 
-      <PageBody :src="src" />
+      <!-- The language goes on a wrapper, not into <PageBody>'s props. The
+           reference content is English in both locales (PRODUCT.md), so on /es/
+           this subtree is the better part of a thousand English words inside
+           `<html lang="es">`, and a screen reader reads every one of them with
+           Spanish phonetics — WCAG 2.2 AA 3.1.2, Language of Parts. The
+           description and the contents links already declared it; the body, by
+           far the largest block on the page, did not.
+           On the wrapper because <PageBody> is a server island cached by its
+           props: adding `lang` to them split one cached render per page into
+           two, one per locale, for markup that is byte-identical. `lang`
+           inherits through the DOM, so the wrapper reaches the same subtree. -->
+      <div :lang="foreign">
+        <PageBody :src="src" />
+      </div>
     </div>
 
     <footer class="doc__foot">
