@@ -6,6 +6,9 @@ definePageMeta({ validate: (route) => isLocaleParam(route.params.lang) })
 
 const { t, path, locale } = useChrome()
 
+// DESIGN.md §7, landing only. The reference and detail pages get none of it.
+useReveal()
+
 // Plugin descriptions come from the framework's marketplace manifest and are
 // English only. Declaring that is the honest fix — silently inventing Spanish
 // for them would be worse than labelling the run.
@@ -61,7 +64,7 @@ useHead({
         <div class="seam" aria-hidden="true" />
 
         <div class="interlock__a">
-          <div class="module module--raised u-chamfer pad-seam">
+          <div data-reveal class="module module--raised u-chamfer pad-seam">
             <!-- No .u-prose: `pad-seam` already caps the measure here, and the
                  two compounded to a ~38-character column at 820 px. One rule
                  owns the measure. -->
@@ -70,7 +73,7 @@ useHead({
         </div>
 
         <div class="interlock__b">
-          <div class="module module--raised-2 u-chamfer install">
+          <div data-reveal class="module module--raised-2 u-chamfer install">
             <div class="install__actions">
               <button type="button" class="btn u-chamfer-control" @click="copyInstall">
                 {{ t.install }}
@@ -105,7 +108,7 @@ useHead({
         <div class="seam" aria-hidden="true" />
 
         <div class="interlock__a">
-          <figure class="module module--raised u-chamfer pad-seam fig">
+          <figure data-reveal class="module module--raised u-chamfer pad-seam fig">
             <p class="u-label fig__rule">{{ t.always }}</p>
             <p class="fig__note">{{ t.alwaysSub }}</p>
             <div v-for="p in core" :key="p.name" class="fig__row">
@@ -119,7 +122,7 @@ useHead({
         </div>
 
         <div class="interlock__b">
-          <figure class="module module--raised-2 u-chamfer fig">
+          <figure data-reveal class="module module--raised-2 u-chamfer fig">
             <p class="u-label fig__rule">{{ t.pick }}</p>
             <p class="fig__note">{{ t.pickSub }}</p>
             <div v-for="p in stack" :key="p.name" class="fig__row">
@@ -144,6 +147,7 @@ useHead({
           :class="i % 2 ? 'interlock__b' : 'interlock__a'"
         >
           <article
+            data-reveal
             class="module u-chamfer card"
             :class="[i % 2 ? 'module--raised-2' : 'module--raised', { 'pad-seam': i % 2 === 0 }]"
           >
@@ -224,6 +228,10 @@ useHead({
   grid-column: 6 / 13;
   min-width: 0;
 }
+
+/* Each module enters along the axis it interlocks on. */
+.interlock__a [data-reveal] { --reveal-shift: translateX(-24px); }
+.interlock__b [data-reveal] { --reveal-shift: translateX(24px); }
 
 .seam {
   position: absolute;
@@ -448,5 +456,9 @@ useHead({
   .pad-seam {
     padding-inline-end: var(--space-module-pad);
   }
+
+  /* The interlock is gone here, so the entry axis becomes vertical. */
+  .interlock__a [data-reveal],
+  .interlock__b [data-reveal] { --reveal-shift: translateY(24px); }
 }
 </style>

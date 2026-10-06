@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 // Vendors the Sumitsubo framework's docs into content/.
 //
-//   npm run sync        clone, transform, write content/, then commit the diff
-//   npm run sync -- -n  dry run: report what would change, write nothing
+//   npm run sync                clone the default branch, transform, write, commit the diff
+//   npm run sync -- --ref <sha>  pin the content to one upstream commit
+//   npm run sync -- -n           dry run: report what would change, write nothing
 //
 // The build never runs this. content/ is committed, so `nuxt generate` is
 // hermetic -- no network, works offline, cannot break because GitHub is down.
@@ -25,6 +26,13 @@ const PUB = join(ROOT, 'server', 'assets', 'pages');
 const REPO = 'https://github.com/kurodaSensei/sumitsubo.git';
 const EXPECTED = { skills: 33, commands: 9, plugins: 6 };
 const dryRun = process.argv.includes('-n') || process.argv.includes('--dry-run');
+
+// Without --ref this clones the default branch tip, so a run made to regenerate
+// after a renderer change also drags in whatever landed upstream meanwhile.
+// That happened once and put an unrelated content update in a fix commit.
+const refArg = process.argv.indexOf('--ref');
+const ref = refArg !== -1 ? process.argv[refArg + 1] : null;
+if (refArg !== -1 && !ref) die('--ref needs a commit sha or branch name');
 
 const die = (msg) => { console.error(`sync: ${msg}`); process.exit(1); };
 const ls = (dir) => (existsSync(dir) ? readdirSync(dir, { withFileTypes: true }) : []);
@@ -144,7 +152,23 @@ function emit(path, meta, body) {
 const tmp = mkdtempSync(join(tmpdir(), 'sumitsubo-'));
 let sha;
 try {
-  execFileSync('git', ['clone', '--depth', '1', '--quiet', REPO, tmp], { stdio: ['ignore', 'ignore', 'pipe'] });
+  if (ref) {
+    // A commit is not fetchable by name from a shallow clone, so fetch it
+    // directly. Note the constraint this carries: `git fetch origin <sha>`
+    // needs the *full* 40-character sha. An abbreviated one fails with
+    // "couldn't find remote ref", which says nothing useful, so catch it here.
+    if (/^[0-9a-f]{4,39}$/i.test(ref)) {
+      die(`--ref ${ref} looks like an abbreviated sha.\n` +
+          `     git can only fetch a single commit by its full 40-character sha.\n` +
+          `     Use the full sha, or a branch name.`);
+    }
+    execFileSync('git', ['init', '--quiet', tmp]);
+    execFileSync('git', ['-C', tmp, 'remote', 'add', 'origin', REPO]);
+    execFileSync('git', ['-C', tmp, 'fetch', '--depth', '1', '--quiet', 'origin', ref], { stdio: ['ignore', 'ignore', 'pipe'] });
+    execFileSync('git', ['-C', tmp, 'checkout', '--quiet', 'FETCH_HEAD']);
+  } else {
+    execFileSync('git', ['clone', '--depth', '1', '--quiet', REPO, tmp], { stdio: ['ignore', 'ignore', 'pipe'] });
+  }
   sha = execFileSync('git', ['-C', tmp, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
 } catch (e) {
   rmSync(tmp, { recursive: true, force: true });
