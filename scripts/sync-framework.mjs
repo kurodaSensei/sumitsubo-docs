@@ -12,6 +12,7 @@
 // untarring a tarball. git is already a hard requirement here and it hands us
 // the SHA for free. Swap to codeload + tar only if a runner without git shows up.
 
+import { marked } from 'marked';
 import { execFileSync } from 'node:child_process';
 import { mkdtempSync, rmSync, readdirSync, readFileSync, writeFileSync, mkdirSync, existsSync, statSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -20,6 +21,7 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = join(ROOT, 'content');
+const PUB = join(ROOT, 'server', 'assets', 'pages');
 const REPO = 'https://github.com/kurodaSensei/sumitsubo.git';
 const EXPECTED = { skills: 33, commands: 9, plugins: 6 };
 const dryRun = process.argv.includes('-n') || process.argv.includes('--dry-run');
@@ -47,14 +49,36 @@ function parse(raw, where) {
 // instead of silently comparing strings.
 const esc = (v) => (typeof v === 'number' || typeof v === 'boolean' ? String(v) : JSON.stringify(String(v ?? '')));
 
-function emit(path, meta, body) {
-  const fm = Object.entries(meta).map(([k, v]) => `${k}: ${esc(v)}`).join('\n');
-  const text = `---\n${fm}\n---\n\n${body}\n`;
-  const full = join(OUT, path);
+// Markdown is rendered HERE, in Node, not in the browser. The renderer is a
+// devDependency that the Nuxt build never imports, so it costs the client
+// bundle nothing -- the page only injects a string.
+//
+// No sanitiser: this content is vendored from the user's own framework repo by
+// the clone above, so it is first-party. Point REPO at something you do not
+// control and that stops being true.
+marked.use({ gfm: true, breaks: false });
+
+function writeAbs(full, text) {
   const prev = existsSync(full) ? readFileSync(full, 'utf8') : null;
   if (prev === text) return 'same';
   if (!dryRun) { mkdirSync(dirname(full), { recursive: true }); writeFileSync(full, text); }
   return prev === null ? 'added' : 'changed';
+}
+
+const write = (path, text) => writeAbs(join(OUT, path), text);
+
+function emit(path, meta, body) {
+  const fm = Object.entries(meta).map(([k, v]) => `${k}: ${esc(v)}`).join('\n');
+  // Two artefacts from one parse, so they cannot disagree:
+  //   .md    the reviewable diff — what you read in a sync PR
+  //   .json  exactly what the detail page needs, nothing more, so the page
+  //          does no frontmatter parsing in the browser
+  const page = writeAbs(
+    join(PUB, path.replace(/\.md$/, '.json')),
+    JSON.stringify({ ...meta, html: marked.parse(body) })
+  );
+  const md = write(path, `---\n${fm}\n---\n\n${body}\n`);
+  return md === 'same' && page === 'same' ? 'same' : md === 'added' ? 'added' : 'changed';
 }
 
 // --- clone -------------------------------------------------------------------
