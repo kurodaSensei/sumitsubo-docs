@@ -1,0 +1,26 @@
+{
+  "sumi": {
+    "description": "Núcleo de ingeniería: flujo de trabajo adaptable (trivial → delegado → expediente de funcionalidad), presupuestos de líneas, controles de riesgo, lentes de revisión sin contexto, estándares de HTML/CSS/JS/accesibilidad/rendimiento y hooks de seguridad.",
+    "source-hash": "3491760c99dfd22a"
+  },
+  "sumi-design": {
+    "description": "Dirección de diseño contra el relleno genérico: brief, anti-referencias, tres direcciones divergentes, registro de repeticiones entre proyectos, tokens de DESIGN.md y reglas de movimiento. Orquesta las skills de Impeccable, Taste y Emil Kowalski.",
+    "source-hash": "0f376a2d3c8f07fa"
+  },
+  "sumi-nuxt": {
+    "description": "Paquete de stack Nuxt 3/4 + Vue 3 + Firebase/Firestore: composables, seguridad en SSR e hidratación, modelado de datos, reglas de seguridad y Tailwind.",
+    "source-hash": "873d7491a7ca2a66"
+  },
+  "sumi-react": {
+    "description": "Paquete de stack React 19 + App Router de Next.js: fronteras entre servidor y cliente, obtención y caché de datos, formularios y acciones, arquitectura de componentes.",
+    "source-hash": "83221e7c1b95e935"
+  },
+  "sumi-shopify": {
+    "description": "Paquete de stack Shopify Online Store 2.0: Liquid, secciones, bloques, esquemas, fragmentos, rendimiento del tema y flujo con la CLI.",
+    "source-hash": "e02e5dcb51dd27ad"
+  },
+  "sumi-wordpress": {
+    "description": "Temas de bloques nativos de WordPress (FSE, Gutenberg) sin paso de compilación: theme.json como sistema de diseño, plantillas HTML y patrones en PHP, bloques dinámicos propios (block.json + render.php) con editores en JavaScript plano, APIs del núcleo antes que plugins, y auditorías de rendimiento y de tokens.",
+    "source-hash": "cc82d7613550b208"
+  }
+}

@@ -23,9 +23,6 @@ export interface Strings {
   seeSkills: string
   copy: string
   copied: string
-  /** Marks a run of text that stays English under a non-English `lang`. */
-  untranslated: string
-
   figLabel: string
   figTitle: string
   figLead: string
@@ -47,6 +44,10 @@ export interface Strings {
   commands: string
 
   protoNote: string
+  /** Shown on a page whose body is still English because no translation exists. */
+  untranslated: string
+  /** Shown on a translation whose English source has moved since it was made. */
+  staleTranslation: string
 }
 
 const en: Strings = {
@@ -69,7 +70,6 @@ const en: Strings = {
   seeSkills: 'See the skills',
   copy: 'Copy',
   copied: 'Copied',
-  untranslated: 'en',
 
   figLabel: 'How it composes',
   figTitle: 'Core and direction always, one stack pack on top',
@@ -93,7 +93,9 @@ const en: Strings = {
   noResults: (q) => `No results for «${q}»`,
   commands: 'Commands',
 
-  protoNote: 'Reference content is generated from the framework repo and is English only.'
+  protoNote: 'Reference content is generated from the framework repo. Pages not yet translated are shown in English and say so.',
+  untranslated: 'This page has not been translated yet. It is shown in English.',
+  staleTranslation: 'The English source of this page changed after this translation was made, so parts of it may be out of date.'
 }
 
 const es: Strings = {
@@ -118,7 +120,6 @@ const es: Strings = {
   seeSkills: 'Ver los skills',
   copy: 'Copiar',
   copied: 'Copiado',
-  untranslated: 'en',
 
   figLabel: 'Cómo se compone',
   figTitle: 'Núcleo y dirección siempre, un paquete de stack encima',
@@ -142,7 +143,9 @@ const es: Strings = {
   noResults: (q) => `Sin resultados para «${q}»`,
   commands: 'Comandos',
 
-  protoNote: 'El contenido de referencia se genera desde el repo del framework y está en inglés.'
+  protoNote: 'El contenido de referencia se genera desde el repo del framework. Las páginas que aún no están traducidas se muestran en inglés y lo indican.',
+  untranslated: 'Esta página todavía no está traducida. Se muestra en inglés.',
+  staleTranslation: 'La fuente en inglés de esta página cambió después de hacerse esta traducción, así que puede haber partes desactualizadas.'
 }
 
 export const STRINGS: Record<Locale, Strings> = { en, es }

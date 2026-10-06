@@ -10,10 +10,28 @@ export interface Entry {
 
 export interface Plugin {
   name: string
+  /** English, from the framework's marketplace manifest. Always present. */
   description: string
+  /** Per-locale descriptions, when one has been written and is not stale. */
+  translations?: Record<string, string>
   commands: number
   skills: number
   tier: 'core' | 'stack'
+}
+
+/**
+ * The description to show, and the language to declare on it.
+ *
+ * `lang` is undefined when the text matches the page — the common case once a
+ * locale is translated, and the one that must not emit a redundant attribute.
+ * Returning both together is what keeps them from disagreeing: a card showing
+ * English under `<html lang="es">` with no `lang` of its own is WCAG 3.1.2.
+ */
+export function describe(plugin: Plugin, locale: string) {
+  const translated = locale === 'en' ? null : plugin.translations?.[locale]
+  return translated
+    ? { text: translated, lang: undefined }
+    : { text: plugin.description, lang: locale === 'en' ? undefined : 'en' }
 }
 
 /**

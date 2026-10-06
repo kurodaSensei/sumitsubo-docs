@@ -245,11 +245,33 @@ function flush() {
 
 const write = (path, text) => writeAbs(join(OUT, path), text);
 
+/**
+ * Spanish (and any future locale's) plugin descriptions for the landing cards.
+ * Read once; absent file means nothing is translated yet, which is not an error.
+ */
+const pluginDict = Object.fromEntries(TRANSLATIONS.map((loc) => {
+  const f = join(OUT, loc, 'plugins.json');
+  return [loc, existsSync(f) ? JSON.parse(readFileSync(f, 'utf8')) : {}];
+}));
+
+function pluginTranslations(name, english) {
+  const hash = sourceHash(english);
+  const out = {};
+  for (const loc of TRANSLATIONS) {
+    const t = pluginDict[loc][name];
+    if (!t) { translations.pluginsMissing += 1; continue; }
+    if (t['source-hash'] !== hash) { translations.stale.push(`${loc}/plugins.json: ${name}`); continue; }
+    out[loc] = t.description;
+    translations.pluginsDone += 1;
+  }
+  return Object.keys(out).length ? { translations: out } : {};
+}
+
 /** What a translation was made from, so the sync can tell when it drifts. */
 const sourceHash = (body) => createHash('sha256').update(body).digest('hex').slice(0, 16);
 
 /** Translations seen this run, for the report at the end. */
-const translations = { done: 0, stale: [], missing: 0 };
+const translations = { done: 0, stale: [], missing: 0, pluginsDone: 0, pluginsMissing: 0 };
 
 /**
  * Render one locale's copy of a page.
@@ -410,6 +432,11 @@ try {
     plugins.push({
       name: p.name,
       description: p.description ?? '',
+      // Translations live in content/<locale>/plugins.json, hand-written and
+      // hashed against the English they were made from, exactly like a page.
+      // A plugin with no entry, or a stale one, keeps English on the card and
+      // the card declares `lang`.
+      ...pluginTranslations(p.name, p.description ?? ''),
       commands,
       skills: entries.filter((e) => e.kind === 'skills' && e.plugin === p.name).length,
       // Derived, not declared: the two plugins that ship commands are the ones
@@ -463,8 +490,9 @@ console.log(`  ${tally.added} added · ${tally.changed} changed · ${tally.same}
 // Translations are the one thing here a person has to act on, so they get their
 // own lines rather than a number folded into the tally above.
 const wanted = meta.pages * TRANSLATIONS.length;
-console.log(`  translations: ${translations.done}/${wanted} current · ` +
-            `${translations.stale.length} stale · ${translations.missing} missing`);
+console.log(`  translations: ${translations.done}/${wanted} pages current · ` +
+            `${translations.pluginsDone}/${plugins.length * TRANSLATIONS.length} plugin cards · ` +
+            `${translations.stale.length} stale · ${translations.missing + translations.pluginsMissing} missing`);
 for (const f of translations.stale) console.log(`    stale  content/${f}`);
 if (translations.stale.length) {
   console.log('  A stale page is still served, marked as behind its source.');

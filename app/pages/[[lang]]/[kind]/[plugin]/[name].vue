@@ -136,8 +136,18 @@ useSeoMeta({
            props: adding `lang` to them split one cached render per page into
            two, one per locale, for markup that is byte-identical. `lang`
            inherits through the DOM, so the wrapper reaches the same subtree. -->
-      <div :lang="foreign">
-        <PageBody :src="src" />
+      <div>
+        <!-- One note or the other, never both: a page is either still English
+             or a translation that has drifted. Both are facts about the text
+             the reader is about to read, so they sit above it, not in a
+             footer. `role="note"` rather than a live region — nothing here
+             changes after load. -->
+        <p v-if="foreign" class="notice" role="note">{{ t.untranslated }}</p>
+        <p v-else-if="page.stale" class="notice" role="note">{{ t.staleTranslation }}</p>
+
+        <div :lang="foreign">
+          <PageBody :src="src" />
+        </div>
       </div>
     </div>
 
@@ -224,6 +234,18 @@ useSeoMeta({
 
 .toc__list a:hover {
   color: var(--color-accent);
+}
+
+/* A statement about the text below it, so it reads as an aside rather than as
+   content: muted, and marked by the same seam the modules are joined with. */
+.notice {
+  margin-block-end: var(--space-6);
+  padding-inline-start: var(--space-4);
+  border-inline-start: var(--seam-width) solid var(--color-seam);
+  color: var(--color-text-muted);
+  font-size: var(--text-small);
+  line-height: var(--text-small-lh);
+  max-width: var(--measure-prose);
 }
 
 .crumb {
