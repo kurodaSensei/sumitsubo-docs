@@ -4,7 +4,12 @@ import { isLocaleParam } from '~/utils/routing'
 
 definePageMeta({ validate: (route) => isLocaleParam(route.params.lang) })
 
-const { t, path } = useChrome()
+const { t, path, locale } = useChrome()
+
+// Plugin descriptions come from the framework's marketplace manifest and are
+// English only. Declaring that is the honest fix — silently inventing Spanish
+// for them would be worse than labelling the run.
+const foreign = computed(() => (locale.value === 'en' ? undefined : 'en'))
 const { counts, core, stack, plugins, skillsOf } = useContentIndex()
 
 const INSTALL = '/plugin marketplace add kurodaSensei/sumitsubo'
@@ -24,9 +29,8 @@ async function copyInstall() {
 }
 
 useSeoMeta({
-  title: 'Sumitsubo — direction first, then the work',
-  description:
-    'An opinionated AI framework for web design and development with Claude Code: engineering quality, accessibility, performance and design without AI slop.'
+  title: () => t.value.seoTitle,
+  description: () => t.value.seoDescription
 })
 </script>
 
@@ -37,7 +41,7 @@ useSeoMeta({
         v0.4.0 · MIT · {{ counts.plugins }} plugins · {{ counts.commands }} {{ t.commandsLabel }} ·
         {{ counts.skills }} {{ t.skills }}
       </p>
-      <h1 id="manifesto" class="hero__line">It marks the true line before any cut is made.</h1>
+      <h1 id="manifesto" class="hero__line">{{ t.manifesto }}</h1>
       <div class="rule" />
 
       <div class="interlock">
@@ -45,13 +49,7 @@ useSeoMeta({
 
         <div class="interlock__a">
           <div class="module module--raised u-chamfer pad-seam">
-            <p class="u-prose">
-              Sumitsubo is the Japanese carpenter's ink line. This framework does the same —
-              direction first, then the work. It encodes how a senior design engineer works:
-              process that scales with the request, code quality without slop, accessibility and
-              performance as acceptance criteria, and — above all — design that doesn't look like
-              every other AI-generated site.
-            </p>
+            <p class="u-prose">{{ t.lede }}</p>
           </div>
         </div>
 
@@ -139,7 +137,7 @@ useSeoMeta({
               · {{ p.skills }} {{ t.skills }}
             </p>
             <h3 class="card__name">{{ p.name }}</h3>
-            <p>{{ p.description }}</p>
+            <p :lang="foreign">{{ p.description }}</p>
           </article>
         </div>
       </div>

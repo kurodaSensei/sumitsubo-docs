@@ -16,10 +16,16 @@ export interface Strings {
   themeDark: string
   themeLight: string
 
+  manifesto: string
+  lede: string
+  seoTitle: string
+  seoDescription: string
   install: string
   seeSkills: string
   copy: string
   copied: string
+  /** Marks a run of text that stays English under a non-English `lang`. */
+  untranslated: string
 
   figLabel: string
   figTitle: string
@@ -55,10 +61,17 @@ const en: Strings = {
   themeDark: 'Dark',
   themeLight: 'Light',
 
+  manifesto: 'It marks the true line before any cut is made.',
+  lede:
+    "Sumitsubo is the Japanese carpenter's ink line. This framework does the same — direction first, then the work. It encodes how a senior design engineer works: process that scales with the request, code quality without slop, accessibility and performance as acceptance criteria, and — above all — design that doesn't look like every other AI-generated site.",
+  seoTitle: 'Sumitsubo — direction first, then the work',
+  seoDescription:
+    'An opinionated AI framework for web design and development with Claude Code: engineering quality, accessibility, performance and design without AI slop.',
   install: 'Install the plugin',
   seeSkills: 'See the skills',
   copy: 'Copy',
   copied: 'Copied',
+  untranslated: 'en',
 
   figLabel: 'How it composes',
   figTitle: 'Core and direction always, one stack pack on top',
@@ -95,10 +108,19 @@ const es: Strings = {
   themeDark: 'Oscuro',
   themeLight: 'Claro',
 
+  // DESIGN.md §1 pins this sentence — it is the one line of manifesto voice on
+  // the whole site, and it is not re-translated per implementation.
+  manifesto: 'Marca la línea antes de cortar.',
+  lede:
+    'Sumitsubo es el cordel de tinta del carpintero japonés. Este framework hace lo mismo: primero la dirección, después el trabajo. Codifica cómo trabaja un ingeniero de diseño senior: proceso que escala con la petición, calidad de código sin relleno, accesibilidad y rendimiento como criterios de aceptación y, por encima de todo, diseño que no se parece a cualquier otro sitio generado por IA.',
+  seoTitle: 'Sumitsubo — primero la dirección, después el trabajo',
+  seoDescription:
+    'Un framework de IA opinado para diseño y desarrollo web con Claude Code: calidad de ingeniería, accesibilidad, rendimiento y diseño sin relleno.',
   install: 'Instalar el plugin',
   seeSkills: 'Ver los skills',
   copy: 'Copiar',
   copied: 'Copiado',
+  untranslated: 'en',
 
   figLabel: 'Cómo se compone',
   figTitle: 'Núcleo y dirección siempre, un paquete de stack encima',

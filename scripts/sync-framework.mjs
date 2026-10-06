@@ -58,6 +58,52 @@ const esc = (v) => (typeof v === 'number' || typeof v === 'boolean' ? String(v) 
 // control and that stops being true.
 marked.use({ gfm: true, breaks: false });
 
+/**
+ * Post-process the rendered HTML.
+ *
+ * Both of these have to happen here rather than in the component: the body is
+ * injected with `v-html`, so the SFC never sees these elements as nodes.
+ */
+function postProcess(html, where) {
+  let n = 0;
+  // Tables are the densest thing in this content (up to 6 columns) and were
+  // overflowing the viewport on every detail page — 1.92x at 320px on the worst
+  // one. DESIGN.md §10 asks for a focusable, named scroll region.
+  const wrapped = html.replace(/<table>([\s\S]*?)<\/table>/g, (m) => {
+    n += 1;
+    return `<div class="table-scroll" tabindex="0" role="region" aria-label="Table ${n}, scrollable">${m}</div>`;
+  });
+
+  // A `<script>` baked into prerendered HTML executes on load, and marked lets
+  // raw HTML through untouched. The upstream repo is public and accepts pull
+  // requests, so "it is first-party" is a policy, not a control. The sync is
+  // manual and dev-time, which makes a loud failure the right boundary.
+  //
+  // Code regions are excluded before matching: inside <pre> and <code> the
+  // content is already entity-escaped and inert, and this documentation is full
+  // of JavaScript that looks like markup (`export const onOrderCreated = …`
+  // matches an event-handler pattern and is not one).
+  const inert = wrapped
+    .replace(/<pre\b[\s\S]*?<\/pre>/gi, '')
+    .replace(/<code\b[\s\S]*?<\/code>/gi, '');
+  const dangerous = /<\s*(script|iframe|object|embed|form|link|meta|style)\b|\son[a-z]+\s*=|(href|src)\s*=\s*["']?\s*javascript:/i;
+  const hit = inert.match(dangerous);
+  if (hit) {
+    die(`${where}: rendered HTML contains active markup, which would be injected with v-html.\n` +
+        `     Found: ${JSON.stringify(hit[0])}\n` +
+        `     Sanitise it upstream, or add a sanitiser here if raw HTML is genuinely wanted.`);
+  }
+
+  return wrapped;
+}
+
+/** The body's own `# Title` duplicates the page heading, so lift it out. */
+function splitHeading(body) {
+  const m = body.match(/^#\s+(.+?)\s*$/m);
+  if (!m || body.indexOf(m[0]) > 2) return { heading: '', rest: body };
+  return { heading: m[1].trim(), rest: body.slice(m[0].length).trim() };
+}
+
 function writeAbs(full, text) {
   const prev = existsSync(full) ? readFileSync(full, 'utf8') : null;
   if (prev === text) return 'same';
@@ -69,14 +115,19 @@ const write = (path, text) => writeAbs(join(OUT, path), text);
 
 function emit(path, meta, body) {
   const fm = Object.entries(meta).map(([k, v]) => `${k}: ${esc(v)}`).join('\n');
-  // Two artefacts from one parse, so they cannot disagree:
-  //   .md    the reviewable diff — what you read in a sync PR
-  //   .json  exactly what the detail page needs, nothing more, so the page
-  //          does no frontmatter parsing in the browser
+
+  // 33 of the 42 bodies open with their own `# Title`, which rendered as a
+  // second <h1> under the page heading — two competing titles per page. Lift it
+  // out and let the page use it as its heading; `title` stays the slug, which
+  // is what the index and the breadcrumb identify the page by.
+  const { heading, rest } = splitHeading(body)
+
   const page = writeAbs(
     join(PUB, path.replace(/\.md$/, '.json')),
-    JSON.stringify({ ...meta, html: marked.parse(body) })
+    JSON.stringify({ ...meta, heading, html: postProcess(marked.parse(rest), path) })
   );
+  // The .md keeps the body intact — it is the reviewable mirror of upstream,
+  // not the render input.
   const md = write(path, `---\n${fm}\n---\n\n${body}\n`);
   return md === 'same' && page === 'same' ? 'same' : md === 'added' ? 'added' : 'changed';
 }

@@ -10,6 +10,8 @@ const { t, path } = useChrome()
 
 interface Page {
   title: string
+  /** The body's own `# Title`, lifted out by the sync script. Empty for commands. */
+  heading: string
   description: string
   plugin: string
   kind: string
@@ -50,7 +52,11 @@ useSeoMeta({
     </nav>
 
     <p class="u-label doc__kind">{{ page.kind }} · {{ page.plugin }} · v0.4.0</p>
-    <h1 class="doc__title">{{ page.title }}</h1>
+    <!-- Skills carry a prose heading lifted from their body; commands fall back
+         to the slug, which is an identifier and is set in mono. -->
+    <h1 :class="page.heading ? 'doc__title' : 'doc__title doc__title--id'">
+      {{ page.heading || page.title }}
+    </h1>
     <p class="doc__lede u-prose">{{ page.description }}</p>
 
     <!-- Rendered in Node at sync time from first-party content. -->
@@ -102,10 +108,15 @@ useSeoMeta({
 }
 
 .doc__title {
-  font-family: var(--font-mono);
-  font-variation-settings: 'wdth' var(--mono-width-code);
-  font-weight: 500;
   margin-block-end: var(--space-5);
+}
+
+/* Command pages title themselves with their invocation, which is an
+   identifier, not prose. DESIGN.md §2 puts identifiers in mono at wdth 100. */
+.doc__title--id {
+  font-family: var(--font-mono);
+  font-variation-settings: 'wdth' var(--mono-width-label);
+  font-weight: 500;
 }
 
 .doc__lede {
@@ -198,11 +209,19 @@ useSeoMeta({
   border: 0;
 }
 
-/* Tables are the densest thing in this content — 3 to 6 columns is normal.
- * They get the full width and scroll rather than squeezing. */
+/* Tables are the densest thing in this content — up to 6 columns. The sync
+ * script wraps each one in a focusable, named scroll region (the SFC cannot:
+ * the body arrives through v-html). Without this they overflowed the viewport
+ * by 1.92x at 320 px. */
+.prose :deep(.table-scroll) {
+  margin-block-end: var(--space-5);
+  overflow-x: auto;
+  max-width: none;
+}
+
 .prose :deep(table) {
   width: 100%;
-  margin-block-end: var(--space-5);
+  min-width: 32rem;
   border-collapse: collapse;
   font-size: var(--text-small);
   line-height: var(--text-small-lh);
