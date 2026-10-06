@@ -13,7 +13,7 @@
 // a runner would be more setup than the thing it runs.
 
 import { strict as assert } from 'node:assert';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { dirname, join } from 'node:path';
 
@@ -94,6 +94,30 @@ check('the language switch lands on a prerendered route from every page', () => 
     const to = localePath(localeOf(from.split('/')[1]) === 'es' ? 'en' : 'es', stripLocale(from));
     assert.ok(prerendered.has(to), `switching language on ${from} goes to ${to}, which is not prerendered`);
   }
+});
+
+// A translation that renamed, merged or dropped a section would break every
+// deep link into that page and leave the contents pointing at anchors that are
+// not there. The sync refuses to render one, and this is the standing proof
+// that none got through.
+check('every translation keeps its English anchors', () => {
+  const PUB = join(ROOT, 'server', 'assets', 'pages');
+  let checked = 0;
+  for (const e of index.entries) {
+    const rel = join(e.kind, e.plugin, `${e.name}.json`);
+    const en = JSON.parse(readFileSync(join(PUB, rel), 'utf8'));
+    for (const loc of ['es']) {
+      const file = join(PUB, loc, rel);
+      if (!existsSync(file)) continue;   // untranslated: the server falls back
+      const tr = JSON.parse(readFileSync(file, 'utf8'));
+      assert.deepEqual(tr.toc.map((h) => h.id), en.toc.map((h) => h.id),
+        `${loc}/${rel}: anchors differ from the English source`);
+      checked += 1;
+    }
+  }
+  // A translation whose headings read the same as English is usually one that
+  // was never actually translated, so say how many were compared.
+  console.log(`  (${checked} translated page${checked === 1 ? '' : 's'} compared)`);
 });
 
 check('the route list is the size the site claims', () => {

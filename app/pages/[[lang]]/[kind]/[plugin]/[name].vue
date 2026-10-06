@@ -8,10 +8,6 @@ definePageMeta({
 const route = useRoute()
 const { t, path, locale } = useChrome()
 
-// The 42 reference pages are English in both locales by design (PRODUCT.md);
-// declaring that is better than pretending otherwise.
-const foreign = computed(() => (locale.value === 'en' ? undefined : 'en'))
-
 interface Page {
   title: string
   /** The body's own `# Title`, lifted out by the sync script. Empty for commands. */
@@ -23,6 +19,10 @@ interface Page {
   source: string
   /** One entry per `h2`, with the fragment id the sync script put on it. */
   toc: { id: string, text: string }[]
+  /** Which locale actually answered — not necessarily the one asked for. */
+  locale: string
+  /** Set on a translation whose English source has moved since it was made. */
+  stale?: boolean
   html: string
 }
 
@@ -34,7 +34,12 @@ interface Page {
 //
 // On a static host this costs nothing at runtime: prerender resolves it and
 // inlines the result into the payload, which is what client navigation reads.
-const src = `/api/page/${route.params.kind}/${route.params.plugin}/${route.params.name}`
+//
+// The locale is part of the key. A page with no translation for it falls back
+// to English server-side and says so in `locale`, so the request never 404s and
+// the page never has to guess what it got.
+const prefix = locale.value === 'en' ? '' : `${locale.value}/`
+const src = `/api/page/${prefix}${route.params.kind}/${route.params.plugin}/${route.params.name}`
 
 // `transform` drops `html` before the result is stored, so the body never
 // enters this page's payload — <PageBody> renders it on the server instead.
@@ -44,6 +49,12 @@ const { data: page } = await useAsyncData(src, () => $fetch<Page>(src), {
   transform: ({ html, ...meta }) => meta as Omit<Page, 'html'>
 })
 if (!page.value) throw createError({ statusCode: 404, statusMessage: 'Page not found', fatal: true })
+
+// The language to declare on the parts that came back in another language.
+// Undefined when the body matches the page, which is the common case and must
+// not emit a redundant attribute.
+const foreign = computed(() =>
+  page.value && page.value.locale !== locale.value ? page.value.locale : undefined)
 
 const REPO = 'https://github.com/kurodaSensei/sumitsubo/blob/main/'
 
