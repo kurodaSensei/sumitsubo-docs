@@ -41,9 +41,12 @@ const groupTitle = (key: string) => (key === 'commands' ? t.value.commands : key
 const counter = computed(() =>
   query.value.trim() ? `${matches.value} / ${counts.pages}` : String(counts.pages))
 
+// Both getters, both localized: these were a hardcoded English sentence and a
+// value read once at setup, so /es/reference described itself in English and
+// neither would have followed a locale change.
 useSeoMeta({
-  title: `${t.value.refTitle} — Sumitsubo`,
-  description: `${counts.commands} commands and ${counts.skills} skills across ${counts.plugins} plugins.`
+  title: () => `${t.value.refTitle} — Sumitsubo`,
+  description: () => t.value.refSeoDescription(counts)
 })
 </script>
 
@@ -191,18 +194,17 @@ useSeoMeta({
               background var(--motion-quick) var(--ease-move);
 }
 
+.btn-outline:hover {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
 .btn-outline:active {
   color: var(--color-accent-contrast);
   background: var(--color-accent);
   border-color: var(--color-accent);
   transition-duration: var(--motion-instant);
 }
-
-.btn-outline:hover {
-  color: var(--color-accent);
-  border-color: var(--color-accent);
-}
-
 /* The landing staggers its modules 1–7, 6–12, 1–7 down the page, which composes
    because each one is a large block and the empty half reads as air. Seven
    groups of links is a different object: staggered, each row carried one module

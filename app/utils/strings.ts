@@ -38,6 +38,7 @@ export interface Strings {
   commandsLabel: string
 
   refTitle: string
+  refSeoDescription: (c: { commands: number, skills: number, plugins: number }) => string
   filterLabel: string
   filterPlaceholder: string
   clear: string
@@ -82,6 +83,8 @@ const en: Strings = {
   commandsLabel: 'commands',
 
   refTitle: 'Reference',
+  refSeoDescription: (c) =>
+    `${c.commands} commands and ${c.skills} skills across ${c.plugins} plugins.`,
   filterLabel: 'Filter',
   filterPlaceholder: 'Search the pages',
   clear: 'Clear the filter',
@@ -128,6 +131,8 @@ const es: Strings = {
   commandsLabel: 'comandos',
 
   refTitle: 'Referencia',
+  refSeoDescription: (c) =>
+    `${c.commands} comandos y ${c.skills} skills repartidos en ${c.plugins} plugins.`,
   filterLabel: 'Filtrar',
   filterPlaceholder: 'Buscar entre las páginas',
   clear: 'Limpiar el filtro',
