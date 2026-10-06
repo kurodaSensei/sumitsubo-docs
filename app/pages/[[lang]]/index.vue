@@ -1,9 +1,408 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import { isLocaleParam } from '~/utils/routing'
 
 definePageMeta({ validate: (route) => isLocaleParam(route.params.lang) })
+
+const { t, path } = useChrome()
+const { counts, core, stack, plugins, skillsOf } = useContentIndex()
+
+const INSTALL = '/plugin marketplace add kurodaSensei/sumitsubo'
+
+const copied = ref(false)
+let timer: ReturnType<typeof setTimeout> | undefined
+
+async function copyInstall() {
+  try {
+    await navigator.clipboard?.writeText(INSTALL)
+  } catch {
+    // Clipboard blocked: the command is on screen and selectable anyway.
+  }
+  copied.value = true
+  clearTimeout(timer)
+  timer = setTimeout(() => (copied.value = false), 1800)
+}
+
+useSeoMeta({
+  title: 'Sumitsubo — direction first, then the work',
+  description:
+    'An opinionated AI framework for web design and development with Claude Code: engineering quality, accessibility, performance and design without AI slop.'
+})
 </script>
 
 <template>
-  <div>index</div>
+  <div class="landing">
+    <section class="hero" aria-labelledby="manifesto">
+      <p class="u-label hero__meta">
+        v0.4.0 · MIT · {{ counts.plugins }} plugins · {{ counts.commands }} {{ t.commandsLabel }} ·
+        {{ counts.skills }} {{ t.skills }}
+      </p>
+      <h1 id="manifesto" class="hero__line">It marks the true line before any cut is made.</h1>
+      <div class="rule" />
+
+      <div class="interlock">
+        <div class="seam" aria-hidden="true" />
+
+        <div class="interlock__a">
+          <div class="module module--raised u-chamfer pad-seam">
+            <p class="u-prose">
+              Sumitsubo is the Japanese carpenter's ink line. This framework does the same —
+              direction first, then the work. It encodes how a senior design engineer works:
+              process that scales with the request, code quality without slop, accessibility and
+              performance as acceptance criteria, and — above all — design that doesn't look like
+              every other AI-generated site.
+            </p>
+          </div>
+        </div>
+
+        <div class="interlock__b">
+          <div class="module module--raised-2 u-chamfer install">
+            <div class="install__actions">
+              <button type="button" class="btn u-chamfer-control" @click="copyInstall">
+                {{ t.install }}
+              </button>
+              <NuxtLink :to="path('/reference')" class="btn-ghost">{{ t.seeSkills }}</NuxtLink>
+            </div>
+
+            <div class="code">
+              <code class="code__text">{{ INSTALL }}</code>
+              <button type="button" class="code__copy" :aria-label="t.copy" @click="copyInstall">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                  <rect x="6" y="6" width="10" height="10" />
+                  <path d="M4 13V4h9" />
+                </svg>
+              </button>
+            </div>
+
+            <p class="u-label install__status" role="status" aria-live="polite">
+              {{ copied ? t.copied : '' }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="compose">
+      <p class="u-label section__label">{{ t.figLabel }}</p>
+      <h2 id="compose" class="section__title">{{ t.figTitle }}</h2>
+      <p class="section__lead u-prose">{{ t.figLead }}</p>
+
+      <div class="interlock">
+        <div class="seam" aria-hidden="true" />
+
+        <div class="interlock__a">
+          <figure class="module module--raised u-chamfer pad-seam fig">
+            <p class="u-label fig__rule">{{ t.always }}</p>
+            <p class="fig__note">{{ t.alwaysSub }}</p>
+            <div v-for="p in core" :key="p.name" class="fig__row">
+              <p class="fig__head">
+                <span class="fig__name">{{ p.name }}</span>
+                <span class="u-label fig__count">{{ p.skills }} {{ t.skills }}</span>
+              </p>
+              <p class="fig__skills">{{ skillsOf(p.name).join(' · ') }}</p>
+            </div>
+          </figure>
+        </div>
+
+        <div class="interlock__b">
+          <figure class="module module--raised-2 u-chamfer fig">
+            <p class="u-label fig__rule">{{ t.pick }}</p>
+            <p class="fig__note">{{ t.pickSub }}</p>
+            <div v-for="p in stack" :key="p.name" class="fig__row">
+              <p class="fig__head">
+                <span class="fig__name">{{ p.name }}</span>
+                <span class="u-label fig__count">{{ p.skills }} {{ t.skills }}</span>
+              </p>
+              <p class="fig__skills">{{ skillsOf(p.name).join(' · ') }}</p>
+            </div>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="plugins">
+      <h2 id="plugins" class="section__title">{{ t.pluginsTitle }}</h2>
+      <div class="interlock">
+        <div class="seam" aria-hidden="true" />
+        <div
+          v-for="(p, i) in plugins"
+          :key="p.name"
+          :class="i % 2 ? 'interlock__b' : 'interlock__a'"
+        >
+          <article
+            class="module u-chamfer card"
+            :class="[i % 2 ? 'module--raised-2' : 'module--raised', { 'pad-seam': i % 2 === 0 }]"
+          >
+            <p class="u-label card__meta">
+              {{ String(i + 1).padStart(2, '0') }}
+              <template v-if="p.commands">· {{ p.commands }} {{ t.commandsLabel }}</template>
+              · {{ p.skills }} {{ t.skills }}
+            </p>
+            <h3 class="card__name">{{ p.name }}</h3>
+            <p>{{ p.description }}</p>
+          </article>
+        </div>
+      </div>
+    </section>
+  </div>
 </template>
+
+<style scoped>
+@layer components {
+  .hero {
+    padding-block-start: clamp(3rem, 9vh, 7rem);
+  }
+
+  .hero__meta {
+    color: var(--color-text-muted);
+    margin-block-end: var(--space-6);
+  }
+
+  .hero__line {
+    font-size: var(--text-display);
+    line-height: var(--text-display-lh);
+    letter-spacing: var(--text-display-ls);
+    max-width: 15ch;
+  }
+
+  .rule {
+    margin-block-start: clamp(2.5rem, 6vh, 4.5rem);
+    height: 1px;
+    background: var(--color-divider);
+  }
+
+  .section {
+    margin-block-start: var(--space-section-block);
+  }
+
+  .section__label {
+    color: var(--color-text-muted);
+    margin-block-end: var(--space-3);
+  }
+
+  .section__title {
+    max-width: 28ch;
+  }
+
+  .section__lead {
+    margin-block: var(--space-3) var(--space-6);
+    color: var(--color-text-muted);
+  }
+
+  /* --- The interlock --------------------------------------------------------
+   * Siblings alternate 1–7 and 6–12 so they overlap by one column, and the seam
+   * sits on the shared edge. The same grid line in every section is what makes
+   * the joint read as a joint rather than a stagger. */
+  .interlock {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    row-gap: 2px;
+    margin-block-start: 2px;
+  }
+
+  .interlock__a {
+    grid-column: 1 / 8;
+    min-width: 0;
+  }
+
+  .interlock__b {
+    grid-column: 6 / 13;
+    min-width: 0;
+  }
+
+  .seam {
+    position: absolute;
+    inset-block: 0;
+    left: calc(100% * 5 / 12);
+    width: var(--seam-width);
+    background: var(--color-seam);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .module {
+    height: 100%;
+    padding: var(--space-module-pad);
+    /* No border and no shadow. Depth is tonal — which is also what makes the
+     * clip-path chamfer safe, since there is no edge for it to eat. */
+  }
+
+  .module--raised {
+    background: var(--color-surface-raised);
+  }
+
+  .module--raised-2 {
+    background: var(--color-surface-raised-2);
+  }
+
+  /* Left-hand modules run under the seam without this. */
+  .pad-seam {
+    padding-inline-end: var(--pad-seam-side);
+  }
+
+  .install {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+  }
+
+  .install__actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-5);
+  }
+
+  .install__status {
+    min-height: 1.2em;
+    color: var(--color-accent);
+  }
+
+  .btn {
+    min-height: 48px;
+    padding-inline: 28px;
+    border: 0;
+    background: var(--color-accent);
+    color: var(--color-accent-contrast);
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: var(--text-body);
+    cursor: pointer;
+  }
+
+  .btn:hover {
+    filter: brightness(1.12);
+  }
+
+  .btn-ghost {
+    min-height: var(--target-touch);
+    display: inline-flex;
+    align-items: center;
+    border-bottom: 1px solid var(--color-text);
+    color: var(--color-text);
+    font-weight: 500;
+    text-decoration: none;
+  }
+
+  .btn-ghost:hover {
+    color: var(--color-accent);
+    border-bottom-color: var(--color-accent);
+  }
+
+  .code {
+    display: flex;
+    align-items: stretch;
+    border: var(--border-width) solid var(--color-border);
+    background: var(--color-surface-sunk);
+  }
+
+  .code__text {
+    flex: 1;
+    min-width: 0;
+    overflow-x: auto;
+    padding: 14px var(--space-4);
+    white-space: nowrap;
+    line-height: var(--text-code-lh);
+  }
+
+  .code__copy {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: var(--target-touch);
+    border: 0;
+    border-left: var(--border-width) solid var(--color-border);
+    background: none;
+    color: var(--color-text);
+    cursor: pointer;
+  }
+
+  .code__copy:hover {
+    color: var(--color-accent);
+  }
+
+  .fig {
+    margin: 0;
+  }
+
+  .fig__rule {
+    color: var(--color-text);
+    font-weight: 600;
+  }
+
+  .fig__note {
+    margin-block: var(--space-2) var(--space-5);
+    font-size: var(--text-small);
+    line-height: var(--text-small-lh);
+    color: var(--color-text-muted);
+  }
+
+  .fig__row {
+    padding-block: var(--space-4);
+    border-block-start: var(--divider-width) solid var(--color-divider);
+  }
+
+  .fig__head {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-block-end: var(--space-2);
+  }
+
+  .fig__name {
+    font-family: var(--font-mono);
+    font-variation-settings: 'wdth' var(--mono-width-code);
+    font-size: var(--text-body);
+    color: var(--color-accent);
+  }
+
+  .fig__count {
+    color: var(--color-text-muted);
+  }
+
+  .fig__skills {
+    font-family: var(--font-mono);
+    font-variation-settings: 'wdth' var(--mono-width-code);
+    font-size: 0.8125rem;
+    line-height: 1.7;
+    color: var(--color-text-muted);
+    overflow-wrap: anywhere;
+  }
+
+  .card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .card__meta {
+    color: var(--color-text-muted);
+  }
+
+  .card__name {
+    font-family: var(--font-mono);
+    font-variation-settings: 'wdth' var(--mono-width-code);
+    font-weight: 400;
+    color: var(--color-accent);
+  }
+
+  /* Below 48rem the interlock collapses to one column. The chamfer stays —
+   * it is the signature; the offset does not. */
+  @media (width < 48rem) {
+    .interlock__a,
+    .interlock__b {
+      grid-column: 1 / -1;
+    }
+
+    .seam {
+      display: none;
+    }
+
+    .pad-seam {
+      padding-inline-end: var(--space-module-pad);
+    }
+  }
+}
+</style>

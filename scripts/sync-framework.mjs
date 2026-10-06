@@ -21,7 +21,7 @@ import { fileURLToPath } from 'node:url';
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = join(ROOT, 'content');
 const REPO = 'https://github.com/kurodaSensei/sumitsubo.git';
-const EXPECTED = { skills: 33, commands: 9 };
+const EXPECTED = { skills: 33, commands: 9, plugins: 6 };
 const dryRun = process.argv.includes('-n') || process.argv.includes('--dry-run');
 
 const die = (msg) => { console.error(`sync: ${msg}`); process.exit(1); };
@@ -71,12 +71,14 @@ try {
 const tally = { added: 0, changed: 0, same: 0 };
 const bump = (r) => { tally[r]++; };
 let nSkills = 0, nCommands = 0;
+const entries = [];
+const plugins = [];
 
 try {
-  const plugins = dirs(join(tmp, 'plugins'));
-  if (!plugins.length) die('no plugins/ directory in the framework clone');
+  const pluginDirs = dirs(join(tmp, 'plugins'));
+  if (!pluginDirs.length) die('no plugins/ directory in the framework clone');
 
-  for (const plugin of plugins) {
+  for (const plugin of pluginDirs) {
     const base = join(tmp, 'plugins', plugin);
 
     // skills: plugins/<plugin>/skills/<skill>/SKILL.md (+ inlined references/)
@@ -103,6 +105,7 @@ try {
         references: refs.length,
         source: `plugins/${plugin}/skills/${skill}/SKILL.md`
       }, body + refs.join('')));
+      entries.push({ kind: 'skills', plugin, name: skill, title: meta.name ?? skill });
       nSkills++;
     }
 
@@ -117,8 +120,26 @@ try {
         argumentHint: meta['argument-hint'] ?? '',
         source: `plugins/${plugin}/commands/${file}`
       }, body));
+      entries.push({ kind: 'commands', plugin, name, title: `/${plugin}:${name}` });
       nCommands++;
     }
+  }
+  // Plugin names and descriptions come from the framework's own marketplace
+  // manifest rather than being retyped here. Owned plugins are the ones with a
+  // local `source`; the rest are companions referenced from upstream.
+  const manifest = JSON.parse(readFileSync(join(tmp, '.claude-plugin', 'marketplace.json'), 'utf8'));
+  for (const p of manifest.plugins ?? []) {
+    if (typeof p.source !== 'string' || !p.source.startsWith('./plugins/')) continue;
+    const commands = entries.filter((e) => e.kind === 'commands' && e.plugin === p.name).length;
+    plugins.push({
+      name: p.name,
+      description: p.description ?? '',
+      commands,
+      skills: entries.filter((e) => e.kind === 'skills' && e.plugin === p.name).length,
+      // Derived, not declared: the two plugins that ship commands are the ones
+      // every project uses; the stack packs are skills-only and you pick one.
+      tier: commands > 0 ? 'core' : 'stack'
+    });
   }
 } finally {
   rmSync(tmp, { recursive: true, force: true });
@@ -126,9 +147,33 @@ try {
 
 // A miscount means the framework layout moved under us. Fail loudly rather than
 // quietly publishing a site that is missing pages.
-if (nSkills !== EXPECTED.skills || nCommands !== EXPECTED.commands) {
-  die(`expected ${EXPECTED.skills} skills and ${EXPECTED.commands} commands, found ${nSkills} and ${nCommands}.\n` +
+if (nSkills !== EXPECTED.skills || nCommands !== EXPECTED.commands || plugins.length !== EXPECTED.plugins) {
+  die(`expected ${EXPECTED.plugins} plugins, ${EXPECTED.skills} skills and ${EXPECTED.commands} commands, ` +
+      `found ${plugins.length}, ${nSkills} and ${nCommands}.\n` +
       `     If the framework really changed, update EXPECTED in this file in the same commit.`);
+}
+
+// The lists (landing figure, plugin cards, reference index) need metadata only.
+// Loading the 42 bodies to render a list would put ~290 KB of markdown in the
+// CLIENT bundle against a 170 KB gzip budget. Bodies belong in prerendered
+// HTML; this index is what the lists import.
+// Deliberately no `description`: the skill descriptions are the framework's
+// trigger prose, 300+ characters each, and carrying all 42 cost 22.5 KB for
+// text no list renders. The detail page reads it from its own frontmatter.
+const index = {
+  repo: REPO,
+  sha,
+  plugins,
+  counts: { plugins: plugins.length, skills: nSkills, commands: nCommands, pages: nSkills + nCommands },
+  entries: entries.sort((a, b) => a.kind.localeCompare(b.kind) || a.plugin.localeCompare(b.plugin) || a.name.localeCompare(b.name))
+};
+const indexJson = JSON.stringify(index);
+const kb = indexJson.length / 1024;
+// Check before writing, so a failure cannot leave an oversized file on disk.
+if (kb > 20) die(`content/index.json would be ${kb.toFixed(1)} KB — it ships to the client, keep it metadata-only`);
+if (!dryRun) {
+  writeFileSync(join(OUT, 'index.json'), indexJson + '\n');
+  console.log(`  index.json ${kb.toFixed(1)} KB`);
 }
 
 const meta = { repo: REPO, sha, skills: nSkills, commands: nCommands, pages: nSkills + nCommands };
