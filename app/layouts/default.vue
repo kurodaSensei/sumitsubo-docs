@@ -1,16 +1,40 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted } from 'vue'
+import { computed, onBeforeUnmount, onMounted } from 'vue'
+import { ALL_LOCALES, absolute, localePath, stripLocale } from '~/utils/routing'
 
 const { locale, t, path, otherLocalePath, applied, toggleTheme, restoreTheme } = useChrome()
+const route = useRoute()
 
 let stopThemeTracking: (() => void) | undefined
 onMounted(() => { stopThemeTracking = restoreTheme() })
 onBeforeUnmount(() => stopThemeTracking?.())
 
+// The path with no locale prefix, which both link sets are built from.
+const base = computed(() => stripLocale(route.path))
+
 // `lang` must be right in the prerendered HTML, not patched on hydration.
+//
+// The links were previously one `hreflang` pointing at the other locale with a
+// RELATIVE href. Lighthouse scored that rule 0 and was right to: a crawler
+// resolving the annotation from another host has nothing to resolve it against,
+// so the two language versions were never actually declared to be each other.
+// Fully qualified now, every locale listed on every page including itself —
+// Google ignores a set where any version fails to name all the others — plus
+// `x-default` for a reader whose language matches neither.
+//
+// The canonical exists because /reference and /reference/ both answer 200, so
+// without it the two are a duplicate pair with no stated preference.
 useHead(() => ({
   htmlAttrs: { lang: locale.value },
-  link: [{ rel: 'alternate', hreflang: locale.value === 'en' ? 'es' : 'en', href: otherLocalePath.value }]
+  link: [
+    { rel: 'canonical', href: absolute(localePath(locale.value, base.value)) },
+    ...ALL_LOCALES.map((loc) => ({
+      rel: 'alternate',
+      hreflang: loc,
+      href: absolute(localePath(loc, base.value))
+    })),
+    { rel: 'alternate', hreflang: 'x-default', href: absolute(localePath('en', base.value)) }
+  ]
 }))
 </script>
 

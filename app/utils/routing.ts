@@ -41,3 +41,18 @@ export function stripLocale(path: string): string {
 function toSegment(param: unknown): string {
   return Array.isArray(param) ? (param[0] ?? '') : String(param ?? '')
 }
+
+/**
+ * The canonical origin. hreflang and canonical links are only honoured as
+ * fully-qualified URLs — the layout shipped a relative `hreflang` href and
+ * Lighthouse scored that rule 0, because a crawler on another host cannot
+ * resolve it.
+ */
+export const SITE = 'https://sumitsubo-docs.vercel.app'
+
+/** Every locale the site serves, English first — it is the one at the root. */
+export const ALL_LOCALES: readonly Locale[] = ['en', ...LOCALES]
+
+export function absolute(path: string): string {
+  return SITE + path
+}
