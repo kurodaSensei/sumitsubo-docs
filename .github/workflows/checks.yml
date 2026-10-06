@@ -1,0 +1,38 @@
+name: checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Matches the engines range in package.json. Nuxt's own range has gaps —
+      # Node 23 is unsupported — so this is pinned rather than left to a default.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - run: npm ci
+
+      # Token drift, the generator's self-check, and the route assertions. The
+      # last one is the reason this workflow exists: links and prerendered
+      # routes come from different code, and when they diverge the build still
+      # passes green while every page 404s.
+      - run: npm run check
+
+      # The real build. `nitro.prerender.failOnError` is on, so a single broken
+      # route fails here instead of publishing a half-built site.
+      - run: npm run generate
+
+      - name: Every indexed page was emitted
+        run: |
+          expected=$(node -p "require('./content/index.json').counts.pages * 2 + 4")
+          actual=$(find .output/public -name index.html | wc -l | tr -d ' ')
+          echo "expected $expected HTML pages, found $actual"
+          [ "$actual" -eq "$expected" ]
