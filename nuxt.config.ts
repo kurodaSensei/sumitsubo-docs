@@ -23,9 +23,12 @@ export default defineNuxtConfig({
   app: {
     head: {
       htmlAttrs: { lang: 'en' },
+      // The two faces every route paints above the fold. The earlier comment
+      // here claimed Martian Mono "is never the LCP element" — it is: it sets
+      // the h1 on all 84 detail routes, plus the header nav, the breadcrumb and
+      // every row of the reference index. Bricolage is preloaded only by the
+      // landing, which is the one route where the display face is the LCP.
       link: [
-        // Only the two faces above the fold. Martian Mono carries labels and
-        // code and is never the LCP element, so it loads on demand.
         {
           rel: 'preload',
           as: 'font',
@@ -37,7 +40,7 @@ export default defineNuxtConfig({
           rel: 'preload',
           as: 'font',
           type: 'font/woff2',
-          href: '/fonts/bricolage-grotesque-latin.woff2',
+          href: '/fonts/martian-mono-latin.woff2',
           crossorigin: 'anonymous'
         }
       ]

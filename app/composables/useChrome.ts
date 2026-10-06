@@ -34,7 +34,13 @@ export function useChrome() {
   // query stay in charge. useState keeps it stable across hydration.
   const theme = useState<Theme | null>('theme', () => null)
 
-  const applied = computed<Theme>(() => theme.value ?? 'dark')
+  // What the system would pick, tracked live. Without this `applied` fell back
+  // to 'dark' whenever no choice was stored, so on a light-preference machine
+  // the page rendered light while the toggle announced "switch to light" and
+  // then switched to dark. The label has to read the same source the click does.
+  const systemTheme = useState<Theme>('system-theme', () => 'dark')
+
+  const applied = computed<Theme>(() => theme.value ?? systemTheme.value)
 
   function setTheme(next: Theme) {
     theme.value = next
@@ -54,16 +60,20 @@ export function useChrome() {
 
   /** What the page is actually showing right now, stored choice or system. */
   function resolvedTheme(): Theme {
-    if (theme.value) return theme.value
-    if (import.meta.client) {
-      return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'
-    }
-    return 'dark'
+    return theme.value ?? systemTheme.value
   }
 
-  /** Read the stored choice on mount. Called once, from the layout. */
+  /**
+   * Read the stored choice and start tracking the system preference. Called
+   * once from the layout; returns a teardown for the media-query listener.
+   */
   function restoreTheme() {
     if (!import.meta.client) return
+    const mq = window.matchMedia('(prefers-color-scheme: light)')
+    const sync = () => { systemTheme.value = mq.matches ? 'light' : 'dark' }
+    sync()
+    mq.addEventListener('change', sync)
+
     let stored: string | null = null
     try {
       stored = localStorage.getItem(STORAGE_KEY)
@@ -74,7 +84,8 @@ export function useChrome() {
       theme.value = stored as Theme
       document.documentElement.dataset.theme = stored
     }
+    return () => mq.removeEventListener('change', sync)
   }
 
-  return { locale, other, t, path, otherLocalePath, theme, applied, setTheme, toggleTheme, resolvedTheme, restoreTheme }
+  return { locale, other, t, path, otherLocalePath, applied, setTheme, toggleTheme, resolvedTheme, restoreTheme }
 }

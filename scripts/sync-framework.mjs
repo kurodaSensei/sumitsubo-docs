@@ -69,9 +69,17 @@ function postProcess(html, where) {
   // Tables are the densest thing in this content (up to 6 columns) and were
   // overflowing the viewport on every detail page — 1.92x at 320px on the worst
   // one. DESIGN.md §10 asks for a focusable, named scroll region.
-  const wrapped = html.replace(/<table>([\s\S]*?)<\/table>/g, (m) => {
+  let wrapped = html.replace(/<table>([\s\S]*?)<\/table>/g, (m) => {
     n += 1;
     return `<div class="table-scroll" tabindex="0" role="region" aria-label="Table ${n}, scrollable">${m}</div>`;
+  });
+
+  // Code blocks scroll horizontally too, and a scroll container that cannot be
+  // focused is unreachable by keyboard. 117 of these across the 42 pages.
+  let p = 0;
+  wrapped = wrapped.replace(/<pre>/g, () => {
+    p += 1;
+    return `<pre tabindex="0" role="region" aria-label="Code block ${p}, scrollable">`;
   });
 
   // A `<script>` baked into prerendered HTML executes on load, and marked lets

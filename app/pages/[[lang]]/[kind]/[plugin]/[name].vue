@@ -6,7 +6,11 @@ definePageMeta({
 })
 
 const route = useRoute()
-const { t, path } = useChrome()
+const { t, path, locale } = useChrome()
+
+// The 42 reference pages are English in both locales by design (PRODUCT.md);
+// declaring that is better than pretending otherwise.
+const foreign = computed(() => (locale.value === 'en' ? undefined : 'en'))
 
 interface Page {
   title: string
@@ -57,7 +61,30 @@ useSeoMeta({
     <h1 :class="page.heading ? 'doc__title' : 'doc__title doc__title--id'">
       {{ page.heading || page.title }}
     </h1>
-    <p class="doc__lede u-prose">{{ page.description }}</p>
+
+    <!-- The signature repeats here. Without it the 42 reference pages were the
+         only part of the site with no module, no chamfer and no seam — 42 of 45
+         pages carrying none of the direction. -->
+    <div class="interlock">
+      <div class="seam" aria-hidden="true" />
+
+      <div class="interlock__a">
+        <div class="module module--raised u-chamfer pad-seam">
+          <p :lang="foreign">{{ page.description }}</p>
+        </div>
+      </div>
+
+      <div class="interlock__b">
+        <dl class="module module--raised-2 u-chamfer doc__spec">
+          <dt class="u-label">{{ t.navRef }}</dt>
+          <dd><NuxtLink :to="path('/reference')">{{ page.plugin }}</NuxtLink></dd>
+          <dt class="u-label">{{ page.kind }}</dt>
+          <dd>{{ page.title }}</dd>
+          <dt class="u-label">source</dt>
+          <dd><a :href="REPO + page.source" rel="noopener">{{ page.source }}</a></dd>
+        </dl>
+      </div>
+    </div>
 
     <!-- Rendered in Node at sync time from first-party content. -->
     <!-- eslint-disable-next-line vue/no-v-html -->
@@ -65,7 +92,6 @@ useSeoMeta({
 
     <footer class="doc__foot">
       <NuxtLink :to="path('/reference')" class="u-label">← {{ t.navRef }}</NuxtLink>
-      <a :href="REPO + page.source" class="u-label" rel="noopener">{{ page.source }}</a>
     </footer>
   </article>
 </template>
@@ -119,9 +145,72 @@ useSeoMeta({
   font-weight: 500;
 }
 
-.doc__lede {
+/* --- The interlock, same grid line as every other section ----------------- */
+.interlock {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  row-gap: var(--space-1);
   margin-block-end: var(--space-7);
+}
+
+.interlock__a { grid-column: 1 / 8; min-width: 0; }
+.interlock__b { grid-column: 6 / 13; min-width: 0; }
+
+.seam {
+  position: absolute;
+  inset-block: 0;
+  left: calc(100% * 5 / 12);
+  width: var(--seam-width);
+  background: var(--color-seam);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.module {
+  height: 100%;
+  padding: var(--space-module-pad);
   color: var(--color-text-muted);
+}
+
+.module--raised { background: var(--color-surface-raised); }
+.module--raised-2 { background: var(--color-surface-raised-2); }
+.pad-seam { padding-inline-end: var(--pad-seam-side); }
+
+.doc__spec {
+  margin: 0;
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  column-gap: var(--space-5);
+}
+
+.doc__spec dt {
+  padding-block: var(--space-3);
+  border-block-start: var(--divider-width) solid var(--color-divider);
+}
+
+.doc__spec dd {
+  margin: 0;
+  padding-block: var(--space-3);
+  border-block-start: var(--divider-width) solid var(--color-divider);
+  font-family: var(--font-mono);
+  font-variation-settings: 'wdth' var(--mono-width-code);
+  font-size: var(--text-small);
+  overflow-wrap: anywhere;
+}
+
+@media (width < 48rem) {
+  .interlock__a,
+  .interlock__b { grid-column: 1 / -1; }
+
+  .seam { display: none; }
+
+  .interlock > div:not(.seam) + div:not(.seam),
+  .interlock > dl:not(.seam) {
+    border-block-start: var(--seam-width) solid var(--color-seam);
+  }
+
+  .pad-seam { padding-inline-end: var(--space-module-pad); }
 }
 
 .doc__foot {

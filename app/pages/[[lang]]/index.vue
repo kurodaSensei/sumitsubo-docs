@@ -32,6 +32,19 @@ useSeoMeta({
   title: () => t.value.seoTitle,
   description: () => t.value.seoDescription
 })
+
+// The manifesto is this route's LCP element and the only place the display face
+// paints above the fold, so the preload belongs here rather than in the global
+// head where it would compete with the LCP on the other 86 routes.
+useHead({
+  link: [{
+    rel: 'preload',
+    as: 'font',
+    type: 'font/woff2',
+    href: '/fonts/bricolage-grotesque-latin.woff2',
+    crossorigin: 'anonymous'
+  }]
+})
 </script>
 
 <template>
@@ -49,7 +62,10 @@ useSeoMeta({
 
         <div class="interlock__a">
           <div class="module module--raised u-chamfer pad-seam">
-            <p class="u-prose">{{ t.lede }}</p>
+            <!-- No .u-prose: `pad-seam` already caps the measure here, and the
+                 two compounded to a ~38-character column at 820 px. One rule
+                 owns the measure. -->
+            <p>{{ t.lede }}</p>
           </div>
         </div>
 
@@ -63,7 +79,7 @@ useSeoMeta({
             </div>
 
             <div class="code">
-              <code class="code__text">{{ INSTALL }}</code>
+              <code class="code__text" tabindex="0">{{ INSTALL }}</code>
               <button type="button" class="code__copy" :aria-label="t.copy" @click="copyInstall">
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
                   <rect x="6" y="6" width="10" height="10" />
@@ -194,8 +210,9 @@ useSeoMeta({
   position: relative;
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
-  row-gap: var(--seam-width);
-  margin-block-start: var(--seam-width);
+  /* A spacing token, not --seam-width: that one is a line weight. */
+  row-gap: var(--space-1);
+  margin-block-start: var(--space-1);
 }
 
 .interlock__a {
@@ -266,10 +283,21 @@ useSeoMeta({
   font-weight: 600;
   font-size: var(--text-body);
   cursor: pointer;
+  transition: background var(--motion-quick) var(--ease-move),
+              transform var(--motion-quick) var(--ease-move);
 }
 
+/* A token, not `filter: brightness()`. The filter brightened the label as well
+   as the fill, so light-theme --color-accent-contrast clipped to pure white —
+   and the resulting pair existed in no table. */
 .btn:hover {
-  filter: brightness(1.12);
+  background: var(--color-accent-hover);
+}
+
+.btn:active {
+  background: var(--color-accent-hover);
+  transform: translateY(1px);
+  transition-duration: var(--motion-instant);
 }
 
 .btn-ghost {
@@ -301,6 +329,18 @@ useSeoMeta({
   padding: var(--space-3) var(--space-4);
   white-space: nowrap;
   line-height: var(--text-code-lh);
+}
+
+/* The install command is the page's primary conversion. On a narrow module it
+   was rendering as `/plugin marketplace add kurodaSensei/` with no visible
+   affordance — it reads as broken text, not as something scrollable. Below
+   64rem it wraps instead. */
+@media (width < 64rem) {
+  .code__text {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    overflow-x: visible;
+  }
 }
 
 .code__copy {
@@ -393,8 +433,16 @@ useSeoMeta({
     grid-column: 1 / -1;
   }
 
+  /* DESIGN.md §6: the seam becomes a full-width horizontal rule here — it does
+     not disappear. One absolutely-positioned element cannot sit between every
+     stacked pair, so the joint is drawn as a top edge on each sibling that
+     follows another: same token, same weight, now horizontal. */
   .seam {
     display: none;
+  }
+
+  .interlock > div:not(.seam) + div:not(.seam) {
+    border-block-start: var(--seam-width) solid var(--color-seam);
   }
 
   .pad-seam {

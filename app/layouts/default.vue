@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onBeforeUnmount, onMounted } from 'vue'
 
-const { locale, t, path, otherLocalePath, applied, toggleTheme, restoreTheme, resolvedTheme } = useChrome()
+const { locale, t, path, otherLocalePath, applied, toggleTheme, restoreTheme } = useChrome()
 
-onMounted(restoreTheme)
+let stopThemeTracking: (() => void) | undefined
+onMounted(() => { stopThemeTracking = restoreTheme() })
+onBeforeUnmount(() => stopThemeTracking?.())
 
 // `lang` must be right in the prerendered HTML, not patched on hydration.
 useHead(() => ({
@@ -148,7 +150,8 @@ useHead(() => ({
   /* 2px, not --border-width: this is the active-page indicator, which has to
      read as heavier than a hairline. */
   border-bottom: 2px solid transparent;
-  transition: border-color var(--motion-quick) var(--ease-move);
+  transition: color var(--motion-quick) var(--ease-move),
+              border-color var(--motion-quick) var(--ease-move);
 }
 
 .nav__link:hover {
@@ -168,12 +171,22 @@ useHead(() => ({
   background: none;
   cursor: pointer;
   font-weight: 600;
+  transition: color var(--motion-quick) var(--ease-move),
+              border-color var(--motion-quick) var(--ease-move);
 }
 
 .lang:hover,
 .theme:hover {
   color: var(--color-accent);
   border-color: var(--color-accent);
+}
+
+.lang:active,
+.theme:active {
+  color: var(--color-accent-contrast);
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  transition-duration: var(--motion-instant);
 }
 
 .main {

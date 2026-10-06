@@ -10,6 +10,14 @@ const { counts, groups, hrefOf } = useContentIndex()
 // Empty on the server, so the prerendered HTML carries the full list and the
 // page is complete without JavaScript. The filter is an enhancement on top.
 const query = ref('')
+const input = ref<HTMLInputElement | null>(null)
+
+// Clearing the filter destroys the empty state the button lives in, so without
+// moving focus first it lands on <body> and keyboard position is lost.
+function clearQuery() {
+  query.value = ''
+  input.value?.focus()
+}
 
 const visible = computed(() => {
   const q = query.value.trim().toLowerCase()
@@ -43,6 +51,7 @@ useSeoMeta({
       </svg>
       <input
         id="q"
+        ref="input"
         v-model="query"
         type="search"
         class="search__input"
@@ -58,7 +67,7 @@ useSeoMeta({
 
     <div v-if="matches === 0" class="module module--raised u-chamfer empty">
       <p>{{ t.noResults(query.trim()) }}</p>
-      <button type="button" class="btn-outline" @click="query = ''">{{ t.clear }}</button>
+      <button type="button" class="btn-outline" @click="clearQuery">{{ t.clear }}</button>
     </div>
 
     <div class="interlock">
@@ -164,6 +173,16 @@ useSeoMeta({
   font-size: var(--text-body);
   font-weight: 500;
   cursor: pointer;
+  transition: color var(--motion-quick) var(--ease-move),
+              border-color var(--motion-quick) var(--ease-move),
+              background var(--motion-quick) var(--ease-move);
+}
+
+.btn-outline:active {
+  color: var(--color-accent-contrast);
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  transition-duration: var(--motion-instant);
 }
 
 .btn-outline:hover {
@@ -175,7 +194,8 @@ useSeoMeta({
   position: relative;
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
-  row-gap: var(--seam-width);
+  /* A spacing token, not --seam-width: that one is a line weight. */
+  row-gap: var(--space-1);
   margin-block-start: var(--space-7);
 }
 
@@ -244,6 +264,7 @@ useSeoMeta({
   font-family: var(--font-mono);
   font-variation-settings: 'wdth' var(--mono-width-code);
   font-size: var(--text-small);
+  transition: color var(--motion-quick) var(--ease-move);
 }
 
 .entry:hover {
@@ -271,8 +292,16 @@ useSeoMeta({
     grid-column: 1 / -1;
   }
 
+  /* DESIGN.md §6: the seam becomes a full-width horizontal rule here, it does
+     not disappear. One absolutely-positioned element cannot sit between every
+     stacked pair, so the joint is drawn as a top edge on each sibling that
+     follows another: same token, same weight, now horizontal. */
   .seam {
     display: none;
+  }
+
+  .interlock > div:not(.seam) + div:not(.seam) {
+    border-block-start: var(--seam-width) solid var(--color-seam);
   }
 
   .pad-seam {

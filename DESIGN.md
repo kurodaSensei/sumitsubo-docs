@@ -81,11 +81,13 @@ Primitives (OKLCH) — one warm hue family (55–85°) for every surface, one co
 | `--kigaro-700` | `oklch(0.44 0.022 58)` |
 | `--kigaro-800` | `oklch(0.24 0.02 55)` |
 | `--moss-300` | `oklch(0.86 0.14 120)` |
+| `--moss-350` | `oklch(0.76 0.12 135)` |
 | `--moss-400` | `oklch(0.70 0.11 135)` |
 | `--moss-500` | `oklch(0.56 0.10 135)` |
 | `--moss-550` | `oklch(0.52 0.08 135)` |
 | `--moss-600` | `oklch(0.46 0.12 135)` |
 | `--moss-700` | `oklch(0.40 0.11 135)` |
+| `--moss-750` | `oklch(0.36 0.105 135)` |
 | `--amber-400` | `oklch(0.78 0.13 75)` |
 | `--amber-600` | `oklch(0.49 0.105 70)` |
 | `--ember-400` | `oklch(0.70 0.17 28)` |
@@ -105,6 +107,7 @@ Roles — **dark is the default theme**, light is the honest daylight companion:
 | `--color-divider` | `--walnut-500` | `--kigaro-500` |
 | `--color-border` | `--walnut-400` | `--kigaro-600` |
 | `--color-accent` | `--moss-400` | `--moss-600` |
+| `--color-accent-hover` | `--moss-350` | `--moss-750` |
 | `--color-accent-contrast` | `oklch(0.17 0.02 120)` | `oklch(0.985 0.01 90)` |
 | `--color-focus` | `--moss-300` | `--moss-700` |
 | `--color-warning` | `--amber-400` | `--amber-600` |
@@ -184,7 +187,7 @@ Module padding must be ≥ `--chamfer-module` on the chamfered corner so content
 | `--radius-control` | `0` | Buttons, inputs, selects, tabs. |
 | `--radius-media` | `0` | Diagrams, figures. |
 | `--border-width` | `1px` | Hairline. Code blocks, tables, controls. Uses `--color-border`. |
-| `--seam-width` | `1px` | The signature joint line between sibling modules. Uses `--color-seam`. |
+| `--seam-width` | `2px` | The signature joint line between sibling modules. Uses `--color-seam`. Raised from 1 px after the prototype: at a 1 px hairline the joint reads as an incidental edge rather than the element the whole direction is named for. It is a **line weight, never a spacing value** — use `--space-*` for gaps. |
 | `--divider-width` | `1px` | Rows, header and footer boundaries. Uses `--color-divider`. |
 | `--elevation-1` | *none* | **No shadows anywhere.** Depth is tonal — see §3 on why the four surfaces are not a ranking. |
 

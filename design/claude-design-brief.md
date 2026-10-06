@@ -70,6 +70,7 @@ Display is a deliberate outlier. From h1 down the ratio is 1.25.
 | **divider** (rows, header, footer) | `oklch(0.40 0.018 58)` | `oklch(0.72 0.020 80)` |
 | border (controls, data) | `oklch(0.58 0.018 58)` | `oklch(0.56 0.022 80)` |
 | accent | `oklch(0.70 0.11 135)` | `oklch(0.46 0.12 135)` |
+| accent-hover | `oklch(0.76 0.12 135)` | `oklch(0.36 0.105 135)` |
 | accent-contrast | `oklch(0.17 0.02 120)` | `oklch(0.985 0.01 90)` |
 | focus | `oklch(0.86 0.14 120)` | `oklch(0.40 0.11 135)` |
 | warning | `oklch(0.78 0.13 75)` | `oklch(0.49 0.105 70)` |
@@ -97,6 +98,7 @@ sRGB hex equivalents, if Claude Design cannot take OKLCH — computed from the v
 | divider | `#4F453E` | `#ABA397` |
 | border | `#837870` | `#7B7366` |
 | accent | `#80AE67` | `#386616` |
+| accent-hover | `#90C273` | `#224800` |
 | accent-contrast | `#0E1107` | `#FDFAF3` |
 | focus | `#C5DE70` | `#2B5409` |
 | warning | `#E8AA4E` | `#865403` |
