@@ -174,6 +174,34 @@
     outline: none;
   }
 
+  /* --- The slot-home reveal (DESIGN.md §7) ---------------------------------
+   * A module slides 24px along its interlock axis into place, once, on first
+   * entry into the viewport. `useReveal()` adds `.is-revealed`.
+   *
+   * Gated on `scripting: enabled` rather than applied unconditionally: without
+   * the gate, a reader with no JavaScript would get a blank page, because the
+   * starting state is invisible and nothing would ever clear it. A browser that
+   * does not understand the query skips the animation and shows the content,
+   * which is the right direction to fail in.
+   *
+   * The direction is set per side by `--reveal-shift`, so each module enters
+   * along the axis it interlocks on — and along the vertical once the interlock
+   * has collapsed. */
+  @media (scripting: enabled) {
+    [data-reveal] {
+      opacity: 0;
+      transform: var(--reveal-shift, translateY(24px));
+      transition:
+        opacity var(--motion-slot) var(--ease-enter),
+        transform var(--motion-slot) var(--ease-enter);
+    }
+
+    [data-reveal].is-revealed {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
   /* --- Reduced motion ------------------------------------------------------
    * DESIGN.md §7: slot reveals become opacity-only, transforms are dropped,
    * theme and language transitions become instant. A media query, not a JS
