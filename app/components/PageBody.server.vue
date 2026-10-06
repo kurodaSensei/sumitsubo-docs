@@ -62,6 +62,25 @@ const { data } = await useAsyncData(`body:${props.src}`, () => $fetch<{ html: st
   padding-inline-start: var(--space-5);
 }
 
+/* The checklist marker that replaced GFM's unlabelled `<input type=checkbox>`
+   at sync time. A square, not a control: nothing here can be checked, and the
+   item's own text is what carries the meaning. aria-hidden, so a screen reader
+   reads the list item and not an unnamed widget. */
+/* The box is the marker, so the bullet goes — two markers for one item read as
+   a mistake. */
+.prose :deep(li:has(.task-box)) {
+  list-style: none;
+}
+
+.prose :deep(.task-box) {
+  display: inline-block;
+  width: 0.8em;
+  height: 0.8em;
+  margin-inline-end: var(--space-2);
+  border: var(--border-width) solid var(--color-border);
+  vertical-align: baseline;
+}
+
 .prose :deep(code) {
   padding: 1px var(--space-1);
   background: var(--color-surface-sunk);

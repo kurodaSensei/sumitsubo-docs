@@ -132,6 +132,22 @@ function postProcess(html, where) {
         `     Sanitise it upstream, or add a sanitiser here if raw HTML is genuinely wanted.`);
   }
 
+  // GFM renders the `- [ ]` checklists in these SKILL.md bodies as real
+  // `<input type="checkbox">` with no label, which Lighthouse's `label` audit
+  // scores 0 — 162 of them across 26 of the 42 pages, every one announced to a
+  // screen reader as an unnamed checkbox.
+  //
+  // They are replaced rather than labelled. All 162 are `disabled` and all are
+  // unchecked, so the control carries no state a reader could learn anything
+  // from and no interaction it could offer; the item's own text is the whole
+  // content. A decorative square says that much without pretending to be a
+  // form control. Re-check this if upstream ever ships a `- [x]`: a mixed list
+  // DOES carry state, and would need the state conveyed, not hidden.
+  wrapped = wrapped.replace(
+    /<input\b[^>]*type="checkbox"[^>]*>/g,
+    '<span class="task-box" aria-hidden="true"></span>'
+  );
+
   // Fragment targets for the table of contents, and the contents themselves.
   // Only h2: these pages run up to 14 of them and adding the h3s would make the
   // list longer than the viewport it has to fit beside.
