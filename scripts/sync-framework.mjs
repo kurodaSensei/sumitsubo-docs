@@ -120,11 +120,42 @@ function splitHeading(body) {
   return { heading: m[1].trim(), rest: body.slice(m[0].length).trim() };
 }
 
+// Every output is planned here and nothing touches disk until the guards below
+// have passed. Writing as we went meant a framework layout change wrote a
+// partial tree and *then* died on the count check, leaving content/ in a state
+// the next build would happily consume. The plan doubles as the keep-set for
+// the orphan sweep: a page deleted upstream used to linger here forever,
+// because nothing ever removed what the run did not produce.
+const planned = new Map();
+
 function writeAbs(full, text) {
+  planned.set(full, text);
   const prev = existsSync(full) ? readFileSync(full, 'utf8') : null;
-  if (prev === text) return 'same';
-  if (!dryRun) { mkdirSync(dirname(full), { recursive: true }); writeFileSync(full, text); }
-  return prev === null ? 'added' : 'changed';
+  return prev === text ? 'same' : prev === null ? 'added' : 'changed';
+}
+
+/** Every file currently under a managed tree, as absolute paths. */
+const tree = (dir) =>
+  (existsSync(dir) ? readdirSync(dir, { recursive: true, withFileTypes: true }) : [])
+    .filter((d) => d.isFile() && d.name !== '.gitkeep')
+    .map((d) => join(d.parentPath, d.name));
+
+function flush() {
+  // Orphans go first: a sync that renamed a page should not leave both names
+  // on disk for even one step.
+  const orphans = [...tree(OUT), ...tree(PUB)].filter((f) => !planned.has(f));
+  for (const f of orphans) {
+    console.log(`  removed ${relative(ROOT, f)}`);
+    if (!dryRun) rmSync(f);
+  }
+
+  if (dryRun) return orphans.length;
+  for (const [full, text] of planned) {
+    if (existsSync(full) && readFileSync(full, 'utf8') === text) continue;
+    mkdirSync(dirname(full), { recursive: true });
+    writeFileSync(full, text);
+  }
+  return orphans.length;
 }
 
 const write = (path, text) => writeAbs(join(OUT, path), text);
@@ -278,15 +309,16 @@ const indexJson = JSON.stringify(index);
 const kb = indexJson.length / 1024;
 // Check before writing, so a failure cannot leave an oversized file on disk.
 if (kb > 20) die(`content/index.json would be ${kb.toFixed(1)} KB — it ships to the client, keep it metadata-only`);
-if (!dryRun) {
-  writeFileSync(join(OUT, 'index.json'), indexJson + '\n');
-  console.log(`  index.json ${kb.toFixed(1)} KB`);
-}
 
 const meta = { repo: REPO, sha, skills: nSkills, commands: nCommands, pages: nSkills + nCommands };
-if (!dryRun) writeFileSync(join(OUT, '_meta.json'), JSON.stringify(meta, null, 2) + '\n');
+writeAbs(join(OUT, 'index.json'), indexJson + '\n');
+writeAbs(join(OUT, '_meta.json'), JSON.stringify(meta, null, 2) + '\n');
 
+// Every guard has passed. Only now does anything reach disk.
+const removed = flush();
+
+console.log(`  index.json ${kb.toFixed(1)} KB`);
 console.log(`${dryRun ? 'would sync' : 'synced'} ${meta.pages} pages from ${sha.slice(0, 7)}`);
 console.log(`  ${nSkills} skills · ${nCommands} commands`);
-console.log(`  ${tally.added} added · ${tally.changed} changed · ${tally.same} unchanged`);
+console.log(`  ${tally.added} added · ${tally.changed} changed · ${tally.same} unchanged · ${removed} removed`);
 if (dryRun && (tally.added || tally.changed)) console.log('  (dry run — nothing written)');

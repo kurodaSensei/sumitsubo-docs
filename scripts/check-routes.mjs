@@ -28,7 +28,7 @@ const index = JSON.parse(readFileSync(join(ROOT, 'content', 'index.json'), 'utf8
 // of this file tried to strip them with regexes and mangled
 // `(LOCALES as readonly string[])` into a syntax error. Hand-rolling a
 // TypeScript parser to run five assertions is not a trade worth making.
-const { localePath, localeOf, isLocaleParam, isKindParam } =
+const { localePath, localeOf, isLocaleParam, isKindParam, stripLocale } =
   await import(pathToFileURL(join(ROOT, 'app', 'utils', 'routing.ts')).href);
 const hrefOf = (e) => `/${e.kind}/${e.plugin}/${e.name}`;
 
@@ -79,6 +79,21 @@ check('the counts on screen match the content index', () => {
   assert.equal(index.plugins.length, index.counts.plugins);
   assert.equal(index.plugins.reduce((s, p) => s + p.skills, 0), skills,
     'per-plugin skill counts must sum to the total');
+});
+
+// The language switch is `localePath(other, stripLocale(path))`. Both halves
+// read LOCALES, so this is what catches a prefix that strips wrong — the kind
+// of bug that only shows up as a 404 after you click the switch.
+check('the language switch lands on a prerendered route from every page', () => {
+  assert.equal(stripLocale('/es'), '/', 'the Spanish root must strip to the root');
+  assert.equal(stripLocale('/'), '/');
+  assert.equal(stripLocale('/reference'), '/reference', 'an unprefixed path is untouched');
+  assert.equal(stripLocale('/essays'), '/essays', 'a path merely starting with a locale is not prefixed');
+
+  for (const from of prerendered) {
+    const to = localePath(localeOf(from.split('/')[1]) === 'es' ? 'en' : 'es', stripLocale(from));
+    assert.ok(prerendered.has(to), `switching language on ${from} goes to ${to}, which is not prerendered`);
+  }
 });
 
 check('the route list is the size the site claims', () => {

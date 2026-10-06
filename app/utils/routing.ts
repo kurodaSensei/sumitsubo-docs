@@ -29,6 +29,15 @@ export function localePath(locale: Locale, path: string): string {
   return locale === 'en' ? clean : `/${locale}${clean === '/' ? '' : clean}`
 }
 
+/** Remove any known locale prefix: '/es/reference' -> '/reference'. */
+export function stripLocale(path: string): string {
+  for (const loc of LOCALES) {
+    if (path === `/${loc}`) return '/'
+    if (path.startsWith(`/${loc}/`)) return path.slice(loc.length + 1)
+  }
+  return path
+}
+
 function toSegment(param: unknown): string {
   return Array.isArray(param) ? (param[0] ?? '') : String(param ?? '')
 }
