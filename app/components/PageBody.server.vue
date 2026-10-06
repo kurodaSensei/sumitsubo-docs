@@ -65,7 +65,9 @@ const { data } = await useAsyncData(`body:${props.src}`, () => $fetch<{ html: st
 .prose :deep(code) {
   padding: 1px var(--space-1);
   background: var(--color-surface-sunk);
-  border: var(--border-width) solid var(--color-divider);
+  /* --color-border, not --color-divider: DESIGN.md §3 assigns code boundaries
+     the >=3:1 token, and divider measured 2.11:1 against the sunk surface. */
+  border: var(--border-width) solid var(--color-border);
 }
 
 .prose :deep(pre) {

@@ -66,11 +66,33 @@ const esc = (v) => (typeof v === 'number' || typeof v === 'boolean' ? String(v) 
 // control and that stops being true.
 marked.use({ gfm: true, breaks: false });
 
+/** Heading text -> fragment id. Collisions are resolved, never allowed. */
+function slugify(text, taken) {
+  const base = text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '') || 'section';
+  let id = base, n = 2;
+  while (taken.has(id)) id = `${base}-${n++}`;
+  taken.add(id);
+  return id;
+}
+
+/** Strip the inline markup marked leaves inside a heading, and decode it. */
+function headingText(inner) {
+  return inner
+    .replace(/<[^>]+>/g, '')
+    .replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>').replace(/&amp;/g, '&')
+    .trim();
+}
+
 /**
- * Post-process the rendered HTML.
+ * Post-process the rendered HTML: scroll regions, the security gate, and the
+ * heading ids the table of contents links to.
  *
- * Both of these have to happen here rather than in the component: the body is
- * injected with `v-html`, so the SFC never sees these elements as nodes.
+ * All of it has to happen here rather than in the component, because the body
+ * is injected with `v-html` and the SFC never sees these elements as nodes.
  */
 function postProcess(html, where) {
   let n = 0;
@@ -110,7 +132,26 @@ function postProcess(html, where) {
         `     Sanitise it upstream, or add a sanitiser here if raw HTML is genuinely wanted.`);
   }
 
-  return wrapped;
+  // Fragment targets for the table of contents, and the contents themselves.
+  // Only h2: these pages run up to 14 of them and adding the h3s would make the
+  // list longer than the viewport it has to fit beside.
+  // ponytail: flat h2 list; nest the h3s when a page shows up where the h2
+  // titles alone are not enough to find a section.
+  //
+  // These ids already exist on the page — the <main> landmark the skip link
+  // targets, the reference filter input, and the heading that names the table
+  // of contents. A content heading that slugified to any of them would be
+  // shadowed in getElementById and its link would silently jump elsewhere.
+  const taken = new Set(['main', 'q', 'toc-title']);
+  const toc = [];
+  wrapped = wrapped.replace(/<h2>([\s\S]*?)<\/h2>/g, (_m, inner) => {
+    const text = headingText(inner);
+    const id = slugify(text, taken);
+    toc.push({ id, text });
+    return `<h2 id="${id}">${inner}</h2>`;
+  });
+
+  return { html: wrapped, toc };
 }
 
 /** The body's own `# Title` duplicates the page heading, so lift it out. */
@@ -120,11 +161,42 @@ function splitHeading(body) {
   return { heading: m[1].trim(), rest: body.slice(m[0].length).trim() };
 }
 
+// Every output is planned here and nothing touches disk until the guards below
+// have passed. Writing as we went meant a framework layout change wrote a
+// partial tree and *then* died on the count check, leaving content/ in a state
+// the next build would happily consume. The plan doubles as the keep-set for
+// the orphan sweep: a page deleted upstream used to linger here forever,
+// because nothing ever removed what the run did not produce.
+const planned = new Map();
+
 function writeAbs(full, text) {
+  planned.set(full, text);
   const prev = existsSync(full) ? readFileSync(full, 'utf8') : null;
-  if (prev === text) return 'same';
-  if (!dryRun) { mkdirSync(dirname(full), { recursive: true }); writeFileSync(full, text); }
-  return prev === null ? 'added' : 'changed';
+  return prev === text ? 'same' : prev === null ? 'added' : 'changed';
+}
+
+/** Every file currently under a managed tree, as absolute paths. */
+const tree = (dir) =>
+  (existsSync(dir) ? readdirSync(dir, { recursive: true, withFileTypes: true }) : [])
+    .filter((d) => d.isFile() && d.name !== '.gitkeep')
+    .map((d) => join(d.parentPath, d.name));
+
+function flush() {
+  // Orphans go first: a sync that renamed a page should not leave both names
+  // on disk for even one step.
+  const orphans = [...tree(OUT), ...tree(PUB)].filter((f) => !planned.has(f));
+  for (const f of orphans) {
+    console.log(`  removed ${relative(ROOT, f)}`);
+    if (!dryRun) rmSync(f);
+  }
+
+  if (dryRun) return orphans.length;
+  for (const [full, text] of planned) {
+    if (existsSync(full) && readFileSync(full, 'utf8') === text) continue;
+    mkdirSync(dirname(full), { recursive: true });
+    writeFileSync(full, text);
+  }
+  return orphans.length;
 }
 
 const write = (path, text) => writeAbs(join(OUT, path), text);
@@ -138,9 +210,10 @@ function emit(path, meta, body) {
   // is what the index and the breadcrumb identify the page by.
   const { heading, rest } = splitHeading(body)
 
+  const { html, toc } = postProcess(marked.parse(rest), path);
   const page = writeAbs(
     join(PUB, path.replace(/\.md$/, '.json')),
-    JSON.stringify({ ...meta, heading, html: postProcess(marked.parse(rest), path) })
+    JSON.stringify({ ...meta, heading, toc, html })
   );
   // The .md keeps the body intact — it is the reviewable mirror of upstream,
   // not the render input.
@@ -278,15 +351,16 @@ const indexJson = JSON.stringify(index);
 const kb = indexJson.length / 1024;
 // Check before writing, so a failure cannot leave an oversized file on disk.
 if (kb > 20) die(`content/index.json would be ${kb.toFixed(1)} KB — it ships to the client, keep it metadata-only`);
-if (!dryRun) {
-  writeFileSync(join(OUT, 'index.json'), indexJson + '\n');
-  console.log(`  index.json ${kb.toFixed(1)} KB`);
-}
 
 const meta = { repo: REPO, sha, skills: nSkills, commands: nCommands, pages: nSkills + nCommands };
-if (!dryRun) writeFileSync(join(OUT, '_meta.json'), JSON.stringify(meta, null, 2) + '\n');
+writeAbs(join(OUT, 'index.json'), indexJson + '\n');
+writeAbs(join(OUT, '_meta.json'), JSON.stringify(meta, null, 2) + '\n');
 
+// Every guard has passed. Only now does anything reach disk.
+const removed = flush();
+
+console.log(`  index.json ${kb.toFixed(1)} KB`);
 console.log(`${dryRun ? 'would sync' : 'synced'} ${meta.pages} pages from ${sha.slice(0, 7)}`);
 console.log(`  ${nSkills} skills · ${nCommands} commands`);
-console.log(`  ${tally.added} added · ${tally.changed} changed · ${tally.same} unchanged`);
+console.log(`  ${tally.added} added · ${tally.changed} changed · ${tally.same} unchanged · ${removed} removed`);
 if (dryRun && (tally.added || tally.changed)) console.log('  (dry run — nothing written)');

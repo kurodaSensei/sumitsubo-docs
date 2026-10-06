@@ -43,7 +43,17 @@ Axis ranges are declared as narrow as the design actually uses, because a variab
 
 Declaring `wdth` up to 100 and `opsz` at all cost 52 KB on the family that renders the LCP element, for widths and optical sizes no screen uses. Narrow the range before adding a weight.
 
-Loading: preload **Spline Sans** and **Bricolage Grotesque** only (above the fold). Martian Mono loads `font-display: swap` — it carries labels and code, never the LCP element. Declare `size-adjust` / `ascent-override` on each fallback to hold CLS at 0.
+Loading: preload **Spline Sans** and **Bricolage Grotesque** only (above the fold). Martian Mono loads `font-display: swap` — it carries labels and code, never the LCP element. Each family carries a metric-matched fallback so `swap` is a repaint, not a relayout:
+
+| Family | Fallback | `size-adjust` | `ascent` / `descent` | Width error unadjusted |
+|---|---|---|---|---|
+| Bricolage Grotesque | Trebuchet MS | `100.07%` | `92.94%` / `26.98%` | 0.1% |
+| Spline Sans | Arial | `98.25%` | `98.11%` / `24.02%` | 1.8% |
+| Martian Mono | Courier New | `116.65%` | `85.73%` / `17.15%` | **14.3%** |
+
+Measured with canvas `measureText` against the real faces at the weights the page paints, not copied from a generator. The fallbacks are the three families present on both macOS and Windows, so one set of numbers is correct on both. Martian Mono is why this is not optional: it sets the `h1` on 84 of the 88 routes and every row of the reference index, and Courier New runs 14% narrow against it — every one of those lines rewrapped on swap. Verified after: `shopify-theme-architecture` measures 273.01 px in the webfont and 272.97 px in the adjusted fallback, against 234.04 px unadjusted — **14.27% → 0.01%**.
+
+Declare the faces with `local()` and no `url()`: on a system missing the named face the whole `@font-face` drops and the stack falls through to the plain names, so there is nothing to download and nothing to break.
 
 Scale (fluid, display as outlier then ratio 1.25):
 
@@ -57,6 +67,9 @@ Scale (fluid, display as outlier then ratio 1.25):
 | `--text-small` | `0.9375rem` | 1.55 | 0 |
 | `--text-label` | `0.75rem` | 1.2 | 0.08em, uppercase |
 | `--text-code` | `0.9375rem` | 1.6 | 0 |
+| `--text-meta` | `0.8125rem` | 1.7 | 0 |
+
+`--text-meta` is the one size that exists for a face rather than a level: Martian Mono sets roughly 15% wider per character than Spline Sans at the same em, so a dense mono list — the skill names under a plugin figure — reads a size larger than the prose around it and wraps where the prose does not. It is **mono-only**; prose at this size fails the §2 floor.
 
 ## 3. Color
 
@@ -197,10 +210,11 @@ Chamfer implementation: `corner-shape: bevel` with `border-radius: 0 var(--chamf
 
 ## 6. Layout
 
-- **Grid:** 12 columns, `--space-gutter` gutters. Modules interlock by alternating spans with a one-column overlap: `1–7` then `6–12` then `1–7`, so consecutive modules share column 6–7. **The seam is drawn in `--color-seam` at `--seam-width`, lives on the shared column edge, and must land on the same grid line in every section** — that repetition is what makes the joint read as a joint rather than a stagger. Draw it as a solid token, never as `--color-accent` at reduced opacity: a translucent line composites differently over each of the four surfaces, so its contrast becomes unpredictable and unverifiable.
-- **Max widths:** prose `68ch` · wide `78rem` · module grid `90rem` · full bleed for the manifesto only.
+- **Grid:** 12 columns, **no column gap**, inset from the viewport by `--space-gutter`. The interlock is the reason: consecutive modules share columns 6–7, and a column gap would put a strip of page background inside the overlap, which is the one place the two modules must actually touch. The gutter is the page's outer inset, not a gap between tracks. Modules interlock by alternating spans with a one-column overlap: `1–7` then `6–12` then `1–7`, so consecutive modules share column 6–7. **The seam is drawn in `--color-seam` at `--seam-width`, lives on the shared column edge, and must land on the same grid line in every section** — that repetition is what makes the joint read as a joint rather than a stagger. Draw it as a solid token, never as `--color-accent` at reduced opacity: a translucent line composites differently over each of the four surfaces, so its contrast becomes unpredictable and unverifiable.
+- **Max widths:** prose `68ch` (`--measure-prose`) · wide `78rem` (`--measure-wide`) · module grid `90rem` (`--measure-grid`) · single controls and their empty states `44rem` (`--measure-control`) · the reference-page table of contents `16rem` (`--measure-toc`) · full bleed for the manifesto only. A search field wider than `--measure-control` reads as a page banner rather than a control, and its caret ends up far from the results it filters.
 - **Breakpoints:** `48rem` (interlock collapses to a single stacked column, the seam becomes a full-width horizontal rule) · `64rem` · `90rem`. Below `48rem` the chamfer stays; the offset does not.
 - **Container queries for:** skill/command cards, the plugin matrix, code blocks with line numbers, and the reference-page table of contents — all appear at more than one width and must size to their container, not the viewport.
+- **The table of contents is a wide-screen affordance.** It appears beside the body at `60rem` of *container* width and is not rendered below that. It lists `h2` only: these pages run to 14 of them, and folding in the `h3`s makes the list taller than the column it has to sit in. It duplicates headings that are in the document either way, so a reader without it loses a shortcut, not content — which is why hiding it below the breakpoint beats pushing 14 links above the first paragraph on a phone.
 
 ## 7. Motion
 
@@ -230,6 +244,7 @@ Reduced motion (`prefers-reduced-motion: reduce`): slot reveals become opacity-o
 ## 9. Accessibility rules
 
 - **Focus ring:** `2px solid var(--color-focus)` at `2px` offset, on every focusable element, in both themes. Never removed, never replaced by a color change alone. Verified ≥3:1 on all four surface layers. Watch for `clip-path` clipping it — see §5.
+- **Inset focus:** a full-bleed row has no room outside itself for a ring, so it draws the ring inward with `outline-offset: calc(var(--focus-width) * -1)`. Derived, never written as a literal `-2px`: the two must move together or the ring detaches from the edge the moment the width changes.
 - **Minimum target:** 24×24 CSS px (WCAG 2.2 AA `2.5.8`); 44×44 for the mobile nav, theme toggle and language switch.
 - **Contrast minimums:** as section 3. New pairs go through `contrast.mjs` **against all four surface layers**, not just `surface`, before they ship. Checking one layer is what let a 4.19:1 `danger` ship into a prototype.
 - **Motion limits:** as section 7.

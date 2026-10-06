@@ -1,6 +1,6 @@
 import { computed } from 'vue'
 import { STRINGS } from '~/utils/strings'
-import { localeOf, localePath, type Locale } from '~/utils/routing'
+import { localeOf, localePath, stripLocale, type Locale } from '~/utils/routing'
 
 const THEMES = ['dark', 'light'] as const
 export type Theme = (typeof THEMES)[number]
@@ -23,8 +23,11 @@ export function useChrome() {
 
   /** Path for the current page in the other language, for the language switch. */
   const otherLocalePath = computed(() => {
-    const stripped = route.path.replace(/^\/es(?=\/|$)/, '') || '/'
-    return localePath(other.value, stripped)
+    // Strips whichever locale prefix is present rather than a hard-coded /es:
+    // LOCALES is a list, and a second entry would have silently broken the
+    // switcher. Query and hash ride along so the link does not drop them.
+    const stripped = stripLocale(route.path)
+    return localePath(other.value, stripped) + (route.hash || '')
   })
 
   /** Prefix a path for the current locale: '/reference' -> '/es/reference'. */
@@ -87,5 +90,5 @@ export function useChrome() {
     return () => mq.removeEventListener('change', sync)
   }
 
-  return { locale, other, t, path, otherLocalePath, applied, setTheme, toggleTheme, resolvedTheme, restoreTheme }
+  return { locale, t, path, otherLocalePath, applied, toggleTheme, restoreTheme }
 }

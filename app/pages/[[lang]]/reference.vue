@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { isLocaleParam } from '~/utils/routing'
 
 definePageMeta({ validate: (route) => isLocaleParam(route.params.lang) })
@@ -27,11 +27,26 @@ const visible = computed(() => {
 })
 
 const matches = computed(() => visible.value.reduce((n, g) => n + g.entries.length, 0))
-const groupTitle = (key: string) => (key === 'commands' ? t.value.commands : key)
 
+// The visible count updates per keystroke; the announced one waits for a pause.
+// Without the delay a screen reader is interrupted on every character typed.
+const announced = ref('')
+let announceTimer: ReturnType<typeof setTimeout> | undefined
+watch(matches, () => {
+  clearTimeout(announceTimer)
+  announceTimer = setTimeout(() => { announced.value = counter.value }, 400)
+})
+onBeforeUnmount(() => clearTimeout(announceTimer))
+const groupTitle = (key: string) => (key === 'commands' ? t.value.commands : key)
+const counter = computed(() =>
+  query.value.trim() ? `${matches.value} / ${counts.pages}` : String(counts.pages))
+
+// Both getters, both localized: these were a hardcoded English sentence and a
+// value read once at setup, so /es/reference described itself in English and
+// neither would have followed a locale change.
 useSeoMeta({
-  title: `${t.value.refTitle} — Sumitsubo`,
-  description: `${counts.commands} commands and ${counts.skills} skills across ${counts.plugins} plugins.`
+  title: () => `${t.value.refTitle} — Sumitsubo`,
+  description: () => t.value.refSeoDescription(counts)
 })
 </script>
 
@@ -60,9 +75,8 @@ useSeoMeta({
       <!-- The count is the honest answer to "is the list complete?" — it can
            never disagree with what is on screen because both derive from the
            same filtered list. -->
-      <span class="u-label search__count tabular" role="status" aria-live="polite">
-        {{ query.trim() ? `${matches} / ${counts.pages}` : counts.pages }}
-      </span>
+      <span class="u-label search__count tabular" aria-hidden="true">{{ counter }}</span>
+      <span class="u-visually-hidden" role="status" aria-live="polite">{{ announced }}</span>
     </div>
 
     <div v-if="matches === 0" class="module module--raised u-chamfer empty">
@@ -71,16 +85,18 @@ useSeoMeta({
     </div>
 
     <div class="interlock">
-      <div class="seam" aria-hidden="true" />
       <div
         v-for="(g, i) in visible"
         :key="g.key"
-        :class="i % 2 ? 'interlock__b' : 'interlock__a'"
+        class="interlock__cell"
       >
-        <section
+        <!-- A plain div, not a labelled <section>: as a section each group
+             became a `region` landmark whose name just repeated the <h2>
+             immediately inside it, so the landmark list read "Commands, sumi,
+             sumi-design, …" for no navigational gain. -->
+        <div
           class="module u-chamfer group"
           :class="[i % 2 ? 'module--raised-2' : 'module--raised', { 'pad-seam': i % 2 === 0 }]"
-          :aria-label="groupTitle(g.key)"
         >
           <h2 class="u-label group__title tabular">{{ groupTitle(g.key) }} · {{ g.entries.length }}</h2>
           <ul class="group__list" role="list">
@@ -91,7 +107,7 @@ useSeoMeta({
               </NuxtLink>
             </li>
           </ul>
-        </section>
+        </div>
       </div>
     </div>
 
@@ -123,7 +139,7 @@ useSeoMeta({
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  max-width: 44rem;
+  max-width: var(--measure-control);
   padding-inline: var(--space-4);
   border: var(--border-width) solid var(--color-border);
   background: var(--color-surface-raised);
@@ -155,7 +171,7 @@ useSeoMeta({
 }
 
 .empty {
-  max-width: 44rem;
+  max-width: var(--measure-control);
   margin-block-start: var(--space-6);
   display: flex;
   flex-direction: column;
@@ -178,20 +194,25 @@ useSeoMeta({
               background var(--motion-quick) var(--ease-move);
 }
 
+.btn-outline:hover {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
 .btn-outline:active {
   color: var(--color-accent-contrast);
   background: var(--color-accent);
   border-color: var(--color-accent);
   transition-duration: var(--motion-instant);
 }
-
-.btn-outline:hover {
-  color: var(--color-accent);
-  border-color: var(--color-accent);
-}
-
+/* The landing staggers its modules 1–7, 6–12, 1–7 down the page, which composes
+   because each one is a large block and the empty half reads as air. Seven
+   groups of links is a different object: staggered, each row carried one module
+   and ~42% of every row was blank, so the index — the page people scan — came
+   out roughly twice as tall as its content for no gain.
+   Here the pair shares the row. Six columns each, meeting on the 6/12 line,
+   which is the same grid line the stagger put its seam on. */
 .interlock {
-  position: relative;
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   /* A spacing token, not --seam-width: that one is a line weight. */
@@ -199,24 +220,22 @@ useSeoMeta({
   margin-block-start: var(--space-7);
 }
 
-.interlock__a {
-  grid-column: 1 / 8;
+.interlock__cell {
   min-width: 0;
+  grid-column: span 6;
 }
 
-.interlock__b {
-  grid-column: 6 / 13;
-  min-width: 0;
+/* The seam rides the wrapper, never the module: the module owns the chamfer,
+   and clip-path would cut the line short at the corner. */
+.interlock__cell:nth-child(odd) {
+  border-inline-end: var(--seam-width) solid var(--color-seam);
 }
 
-.seam {
-  position: absolute;
-  inset-block: 0;
-  left: calc(100% * 5 / 12);
-  width: var(--seam-width);
-  background: var(--color-seam);
-  pointer-events: none;
-  z-index: 1;
+/* An odd number of groups leaves a last one without a partner. It keeps its
+   half — stretched to full width its four rows put the arrow a long way from
+   the name it belongs to — and drops the joint, there being nothing to join. */
+.interlock__cell:last-child:nth-child(odd) {
+  border-inline-end: 0;
 }
 
 .module {
@@ -262,7 +281,8 @@ useSeoMeta({
   color: var(--color-text);
   text-decoration: none;
   font-family: var(--font-mono);
-  font-variation-settings: 'wdth' var(--mono-width-code);
+  /* An identifier, not code: DESIGN.md §2 puts these at wdth 100. */
+  font-variation-settings: 'wdth' var(--mono-width-label);
   font-size: var(--text-small);
   transition: color var(--motion-quick) var(--ease-move);
 }
@@ -272,7 +292,7 @@ useSeoMeta({
 }
 
 .entry:focus-visible {
-  outline-offset: -2px;
+  outline-offset: var(--focus-offset-inset);
 }
 
 .entry__arrow {
@@ -287,20 +307,18 @@ useSeoMeta({
 }
 
 @media (width < 48rem) {
-  .interlock__a,
-  .interlock__b {
+  /* DESIGN.md §6: the seam becomes a full-width horizontal rule here, it does
+     not disappear. Same token, same weight, now horizontal — drawn as a top
+     edge on each cell that follows another. */
+  .interlock__cell {
     grid-column: 1 / -1;
   }
 
-  /* DESIGN.md §6: the seam becomes a full-width horizontal rule here, it does
-     not disappear. One absolutely-positioned element cannot sit between every
-     stacked pair, so the joint is drawn as a top edge on each sibling that
-     follows another: same token, same weight, now horizontal. */
-  .seam {
-    display: none;
+  .interlock__cell:nth-child(odd) {
+    border-inline-end: 0;
   }
 
-  .interlock > div:not(.seam) + div:not(.seam) {
+  .interlock__cell + .interlock__cell {
     border-block-start: var(--seam-width) solid var(--color-seam);
   }
 

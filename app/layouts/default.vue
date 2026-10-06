@@ -30,8 +30,12 @@ useHead(() => ({
 
         <!-- A real link to the translated route, not a JS toggle: it works
              without script and search engines can follow it. -->
-        <NuxtLink :to="otherLocalePath" class="lang" :aria-label="t.langSwitchTo">
+        <!-- The visible label is part of the accessible name (2.5.3), and the
+             foreign phrase carries its own lang so it is not read with the
+             wrong voice (3.1.2). -->
+        <NuxtLink :to="otherLocalePath" class="lang" :hreflang="locale === 'en' ? 'es' : 'en'">
           {{ locale === 'en' ? 'ES' : 'EN' }}
+          <span class="u-visually-hidden" :lang="locale === 'en' ? 'es' : 'en'">{{ t.langSwitchTo }}</span>
         </NuxtLink>
 
         <button
@@ -48,12 +52,14 @@ useHead(() => ({
       </nav>
     </header>
 
-    <main id="main" class="main">
+    <!-- tabindex="-1" so the skip link moves focus, not just the scroll
+         position: without it the next Tab resumes from the skip link. -->
+    <main id="main" class="main" tabindex="-1">
       <slot />
     </main>
 
     <footer class="footer">
-      <span>SUMITSUBO 墨壺 · MIT</span>
+      <span>SUMITSUBO <span lang="ja">墨壺</span> · MIT</span>
       <span>v0.4.0</span>
     </footer>
   </div>
@@ -109,7 +115,7 @@ useHead(() => ({
   font-family: var(--font-display);
   font-weight: 700;
   font-variation-settings: 'wdth' 85;
-  font-size: 1.3rem;
+  font-size: var(--text-h3);
   letter-spacing: 0.06em;
 }
 

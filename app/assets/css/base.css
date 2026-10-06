@@ -37,6 +37,57 @@
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+2000-206F, U+2212, U+2215;
 }
 
+/* --- Metric-matched fallbacks (DESIGN.md §2) --------------------------------
+ * Each webfont loads `font-display: swap`, so the first paint is the fallback
+ * and the swap reflows every line it set. These faces scale the fallback until
+ * its average advance and its line box match the webfont, which makes the swap
+ * a repaint instead of a relayout.
+ *
+ * The numbers are measured, not copied: canvas `measureText` against the real
+ * faces in the engine, at the weights the page paints. The fallbacks are the
+ * three families that ship on both macOS and Windows, so one set of numbers is
+ * right on both rather than tuned to this machine.
+ *
+ *   Bricolage ← Trebuchet MS    0.1% width error unadjusted
+ *   Spline    ← Arial           1.8%
+ *   Martian   ← Courier New    14.3%   <- the one that matters
+ *
+ * Martian Mono is the reason this exists: it sets the h1 on 84 of the 88
+ * routes and every row of the reference index, and Courier New runs 14% narrow
+ * against it, so each of those lines rewrapped on swap.
+ *
+ * `local()` with no `url()` fallback is deliberate — on a system without the
+ * named face the whole @font-face is dropped and the stack simply falls
+ * through to the unadjusted names below it. Nothing to download, nothing to
+ * break. */
+
+@font-face {
+  font-family: 'Bricolage Fallback';
+  src: local('Trebuchet MS');
+  size-adjust: 100.07%;
+  ascent-override: 92.94%;
+  descent-override: 26.98%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'Spline Fallback';
+  src: local('Arial');
+  size-adjust: 98.25%;
+  ascent-override: 98.11%;
+  descent-override: 24.02%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'Martian Fallback';
+  src: local('Courier New');
+  size-adjust: 116.65%;
+  ascent-override: 85.73%;
+  descent-override: 17.15%;
+  line-gap-override: 0%;
+}
+
 @layer reset {
   *,
   *::before,
@@ -84,11 +135,6 @@
 }
 
 @layer base {
-  html {
-    /* Dark is the default; the token layer handles the light override. */
-    color-scheme: dark light;
-  }
-
   body {
     margin: 0;
     min-height: 100svh;

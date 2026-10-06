@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, onBeforeUnmount, ref } from 'vue'
 import { isLocaleParam } from '~/utils/routing'
 
 definePageMeta({ validate: (route) => isLocaleParam(route.params.lang) })
@@ -21,15 +21,24 @@ const copied = ref(false)
 let timer: ReturnType<typeof setTimeout> | undefined
 
 async function copyInstall() {
+  // Only announce success when it succeeded. `navigator.clipboard` is undefined
+  // in an insecure context and optional chaining swallows that silently, so the
+  // old version told every such visitor "Copied" while the clipboard was
+  // untouched. The command stays on screen and selectable either way.
   try {
-    await navigator.clipboard?.writeText(INSTALL)
+    if (!navigator.clipboard) return
+    await navigator.clipboard.writeText(INSTALL)
   } catch {
-    // Clipboard blocked: the command is on screen and selectable anyway.
+    return
   }
   copied.value = true
   clearTimeout(timer)
-  timer = setTimeout(() => (copied.value = false), 1800)
+  // 5s, not 1.8s: a status message has to outlast the time it takes to notice
+  // and read it.
+  timer = setTimeout(() => (copied.value = false), 5000)
 }
+
+onBeforeUnmount(() => clearTimeout(timer))
 
 useSeoMeta({
   title: () => t.value.seoTitle,
@@ -75,7 +84,7 @@ useHead({
         <div class="interlock__b">
           <div data-reveal class="module module--raised-2 u-chamfer install">
             <div class="install__actions">
-              <button type="button" class="btn u-chamfer-control" @click="copyInstall">
+              <button type="button" class="btn u-chamfer-control" :aria-label="t.installAction" @click="copyInstall">
                 {{ t.install }}
               </button>
               <NuxtLink :to="path('/reference')" class="btn-ghost">{{ t.seeSkills }}</NuxtLink>
@@ -398,7 +407,8 @@ useHead({
 
 .fig__name {
   font-family: var(--font-mono);
-  font-variation-settings: 'wdth' var(--mono-width-code);
+  /* An identifier, not code: DESIGN.md §2 puts these at wdth 100. */
+  font-variation-settings: 'wdth' var(--mono-width-label);
   font-size: var(--text-body);
   color: var(--color-accent);
 }
@@ -410,8 +420,8 @@ useHead({
 .fig__skills {
   font-family: var(--font-mono);
   font-variation-settings: 'wdth' var(--mono-width-code);
-  font-size: 0.8125rem;
-  line-height: 1.7;
+  font-size: var(--text-meta);
+  line-height: var(--text-meta-lh);
   color: var(--color-text-muted);
   overflow-wrap: anywhere;
 }
@@ -428,7 +438,7 @@ useHead({
 
 .card__name {
   font-family: var(--font-mono);
-  font-variation-settings: 'wdth' var(--mono-width-code);
+  font-variation-settings: 'wdth' var(--mono-width-label);
   font-weight: 400;
   color: var(--color-accent);
 }

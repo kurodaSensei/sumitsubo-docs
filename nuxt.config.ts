@@ -23,6 +23,20 @@ export default defineNuxtConfig({
   app: {
     head: {
       htmlAttrs: { lang: 'en' },
+
+      // Applies a stored theme before first paint. Without it the page renders
+      // with the system preference and only switches once the bundle has
+      // hydrated, so anyone whose choice disagrees with their system gets a
+      // full-viewport repaint on every cold load. Inline and blocking on
+      // purpose — it has to win the race against the first paint, and it is
+      // two statements.
+      script: [{
+        innerHTML:
+          "try{var t=localStorage.getItem('sumitsubo-theme');" +
+          "if(t==='dark'||t==='light')document.documentElement.dataset.theme=t}catch(e){}",
+        tagPriority: 'critical'
+      }],
+
       // The two faces every route paints above the fold. The earlier comment
       // here claimed Martian Mono "is never the LCP element" — it is: it sets
       // the h1 on all 84 detail routes, plus the header nav, the breadcrumb and

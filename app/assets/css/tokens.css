@@ -11,9 +11,13 @@
 @layer tokens {
   :root {
     /* --- Typography (DESIGN.md §2) ------------------------------------- */
-    --font-display: 'Bricolage Grotesque', 'Trebuchet MS', sans-serif;
-    --font-body: 'Spline Sans', 'Segoe UI', system-ui, sans-serif;
-    --font-mono: 'Martian Mono', ui-monospace, monospace;
+    /* The *-Fallback faces are metric-matched in base.css; they sit ahead of
+       the plain names so the swap does not rewrap. If the local face they
+       scale is missing the @font-face drops and the rest of the stack
+       applies unchanged. */
+    --font-display: 'Bricolage Grotesque', 'Bricolage Fallback', 'Trebuchet MS', sans-serif;
+    --font-body: 'Spline Sans', 'Spline Fallback', 'Segoe UI', system-ui, sans-serif;
+    --font-mono: 'Martian Mono', 'Martian Fallback', ui-monospace, monospace;
 
     /* Martian Mono is one family at two widths: labels read at 100, code at 75. */
     --mono-width-label: 100;
@@ -43,6 +47,9 @@
     --text-label: 0.75rem;
     --text-label-lh: 1.2;
     --text-label-ls: 0.08em;
+
+    --text-meta: 0.8125rem;
+    --text-meta-lh: 1.7;
 
     --text-code: 0.9375rem;
     --text-code-lh: 1.6;
@@ -83,6 +90,8 @@
     --measure-prose: 68ch;
     --measure-wide: 78rem;
     --measure-grid: 90rem;
+    --measure-control: 44rem;
+    --measure-toc: 16rem;
 
     /* A module spanning cols 1–7 is 7/12 of the grid; the seam sits at 5/12 of
      * the grid, i.e. 5/7 = 71.43% across that module. Pad the remaining 28.57%
@@ -101,8 +110,23 @@
     /* --- Accessibility (DESIGN.md §9) ---------------------------------- */
     --focus-width: 2px;
     --focus-offset: 2px;
+    /* DESIGN.md §9: a full-bleed row draws its ring inward. Derived so the two
+       cannot drift apart. */
+    --focus-offset-inset: calc(var(--focus-width) * -1);
     --target-min: 24px;
     --target-touch: 44px;
+  }
+
+  /* Native UI — scrollbars, the search field's clear button, the caret — follows
+   * `color-scheme`. It used to be the static `dark light` on <html>, so a
+   * visitor on a dark system who chose the light theme got dark scrollbars over
+   * light surfaces. It tracks the theme now. */
+  :root,
+  [data-theme='dark'] { color-scheme: dark; }
+  [data-theme='light'] { color-scheme: light; }
+
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme='dark']) { color-scheme: light; }
   }
 
   /* Dark is the default theme; light is the daylight companion. A visitor with

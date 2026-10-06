@@ -9,18 +9,17 @@ export interface Strings {
   navAria: string
   navHome: string
   navRef: string
-  langAria: string
   langSwitchTo: string
   themeToDark: string
   themeToLight: string
-  themeDark: string
-  themeLight: string
 
   manifesto: string
   lede: string
   seoTitle: string
   seoDescription: string
   install: string
+  /** What activating the install button actually does (2.4.6). */
+  installAction: string
   seeSkills: string
   copy: string
   copied: string
@@ -39,11 +38,12 @@ export interface Strings {
   commandsLabel: string
 
   refTitle: string
+  tocLabel: string
+  refSeoDescription: (c: { commands: number, skills: number, plugins: number }) => string
   filterLabel: string
   filterPlaceholder: string
   clear: string
   noResults: (q: string) => string
-  pages: string
   commands: string
 
   protoNote: string
@@ -54,12 +54,9 @@ const en: Strings = {
   navAria: 'Main',
   navHome: 'Home',
   navRef: 'Reference',
-  langAria: 'Language',
   langSwitchTo: 'Ver en español',
   themeToDark: 'Switch to dark theme',
   themeToLight: 'Switch to light theme',
-  themeDark: 'Dark',
-  themeLight: 'Light',
 
   manifesto: 'It marks the true line before any cut is made.',
   lede:
@@ -68,6 +65,7 @@ const en: Strings = {
   seoDescription:
     'An opinionated AI framework for web design and development with Claude Code: engineering quality, accessibility, performance and design without AI slop.',
   install: 'Install the plugin',
+  installAction: 'Copy the install command',
   seeSkills: 'See the skills',
   copy: 'Copy',
   copied: 'Copied',
@@ -86,11 +84,13 @@ const en: Strings = {
   commandsLabel: 'commands',
 
   refTitle: 'Reference',
+  tocLabel: 'On this page',
+  refSeoDescription: (c) =>
+    `${c.commands} commands and ${c.skills} skills across ${c.plugins} plugins.`,
   filterLabel: 'Filter',
   filterPlaceholder: 'Search the pages',
   clear: 'Clear the filter',
   noResults: (q) => `No results for «${q}»`,
-  pages: 'pages',
   commands: 'Commands',
 
   protoNote: 'Reference content is generated from the framework repo and is English only.'
@@ -101,12 +101,9 @@ const es: Strings = {
   navAria: 'Principal',
   navHome: 'Inicio',
   navRef: 'Referencia',
-  langAria: 'Idioma',
   langSwitchTo: 'View in English',
   themeToDark: 'Cambiar a tema oscuro',
   themeToLight: 'Cambiar a tema claro',
-  themeDark: 'Oscuro',
-  themeLight: 'Claro',
 
   // DESIGN.md §1 pins this sentence — it is the one line of manifesto voice on
   // the whole site, and it is not re-translated per implementation.
@@ -117,6 +114,7 @@ const es: Strings = {
   seoDescription:
     'Un framework de IA opinado para diseño y desarrollo web con Claude Code: calidad de ingeniería, accesibilidad, rendimiento y diseño sin relleno.',
   install: 'Instalar el plugin',
+  installAction: 'Copiar el comando de instalación',
   seeSkills: 'Ver los skills',
   copy: 'Copiar',
   copied: 'Copiado',
@@ -135,11 +133,13 @@ const es: Strings = {
   commandsLabel: 'comandos',
 
   refTitle: 'Referencia',
+  tocLabel: 'En esta página',
+  refSeoDescription: (c) =>
+    `${c.commands} comandos y ${c.skills} skills repartidos en ${c.plugins} plugins.`,
   filterLabel: 'Filtrar',
   filterPlaceholder: 'Buscar entre las páginas',
   clear: 'Limpiar el filtro',
   noResults: (q) => `Sin resultados para «${q}»`,
-  pages: 'páginas',
   commands: 'Comandos',
 
   protoNote: 'El contenido de referencia se genera desde el repo del framework y está en inglés.'
