@@ -11,7 +11,8 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "sync": "node scripts/sync-framework.mjs"
+    "sync": "node scripts/sync-framework.mjs",
+    "check": "node design/tokens.mjs --check && node design/tokens.mjs --test && node scripts/check-routes.mjs"
   },
   "dependencies": {
     "nuxt": "^4.5.2",
