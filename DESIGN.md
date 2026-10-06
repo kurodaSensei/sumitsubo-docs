@@ -24,12 +24,24 @@
 
 | Role | Family (fallback stack) | Weights | Notes |
 |---|---|---|---|
-| Display | `'Bricolage Grotesque Variable', 'Trebuchet MS', sans-serif` | 500–700, `wdth` 85–100, `opsz` auto | Crafted, non-neutral grotesque. Variable `wdth` absorbs Spanish expansion in headlines. |
+| Display | `'Bricolage Grotesque Variable', 'Trebuchet MS', sans-serif` | 600–700, `wdth` 85–90 | Crafted, non-neutral grotesque. Variable `wdth` absorbs Spanish expansion in headlines. |
 | Body | `'Spline Sans Variable', 'Segoe UI', system-ui, sans-serif` | 300–600 | Humanist-grotesque workhorse. Carries all prose and tables. |
 | UI / labels | `'Martian Mono Variable', ui-monospace, monospace` | 500–600, `wdth 100` | Uppercase, tracked. Metadata, plugin IDs, tier badges, section numbers. |
 | Mono / numerals | `'Martian Mono Variable', ui-monospace, monospace` | 400, `wdth 75` | Code blocks and inline code. `font-variant-numeric: tabular-nums` on all tables and counts. |
 
-All three are OFL, self-hosted WOFF2, subset to `latin + latin-ext` (full Spanish diacritic coverage: á é í ó ú ñ ü ¡ ¿).
+All three are OFL and self-hosted. **The `latin` range alone is enough** — every Spanish diacritic (á é í ó ú ü ñ ¡ ¿) lives between U+00A1 and U+00FC, inside `U+0000-00FF`. `latin-ext` covers Polish, Czech and Turkish and is dead weight on a site that ships English and Spanish.
+
+Axis ranges are declared as narrow as the design actually uses, because a variable font's file size scales with the span of its axes. Measured on the `latin` range:
+
+| Family | Axes requested | Size |
+|---|---|---|
+| Bricolage Grotesque | `wdth` 85–90, `wght` 600–700 | **76.3 KB** |
+| | *(`opsz` 12–96, `wdth` 85–100, `wght` 500–700 — the first draft of this table)* | *128.2 KB* |
+| Spline Sans | `wght` 300–600 | 56.5 KB |
+| Martian Mono | `wdth` 75–100, `wght` 400–600 | 37.4 KB |
+| | | **170.2 KB total** |
+
+Declaring `wdth` up to 100 and `opsz` at all cost 52 KB on the family that renders the LCP element, for widths and optical sizes no screen uses. Narrow the range before adding a weight.
 
 Loading: preload **Spline Sans** and **Bricolage Grotesque** only (above the fold). Martian Mono loads `font-display: swap` — it carries labels and code, never the LCP element. Declare `size-adjust` / `ascent-override` on each fallback to hold CLS at 0.
 

@@ -1,0 +1,251 @@
+/* Reset and element defaults. Component styling lives with its component.
+ * Layer order is declared in tokens.css. */
+
+/* --- Fonts ------------------------------------------------------------------
+ * Self-hosted so the critical path has no third-party origin to resolve.
+ * Only the `latin` range ships: every Spanish diacritic (á é í ó ú ü ñ ¡ ¿)
+ * sits between U+00A1 and U+00FC. See DESIGN.md §2 for the axis-range
+ * measurements — declaring wider axes than the design uses cost 52 KB on the
+ * family that renders the LCP element. */
+
+@font-face {
+  font-family: 'Bricolage Grotesque';
+  font-style: normal;
+  font-weight: 600 700;
+  font-stretch: 85% 90%;
+  font-display: swap;
+  src: url('/fonts/bricolage-grotesque-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+2000-206F, U+2212, U+2215;
+}
+
+@font-face {
+  font-family: 'Spline Sans';
+  font-style: normal;
+  font-weight: 300 600;
+  font-display: swap;
+  src: url('/fonts/spline-sans-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+2000-206F, U+2212, U+2215;
+}
+
+@font-face {
+  font-family: 'Martian Mono';
+  font-style: normal;
+  font-weight: 400 600;
+  font-stretch: 75% 100%;
+  font-display: swap;
+  src: url('/fonts/martian-mono-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+2000-206F, U+2212, U+2215;
+}
+
+@layer reset {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  body,
+  h1, h2, h3, h4, h5, h6,
+  p, figure, blockquote, dl, dd, ol, ul, pre {
+    margin: 0;
+  }
+
+  ol[role='list'],
+  ul[role='list'] {
+    list-style: none;
+    padding: 0;
+  }
+
+  img,
+  svg,
+  video {
+    display: block;
+    max-width: 100%;
+  }
+
+  input,
+  button,
+  textarea,
+  select {
+    font: inherit;
+    color: inherit;
+  }
+
+  /* Long identifiers like `shopify-performance-a11y` must not force a scrollbar
+   * on a narrow screen. */
+  p, li, dd, h1, h2, h3 {
+    overflow-wrap: break-word;
+  }
+}
+
+@layer base {
+  html {
+    /* Dark is the default; the token layer handles the light override. */
+    color-scheme: dark light;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100svh;
+    background: var(--color-surface);
+    color: var(--color-text);
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    line-height: var(--text-body-lh);
+    font-synthesis-weight: none;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    text-wrap: balance;
+  }
+
+  h1 {
+    font-size: var(--text-h1);
+    line-height: var(--text-h1-lh);
+    letter-spacing: var(--text-h1-ls);
+    font-variation-settings: 'wdth' 85;
+    font-weight: 700;
+  }
+
+  h2 {
+    font-size: var(--text-h2);
+    line-height: var(--text-h2-lh);
+    letter-spacing: var(--text-h2-ls);
+    font-variation-settings: 'wdth' 90;
+  }
+
+  h3 {
+    font-size: var(--text-h3);
+    line-height: var(--text-h3-lh);
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  a {
+    color: var(--color-accent);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+  }
+
+  a:hover {
+    color: var(--color-text);
+  }
+
+  code, pre, kbd, samp {
+    font-family: var(--font-mono);
+    font-variation-settings: 'wdth' var(--mono-width-code);
+    font-size: var(--text-code);
+  }
+
+  /* Tables and counts align by digit. */
+  table, .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  ::selection {
+    background: var(--color-accent);
+    color: var(--color-accent-contrast);
+  }
+
+  /* --- Focus ---------------------------------------------------------------
+   * DESIGN.md §9: visible on every focusable element, in both themes, never
+   * removed and never signalled by colour change alone. Verified ≥3:1 against
+   * all four surface layers.
+   *
+   * A clip-path chamfer clips the outline too, so a control that owns the
+   * chamfer must drop it while focused — see .u-chamfer-control below. */
+  :focus-visible {
+    outline: var(--focus-width) solid var(--color-focus);
+    outline-offset: var(--focus-offset);
+  }
+
+  /* Only remove the default ring where :focus-visible has already taken over. */
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  /* --- Reduced motion ------------------------------------------------------
+   * DESIGN.md §7: slot reveals become opacity-only, transforms are dropped,
+   * theme and language transitions become instant. A media query, not a JS
+   * flag, so it holds before hydration. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 1ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: var(--motion-instant) !important;
+      scroll-behavior: auto !important;
+    }
+
+    /* Transform is the part that causes trouble, so it is dropped outright
+     * rather than merely shortened. */
+    [data-reveal] {
+      transform: none !important;
+    }
+  }
+}
+
+@layer utilities {
+  /* Visually hidden but reachable by screen readers and focus. */
+  .u-visually-hidden:not(:focus-within):not(:active) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  /* The signature: one cut corner, top-right. Modules carry no border, which
+   * is what makes clip-path safe here — there is no edge for it to eat. */
+  .u-chamfer {
+    clip-path: polygon(
+      0 0,
+      calc(100% - var(--chamfer-module)) 0,
+      100% var(--chamfer-module),
+      100% 100%,
+      0 100%
+    );
+  }
+
+  .u-chamfer-control {
+    clip-path: polygon(
+      0 0,
+      calc(100% - var(--chamfer-control)) 0,
+      100% var(--chamfer-control),
+      100% 100%,
+      0 100%
+    );
+  }
+
+  .u-chamfer-control:focus-visible {
+    clip-path: none;
+  }
+
+  .u-label {
+    font-family: var(--font-mono);
+    font-variation-settings: 'wdth' var(--mono-width-label);
+    font-size: var(--text-label);
+    line-height: var(--text-label-lh);
+    letter-spacing: var(--text-label-ls);
+    font-weight: 500;
+    text-transform: uppercase;
+  }
+
+  .u-prose {
+    max-width: var(--measure-prose);
+  }
+}
