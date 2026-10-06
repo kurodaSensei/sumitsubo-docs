@@ -148,261 +148,259 @@ useSeoMeta({
 </template>
 
 <style scoped>
-@layer components {
-  .hero {
-    padding-block-start: clamp(3rem, 9vh, 7rem);
-  }
+.hero {
+  padding-block-start: clamp(3rem, 9vh, 7rem);
+}
 
-  .hero__meta {
-    color: var(--color-text-muted);
-    margin-block-end: var(--space-6);
-  }
+.hero__meta {
+  color: var(--color-text-muted);
+  margin-block-end: var(--space-6);
+}
 
-  .hero__line {
-    font-size: var(--text-display);
-    line-height: var(--text-display-lh);
-    letter-spacing: var(--text-display-ls);
-    max-width: 15ch;
-  }
+.hero__line {
+  font-size: var(--text-display);
+  line-height: var(--text-display-lh);
+  letter-spacing: var(--text-display-ls);
+  max-width: 15ch;
+}
 
-  .rule {
-    margin-block-start: clamp(2.5rem, 6vh, 4.5rem);
-    height: 1px;
-    background: var(--color-divider);
-  }
+.rule {
+  margin-block-start: clamp(2.5rem, 6vh, 4.5rem);
+  height: 1px;
+  background: var(--color-divider);
+}
 
-  .section {
-    margin-block-start: var(--space-section-block);
-  }
+.section {
+  margin-block-start: var(--space-section-block);
+}
 
-  .section__label {
-    color: var(--color-text-muted);
-    margin-block-end: var(--space-3);
-  }
+.section__label {
+  color: var(--color-text-muted);
+  margin-block-end: var(--space-3);
+}
 
-  .section__title {
-    max-width: 28ch;
-  }
+.section__title {
+  max-width: 28ch;
+}
 
-  .section__lead {
-    margin-block: var(--space-3) var(--space-6);
-    color: var(--color-text-muted);
-  }
+.section__lead {
+  margin-block: var(--space-3) var(--space-6);
+  color: var(--color-text-muted);
+}
 
-  /* --- The interlock --------------------------------------------------------
-   * Siblings alternate 1–7 and 6–12 so they overlap by one column, and the seam
-   * sits on the shared edge. The same grid line in every section is what makes
-   * the joint read as a joint rather than a stagger. */
-  .interlock {
-    position: relative;
-    display: grid;
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-    row-gap: 2px;
-    margin-block-start: 2px;
-  }
+/* --- The interlock --------------------------------------------------------
+ * Siblings alternate 1–7 and 6–12 so they overlap by one column, and the seam
+ * sits on the shared edge. The same grid line in every section is what makes
+ * the joint read as a joint rather than a stagger. */
+.interlock {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  row-gap: 2px;
+  margin-block-start: 2px;
+}
 
-  .interlock__a {
-    grid-column: 1 / 8;
-    min-width: 0;
-  }
+.interlock__a {
+  grid-column: 1 / 8;
+  min-width: 0;
+}
 
+.interlock__b {
+  grid-column: 6 / 13;
+  min-width: 0;
+}
+
+.seam {
+  position: absolute;
+  inset-block: 0;
+  left: calc(100% * 5 / 12);
+  width: var(--seam-width);
+  background: var(--color-seam);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.module {
+  height: 100%;
+  padding: var(--space-module-pad);
+  /* No border and no shadow. Depth is tonal — which is also what makes the
+   * clip-path chamfer safe, since there is no edge for it to eat. */
+}
+
+.module--raised {
+  background: var(--color-surface-raised);
+}
+
+.module--raised-2 {
+  background: var(--color-surface-raised-2);
+}
+
+/* Left-hand modules run under the seam without this. */
+.pad-seam {
+  padding-inline-end: var(--pad-seam-side);
+}
+
+.install {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.install__actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-5);
+}
+
+.install__status {
+  min-height: 1.2em;
+  color: var(--color-accent);
+}
+
+.btn {
+  min-height: 48px;
+  padding-inline: 28px;
+  border: 0;
+  background: var(--color-accent);
+  color: var(--color-accent-contrast);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: var(--text-body);
+  cursor: pointer;
+}
+
+.btn:hover {
+  filter: brightness(1.12);
+}
+
+.btn-ghost {
+  min-height: var(--target-touch);
+  display: inline-flex;
+  align-items: center;
+  border-bottom: 1px solid var(--color-text);
+  color: var(--color-text);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.btn-ghost:hover {
+  color: var(--color-accent);
+  border-bottom-color: var(--color-accent);
+}
+
+.code {
+  display: flex;
+  align-items: stretch;
+  border: var(--border-width) solid var(--color-border);
+  background: var(--color-surface-sunk);
+}
+
+.code__text {
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  padding: 14px var(--space-4);
+  white-space: nowrap;
+  line-height: var(--text-code-lh);
+}
+
+.code__copy {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--target-touch);
+  border: 0;
+  border-left: var(--border-width) solid var(--color-border);
+  background: none;
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.code__copy:hover {
+  color: var(--color-accent);
+}
+
+.fig {
+  margin: 0;
+}
+
+.fig__rule {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.fig__note {
+  margin-block: var(--space-2) var(--space-5);
+  font-size: var(--text-small);
+  line-height: var(--text-small-lh);
+  color: var(--color-text-muted);
+}
+
+.fig__row {
+  padding-block: var(--space-4);
+  border-block-start: var(--divider-width) solid var(--color-divider);
+}
+
+.fig__head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-block-end: var(--space-2);
+}
+
+.fig__name {
+  font-family: var(--font-mono);
+  font-variation-settings: 'wdth' var(--mono-width-code);
+  font-size: var(--text-body);
+  color: var(--color-accent);
+}
+
+.fig__count {
+  color: var(--color-text-muted);
+}
+
+.fig__skills {
+  font-family: var(--font-mono);
+  font-variation-settings: 'wdth' var(--mono-width-code);
+  font-size: 0.8125rem;
+  line-height: 1.7;
+  color: var(--color-text-muted);
+  overflow-wrap: anywhere;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.card__meta {
+  color: var(--color-text-muted);
+}
+
+.card__name {
+  font-family: var(--font-mono);
+  font-variation-settings: 'wdth' var(--mono-width-code);
+  font-weight: 400;
+  color: var(--color-accent);
+}
+
+/* Below 48rem the interlock collapses to one column. The chamfer stays —
+ * it is the signature; the offset does not. */
+@media (width < 48rem) {
+  .interlock__a,
   .interlock__b {
-    grid-column: 6 / 13;
-    min-width: 0;
+    grid-column: 1 / -1;
   }
 
   .seam {
-    position: absolute;
-    inset-block: 0;
-    left: calc(100% * 5 / 12);
-    width: var(--seam-width);
-    background: var(--color-seam);
-    pointer-events: none;
-    z-index: 1;
+    display: none;
   }
 
-  .module {
-    height: 100%;
-    padding: var(--space-module-pad);
-    /* No border and no shadow. Depth is tonal — which is also what makes the
-     * clip-path chamfer safe, since there is no edge for it to eat. */
-  }
-
-  .module--raised {
-    background: var(--color-surface-raised);
-  }
-
-  .module--raised-2 {
-    background: var(--color-surface-raised-2);
-  }
-
-  /* Left-hand modules run under the seam without this. */
   .pad-seam {
-    padding-inline-end: var(--pad-seam-side);
-  }
-
-  .install {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-5);
-  }
-
-  .install__actions {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: var(--space-5);
-  }
-
-  .install__status {
-    min-height: 1.2em;
-    color: var(--color-accent);
-  }
-
-  .btn {
-    min-height: 48px;
-    padding-inline: 28px;
-    border: 0;
-    background: var(--color-accent);
-    color: var(--color-accent-contrast);
-    font-family: var(--font-body);
-    font-weight: 600;
-    font-size: var(--text-body);
-    cursor: pointer;
-  }
-
-  .btn:hover {
-    filter: brightness(1.12);
-  }
-
-  .btn-ghost {
-    min-height: var(--target-touch);
-    display: inline-flex;
-    align-items: center;
-    border-bottom: 1px solid var(--color-text);
-    color: var(--color-text);
-    font-weight: 500;
-    text-decoration: none;
-  }
-
-  .btn-ghost:hover {
-    color: var(--color-accent);
-    border-bottom-color: var(--color-accent);
-  }
-
-  .code {
-    display: flex;
-    align-items: stretch;
-    border: var(--border-width) solid var(--color-border);
-    background: var(--color-surface-sunk);
-  }
-
-  .code__text {
-    flex: 1;
-    min-width: 0;
-    overflow-x: auto;
-    padding: 14px var(--space-4);
-    white-space: nowrap;
-    line-height: var(--text-code-lh);
-  }
-
-  .code__copy {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: var(--target-touch);
-    border: 0;
-    border-left: var(--border-width) solid var(--color-border);
-    background: none;
-    color: var(--color-text);
-    cursor: pointer;
-  }
-
-  .code__copy:hover {
-    color: var(--color-accent);
-  }
-
-  .fig {
-    margin: 0;
-  }
-
-  .fig__rule {
-    color: var(--color-text);
-    font-weight: 600;
-  }
-
-  .fig__note {
-    margin-block: var(--space-2) var(--space-5);
-    font-size: var(--text-small);
-    line-height: var(--text-small-lh);
-    color: var(--color-text-muted);
-  }
-
-  .fig__row {
-    padding-block: var(--space-4);
-    border-block-start: var(--divider-width) solid var(--color-divider);
-  }
-
-  .fig__head {
-    display: flex;
-    align-items: baseline;
-    flex-wrap: wrap;
-    gap: var(--space-3);
-    margin-block-end: var(--space-2);
-  }
-
-  .fig__name {
-    font-family: var(--font-mono);
-    font-variation-settings: 'wdth' var(--mono-width-code);
-    font-size: var(--text-body);
-    color: var(--color-accent);
-  }
-
-  .fig__count {
-    color: var(--color-text-muted);
-  }
-
-  .fig__skills {
-    font-family: var(--font-mono);
-    font-variation-settings: 'wdth' var(--mono-width-code);
-    font-size: 0.8125rem;
-    line-height: 1.7;
-    color: var(--color-text-muted);
-    overflow-wrap: anywhere;
-  }
-
-  .card {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-4);
-  }
-
-  .card__meta {
-    color: var(--color-text-muted);
-  }
-
-  .card__name {
-    font-family: var(--font-mono);
-    font-variation-settings: 'wdth' var(--mono-width-code);
-    font-weight: 400;
-    color: var(--color-accent);
-  }
-
-  /* Below 48rem the interlock collapses to one column. The chamfer stays —
-   * it is the signature; the offset does not. */
-  @media (width < 48rem) {
-    .interlock__a,
-    .interlock__b {
-      grid-column: 1 / -1;
-    }
-
-    .seam {
-      display: none;
-    }
-
-    .pad-seam {
-      padding-inline-end: var(--space-module-pad);
-    }
+    padding-inline-end: var(--space-module-pad);
   }
 }
 </style>

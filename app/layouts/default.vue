@@ -58,147 +58,145 @@ useHead(() => ({
 </template>
 
 <style scoped>
-@layer components {
-  .shell {
-    display: flex;
-    flex-direction: column;
-    min-height: 100svh;
-  }
+.shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100svh;
+}
 
-  /* Off-screen until focused, then it lands in the top-left corner. */
-  .skip {
-    position: absolute;
-    left: -9999px;
-    top: var(--space-2);
-    z-index: 10;
-    padding: var(--space-3) var(--space-4);
-    background: var(--color-accent);
-    color: var(--color-accent-contrast);
-    font-family: var(--font-mono);
-    font-size: var(--text-label);
-    letter-spacing: var(--text-label-ls);
-    text-transform: uppercase;
-    text-decoration: none;
-  }
+/* Off-screen until focused, then it lands in the top-left corner. */
+.skip {
+  position: absolute;
+  left: -9999px;
+  top: var(--space-2);
+  z-index: 10;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-accent);
+  color: var(--color-accent-contrast);
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  letter-spacing: var(--text-label-ls);
+  text-transform: uppercase;
+  text-decoration: none;
+}
 
-  .skip:focus-visible {
-    left: var(--space-2);
-  }
+.skip:focus-visible {
+  left: var(--space-2);
+}
 
-  .header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: var(--space-4);
-    padding: var(--space-3) var(--space-gutter);
-    border-bottom: var(--divider-width) solid var(--color-divider);
-  }
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-gutter);
+  border-bottom: var(--divider-width) solid var(--color-divider);
+}
 
-  .wordmark {
-    display: flex;
-    align-items: baseline;
-    gap: var(--space-3);
-    min-height: var(--target-touch);
-    color: var(--color-text);
-    text-decoration: none;
-  }
+.wordmark {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  min-height: var(--target-touch);
+  color: var(--color-text);
+  text-decoration: none;
+}
 
-  .wordmark__name {
-    font-family: var(--font-display);
-    font-weight: 700;
-    font-variation-settings: 'wdth' 85;
-    font-size: 1.3rem;
-    letter-spacing: 0.06em;
-  }
+.wordmark__name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-variation-settings: 'wdth' 85;
+  font-size: 1.3rem;
+  letter-spacing: 0.06em;
+}
 
-  .wordmark__kanji {
-    font-family: var(--font-mono);
-    font-variation-settings: 'wdth' var(--mono-width-code);
-    font-size: var(--text-small);
-    color: var(--color-text-muted);
-  }
+.wordmark__kanji {
+  font-family: var(--font-mono);
+  font-variation-settings: 'wdth' var(--mono-width-code);
+  font-size: var(--text-small);
+  color: var(--color-text-muted);
+}
 
-  .nav {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: var(--space-2);
-  }
+.nav {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
 
-  .nav__link,
-  .lang,
-  .theme {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: var(--target-touch);
-    font-family: var(--font-mono);
-    font-variation-settings: 'wdth' var(--mono-width-label);
-    font-size: var(--text-label);
-    line-height: var(--text-label-lh);
-    letter-spacing: var(--text-label-ls);
-    font-weight: 500;
-    text-transform: uppercase;
-    text-decoration: none;
-    color: var(--color-text);
-  }
+.nav__link,
+.lang,
+.theme {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--target-touch);
+  font-family: var(--font-mono);
+  font-variation-settings: 'wdth' var(--mono-width-label);
+  font-size: var(--text-label);
+  line-height: var(--text-label-lh);
+  letter-spacing: var(--text-label-ls);
+  font-weight: 500;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--color-text);
+}
 
-  .nav__link {
-    padding: 0 var(--space-4);
-    border-bottom: 2px solid transparent;
-    transition: border-color var(--motion-quick) var(--ease-move);
-  }
+.nav__link {
+  padding: 0 var(--space-4);
+  border-bottom: 2px solid transparent;
+  transition: border-color var(--motion-quick) var(--ease-move);
+}
 
-  .nav__link:hover {
-    color: var(--color-accent);
-  }
+.nav__link:hover {
+  color: var(--color-accent);
+}
 
-  /* aria-current is set by NuxtLink on the active route. */
-  .nav__link.router-link-exact-active {
-    border-bottom-color: var(--color-accent);
-  }
+/* aria-current is set by NuxtLink on the active route. */
+.nav__link.router-link-exact-active {
+  border-bottom-color: var(--color-accent);
+}
 
-  .lang,
-  .theme {
-    min-width: var(--target-touch);
-    padding: 0 var(--space-3);
-    border: var(--border-width) solid var(--color-border);
-    background: none;
-    cursor: pointer;
-    font-weight: 600;
-  }
+.lang,
+.theme {
+  min-width: var(--target-touch);
+  padding: 0 var(--space-3);
+  border: var(--border-width) solid var(--color-border);
+  background: none;
+  cursor: pointer;
+  font-weight: 600;
+}
 
-  .lang:hover,
-  .theme:hover {
-    color: var(--color-accent);
-    border-color: var(--color-accent);
-  }
+.lang:hover,
+.theme:hover {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+}
 
-  .main {
-    flex: 1;
-    width: 100%;
-    max-width: var(--measure-grid);
-    margin-inline: auto;
-    padding-inline: var(--space-gutter);
-    padding-block-end: var(--space-section-block);
-  }
+.main {
+  flex: 1;
+  width: 100%;
+  max-width: var(--measure-grid);
+  margin-inline: auto;
+  padding-inline: var(--space-gutter);
+  padding-block-end: var(--space-section-block);
+}
 
-  .footer {
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: var(--space-4);
-    padding: var(--space-5) var(--space-gutter);
-    border-top: var(--divider-width) solid var(--color-divider);
-    font-family: var(--font-mono);
-    font-variation-settings: 'wdth' var(--mono-width-label);
-    font-size: var(--text-label);
-    line-height: var(--text-label-lh);
-    letter-spacing: var(--text-label-ls);
-    font-weight: 500;
-    text-transform: uppercase;
-    color: var(--color-text-muted);
-  }
+.footer {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  padding: var(--space-5) var(--space-gutter);
+  border-top: var(--divider-width) solid var(--color-divider);
+  font-family: var(--font-mono);
+  font-variation-settings: 'wdth' var(--mono-width-label);
+  font-size: var(--text-label);
+  line-height: var(--text-label-lh);
+  letter-spacing: var(--text-label-ls);
+  font-weight: 500;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
 }
 </style>

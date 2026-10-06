@@ -1,6 +1,6 @@
 /* Cascade layer order for the whole site. Declared here because tokens.css
  * loads first; later files only append to layers named in this list. */
-@layer tokens, reset, base, components, utilities;
+@layer tokens, reset, base, utilities;
 
 /* Design tokens. Every value traces to DESIGN.md — change that file first.
  *
