@@ -166,7 +166,7 @@ useSeoMeta({
 
 .rule {
   margin-block-start: clamp(2.5rem, 6vh, 4.5rem);
-  height: 1px;
+  height: var(--divider-width);
   background: var(--color-divider);
 }
 
@@ -196,8 +196,8 @@ useSeoMeta({
   position: relative;
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
-  row-gap: 2px;
-  margin-block-start: 2px;
+  row-gap: var(--seam-width);
+  margin-block-start: var(--seam-width);
 }
 
 .interlock__a {
@@ -259,8 +259,8 @@ useSeoMeta({
 }
 
 .btn {
-  min-height: 48px;
-  padding-inline: 28px;
+  min-height: var(--space-7);
+  padding-inline: var(--space-6);
   border: 0;
   background: var(--color-accent);
   color: var(--color-accent-contrast);
@@ -278,7 +278,7 @@ useSeoMeta({
   min-height: var(--target-touch);
   display: inline-flex;
   align-items: center;
-  border-bottom: 1px solid var(--color-text);
+  border-bottom: var(--border-width) solid var(--color-text);
   color: var(--color-text);
   font-weight: 500;
   text-decoration: none;
@@ -300,7 +300,7 @@ useSeoMeta({
   flex: 1;
   min-width: 0;
   overflow-x: auto;
-  padding: 14px var(--space-4);
+  padding: var(--space-3) var(--space-4);
   white-space: nowrap;
   line-height: var(--text-code-lh);
 }

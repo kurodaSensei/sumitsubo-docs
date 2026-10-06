@@ -133,7 +133,7 @@ useSeoMeta({
 .search__input {
   flex: 1;
   min-width: 0;
-  min-height: 52px;
+  min-height: var(--space-7);
   border: 0;
   outline: 0;
   background: none;
@@ -175,7 +175,7 @@ useSeoMeta({
   position: relative;
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
-  row-gap: 2px;
+  row-gap: var(--seam-width);
   margin-block-start: var(--space-7);
 }
 

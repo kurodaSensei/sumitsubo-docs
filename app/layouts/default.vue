@@ -145,6 +145,8 @@ useHead(() => ({
 
 .nav__link {
   padding: 0 var(--space-4);
+  /* 2px, not --border-width: this is the active-page indicator, which has to
+     read as heavier than a hairline. */
   border-bottom: 2px solid transparent;
   transition: border-color var(--motion-quick) var(--ease-move);
 }
