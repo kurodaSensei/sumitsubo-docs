@@ -1,7 +1,7 @@
 ---
 title: "/sumi:feature"
 description: "Empieza (o retoma) una funcionalidad T2: explora, refuta la incertidumbre, haz las preguntas de nivel decisión, estima líneas y rebanadas, y escribe el expediente único en .sumi/tasks/."
-source-hash: "23962214354ee783"
+source-hash: "52853ba844658f0d"
 ---
 
 Petición: $ARGUMENTS
@@ -17,4 +17,5 @@ Sigue `sumi:workflow`.
 4. **Pregunta** lo que quede en un único bloque (de opción múltiple cuando se pueda), cada pregunta con un valor por defecto recomendado y su compromiso. Si el usuario no está, toma los valores por defecto y regístralos como decisiones.
 5. **Decide y estima**: para las decisiones de arquitectura, modelo de datos o migración, consulta a `sumi:architect` (con los hechos que trajeron los scouts) y registra su decisión. Estima las líneas cambiadas por fase. Si el total supera el presupuesto de líneas de `.sumi/config.json` (400 por defecto), divídelo en rebanadas que dejen el código funcionando cada una; propón un PR único, PRs encadenados o rebanadas directas a main.
 6. **Escribe** `.sumi/tasks/<yyyy-mm-dd>-<slug>.md` a partir de `${CLAUDE_PLUGIN_ROOT}/templates/feature.md`: objetivo, por qué, alcance, no-objetivos, restricciones, decisiones, tareas por fases, criterios de aceptación verificables (incluye siempre los de accesibilidad y rendimiento) y la primera entrada del registro de proceso.
-7. Refleja las tareas en la lista de tareas. Presenta el plan brevemente y empieza por la primera rebanada, salvo que el cambio sea de alto riesgo o irreversible: entonces espera luz verde.
+7. Refleja las tareas en la lista de tareas.
+8. **Informa** siguiendo `sumi:output`. Asunto: el identificador de la funcionalidad y la ruta de su expediente. Cuerpo: las fases con sus líneas estimadas y la forma de entrega elegida, más las decisiones registradas en el paso 4 y todo lo que quede explícitamente fuera del alcance. Siguiente paso: la primera rebanada — o, cuando el cambio sea de alto riesgo o irreversible, la luz verde que estás esperando. Empieza esa rebanada de inmediato salvo que estés esperando.

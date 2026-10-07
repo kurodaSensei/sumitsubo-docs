@@ -1,7 +1,7 @@
 ---
 title: "/sumi-design:deps"
 description: "Verifica que los plugins acompañantes que Sumitsubo orquesta estén instalados y activados, y encuentra copias duplicadas que hayan quedado sueltas (skills sueltas o de otros marketplaces) y que convenga eliminar."
-source-hash: "c086869484191c33"
+source-hash: "5c8b887bd52abde2"
 ---
 
 Los acompañantes están declarados como dependencias de `sumi` y de `sumi-design`, así que instalar esos plugins los instala. Este comando comprueba el resultado y despeja el terreno.
@@ -14,5 +14,5 @@ Los acompañantes están declarados como dependencias de `sumi` y de `sumi-desig
    - Los mismos proyectos instalados desde otros marketplaces (`impeccable@impeccable`, `ponytail@ponytail`, `superpowers@claude-plugins-official`).
    - Copias sueltas en `~/.claude/skills/` o `.claude/skills/` (carpetas o enlaces simbólicos a `~/.agents/skills/`) con nombres como los de los acompañantes (`design-taste-frontend`, `minimalist-ui`, `industrial-brutalist-ui`, `high-end-visual-design`, `redesign-existing-projects`, `emil-design-eng`, `review-animations`, `animation-vocabulary`, `impeccable`), y agentes `impeccable-*` sueltos en `~/.claude/agents/`.
    - Plugins de flujo de trabajo que inyecten una metodología rival al arrancar la sesión (por ejemplo el plugin completo de superpowers) o una voz de diseño rival (`frontend-design`).
-4. **Informa** con una tabla (elemento · dónde · recomendación) y da los comandos exactos: `claude plugin uninstall <name>@<marketplace>`, `claude plugin marketplace remove <name>`, y el `mv` de las skills sueltas a una carpeta de archivo (nunca borrarlas). No ejecutes nada destructivo sin el visto bueno explícito del usuario.
+4. **Informa** siguiendo `sumi:output`. Asunto: el número de compañeros, presentes sobre esperados. Cuerpo: una tabla de elemento · dónde · recomendación, con los comandos exactos — `claude plugin uninstall <name>@<marketplace>`, `claude plugin marketplace remove <name>`, y el `mv` de las skills sueltas a una carpeta de archivo, nunca un borrado. Siguiente paso: el único comando que arregla la fila más importante. No ejecutes nada destructivo sin el visto bueno explícito del usuario.
 5. Recuérdale al usuario que reinicie Claude Code después de los cambios.

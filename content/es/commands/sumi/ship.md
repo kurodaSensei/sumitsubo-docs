@@ -1,7 +1,7 @@
 ---
 title: "/sumi:ship"
 description: "Control final antes del PR: verifica los chequeos, el recibo de revisión y los criterios de aceptación, y después redacta los commits y la descripción del PR (único o encadenado)."
-source-hash: "54ce5abb2e5fda41"
+source-hash: "baa0fc992d2715ab"
 ---
 
 Funcionalidad: $ARGUMENTS (por defecto: el único archivo `active` en `.sumi/tasks/`).
@@ -15,3 +15,4 @@ Funcionalidad: $ARGUMENTS (por defecto: el único archivo `active` en `.sumi/tas
 7. **Borrador del PR.** Rellena `${CLAUDE_PLUGIN_ROOT}/templates/pull-request.md` a partir del expediente y del recibo (evidencia, riesgo, reversión). Para `delivery: chained-prs`, redacta una descripción por rebanada con los enlaces de la cadena, más una descripción final de PR de seguimiento.
 8. No hagas push ni abras el PR tú mismo salvo que el usuario lo pida; dale los comandos exactos (`git push -u origin <branch>`, `gh pr create --fill` o el archivo del cuerpo).
 9. Actualiza el expediente de funcionalidad: estado, entrada en el registro de proceso y seguimientos.
+10. **Informa** siguiendo `sumi:output`. Asunto: la rama y el identificador de la funcionalidad. Cuerpo: una tabla de criterios de aceptación × evidencia, marcando como `open` todo criterio que siga abierto; debajo, los checks que se ejecutaron con sus resultados, y las notas `ponytail:` reunidas en el paso 6. Siguiente paso: los comandos exactos de push y de PR del paso 8 — o `/sumi:review` cuando el paso 3 no haya encontrado ningún recibo quemado.
