@@ -52,7 +52,24 @@ function parse(raw, where) {
   const meta = {};
   for (const line of m[1].split(/\r?\n/)) {
     const kv = line.match(/^([a-zA-Z-]+):\s*(.*)$/);
-    if (kv) meta[kv[1]] = kv[2].trim().replace(/^["'](.*)["']$/, '$1');
+    if (!kv) continue;
+    const v = kv[2].trim();
+
+    // A double-quoted value is JSON, by construction: `esc` below writes it
+    // with JSON.stringify and the translation sources are hand-written in the
+    // same shape. Reading it with anything less drops the escapes -- stripping
+    // the outer quotes with a regex left the backslash of every \" inside the
+    // value, and five Spanish skill descriptions reached production reading
+    // `\"feature\"`, in the lede on the page as well as in og:description.
+    // The English sources are plain unquoted scalars, which is why the bug was
+    // one-sided and survived the code-parity check: a description is prose, not
+    // a code span.
+    if (v.startsWith('"')) {
+      try { meta[kv[1]] = JSON.parse(v); }
+      catch { die(`${where}: ${kv[1]} is not a valid double-quoted value: ${v}`); }
+    } else {
+      meta[kv[1]] = v.replace(/^'(.*)'$/, '$1');
+    }
   }
   return { meta, body: m[2].trim() };
 }
