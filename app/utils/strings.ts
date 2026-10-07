@@ -64,10 +64,10 @@ const en: Strings = {
 
   manifesto: 'It marks the true line before any cut is made.',
   lede:
-    "Sumitsubo is the Japanese carpenter's ink line. This framework does the same — direction first, then the work. It encodes how a senior design engineer works: process that scales with the request, code quality without slop, accessibility and performance as acceptance criteria, and — above all — design that doesn't look like every other AI-generated site.",
+    "Sumitsubo is the Japanese carpenter's ink line: snapped once, before any cut. This framework works the same way. A one-line fix does not get a written plan; a migration does not get improvised. Accessibility and performance have to pass, not get added at the end. And the look is settled before anything is drawn, so it does not come out like everything else a model has made.",
   seoTitle: 'Sumitsubo — direction first, then the work',
   seoDescription:
-    'An opinionated AI framework for web design and development with Claude Code: engineering quality, accessibility, performance and design without AI slop.',
+    'A framework for building websites with Claude Code. Direction gets decided first, then the work. Accessibility and performance are requirements, not polish.',
   install: 'Install the plugin',
   installAction: 'Copy the install command',
   seeSkills: 'See the skills',
@@ -91,7 +91,7 @@ const en: Strings = {
   refSeoDescription: (c) =>
     `${c.commands} commands and ${c.skills} skills across ${c.plugins} plugins.`,
   filterLabel: 'Filter',
-  filterPlaceholder: 'Search the pages',
+  filterPlaceholder: 'Search for a page',
   clear: 'Clear the filter',
   noResults: (q) => `No results for «${q}»`,
   commands: 'Commands',
@@ -101,7 +101,7 @@ const en: Strings = {
     `Reference content is generated from the framework repo. ${n} page${n === 1 ? '' : 's'} ` +
     `${n === 1 ? 'is' : 'are'} not translated yet and ${n === 1 ? 'is' : 'are'} shown in English, marked as such.`,
   untranslated: 'This page has not been translated yet. It is shown in English.',
-  staleTranslation: 'The English source of this page changed after this translation was made, so parts of it may be out of date.'
+  staleTranslation: 'This translation was made from an earlier version of the English page. Some of it may not match any more.'
 }
 
 const es: Strings = {
@@ -117,10 +117,10 @@ const es: Strings = {
   // the whole site, and it is not re-translated per implementation.
   manifesto: 'Marca la línea antes de cortar.',
   lede:
-    'Sumitsubo es el cordel de tinta del carpintero japonés. Este framework hace lo mismo: primero la dirección, después el trabajo. Codifica cómo trabaja un ingeniero de diseño senior: proceso que escala con la petición, calidad de código sin relleno, accesibilidad y rendimiento como criterios de aceptación y, por encima de todo, diseño que no se parece a cualquier otro sitio generado por IA.',
+    'Sumitsubo es el cordel de tinta del carpintero japonés: se marca una vez, antes de cortar. Este framework funciona igual. Un arreglo de una línea no se lleva un plan escrito; una migración no se improvisa. La accesibilidad y el rendimiento hay que aprobarlos, no se añaden al final. Y el aspecto se decide antes de dibujar nada, para que no acabe pareciéndose a todo lo demás que ha hecho un modelo.',
   seoTitle: 'Sumitsubo — primero la dirección, después el trabajo',
   seoDescription:
-    'Un framework de IA opinado para diseño y desarrollo web con Claude Code: calidad de ingeniería, accesibilidad, rendimiento y diseño sin relleno.',
+    'Un framework para construir sitios web con Claude Code. Primero se decide la dirección, después se trabaja. La accesibilidad y el rendimiento son requisitos, no retoques.',
   install: 'Instalar el plugin',
   installAction: 'Copiar el comando de instalación',
   seeSkills: 'Ver los skills',
@@ -144,7 +144,7 @@ const es: Strings = {
   refSeoDescription: (c) =>
     `${c.commands} comandos y ${c.skills} skills repartidos en ${c.plugins} plugins.`,
   filterLabel: 'Filtrar',
-  filterPlaceholder: 'Buscar entre las páginas',
+  filterPlaceholder: 'Buscar una página',
   clear: 'Limpiar el filtro',
   noResults: (q) => `Sin resultados para «${q}»`,
   commands: 'Comandos',
@@ -154,7 +154,7 @@ const es: Strings = {
     `El contenido de referencia se genera desde el repo del framework. ${n} página${n === 1 ? '' : 's'} ` +
     `${n === 1 ? 'sigue' : 'siguen'} sin traducir y se ${n === 1 ? 'muestra' : 'muestran'} en inglés, señalada${n === 1 ? '' : 's'} como tal.`,
   untranslated: 'Esta página todavía no está traducida. Se muestra en inglés.',
-  staleTranslation: 'La fuente en inglés de esta página cambió después de hacerse esta traducción, así que puede haber partes desactualizadas.'
+  staleTranslation: 'Esta traducción se hizo con una versión anterior de la página en inglés. Puede que algo ya no coincida.'
 }
 
 export const STRINGS: Record<Locale, Strings> = { en, es }
