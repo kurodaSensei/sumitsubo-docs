@@ -9,9 +9,10 @@ const index = JSON.parse(
 ) as { entries: { kind: string, plugin: string, name: string }[] }
 
 const pages = ['/', '/reference', ...index.entries.map((e) => `/${e.kind}/${e.plugin}/${e.name}`)]
-// English sits at `/`, Spanish at `/es/`. Both are prerendered; the reference
-// content inside them is English either way.
-const routes = [...pages, ...pages.map((p) => (p === '/' ? '/es' : `/es${p}`))]
+// Spanish sits at `/`, English at `/en/`. Both are prerendered. Mirrors
+// DEFAULT_LOCALE in app/utils/routing.ts — the last assertion in
+// scripts/check-routes.mjs is what notices if the two drift apart.
+const routes = [...pages, ...pages.map((p) => (p === '/' ? '/en' : `/en${p}`))]
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
@@ -22,7 +23,9 @@ export default defineNuxtConfig({
 
   app: {
     head: {
-      htmlAttrs: { lang: 'en' },
+      // The default locale. The layout overrides this per route; this is what
+      // an error page and anything rendered outside a route get.
+      htmlAttrs: { lang: 'es' },
 
       // Applies a stored theme before first paint. Without it the page renders
       // with the system preference and only switches once the bundle has
@@ -59,6 +62,14 @@ export default defineNuxtConfig({
         }
       ]
     }
+  },
+
+  // `/es/*` was the Spanish home until this commit, and those URLs are already
+  // out in the world. The old English URLs cannot be redirected — they ARE the
+  // new Spanish ones — but these can, so they are.
+  routeRules: {
+    '/es': { redirect: { to: '/', statusCode: 301 } },
+    '/es/**': { redirect: { to: '/**', statusCode: 301 } }
   },
 
   nitro: {

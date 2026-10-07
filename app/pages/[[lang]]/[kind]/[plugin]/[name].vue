@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { isKindParam, isLocaleParam } from '~/utils/routing'
+import { contentPrefix, isKindParam, isLocaleParam } from '~/utils/routing'
 import { previewDescription } from '~/utils/strings'
 
 definePageMeta({
@@ -39,8 +39,9 @@ interface Page {
 // The locale is part of the key. A page with no translation for it falls back
 // to English server-side and says so in `locale`, so the request never 404s and
 // the page never has to guess what it got.
-const prefix = locale.value === 'en' ? '' : `${locale.value}/`
-const src = `/api/page/${prefix}${route.params.kind}/${route.params.plugin}/${route.params.name}`
+// The CONTENT prefix, which is not the URL prefix. English has none here and
+// Spanish does, the reverse of the addresses above.
+const src = `/api/page/${contentPrefix(locale.value)}${route.params.kind}/${route.params.plugin}/${route.params.name}`
 
 // `transform` drops `html` before the result is stored, so the body never
 // enters this page's payload — <PageBody> renders it on the server instead.

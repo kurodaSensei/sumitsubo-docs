@@ -1,5 +1,6 @@
 import { computed } from 'vue'
 import index from '~~/content/index.json'
+import { SOURCE_LOCALE } from '~/utils/routing'
 
 export interface Entry {
   kind: 'skills' | 'commands'
@@ -28,10 +29,10 @@ export interface Plugin {
  * English under `<html lang="es">` with no `lang` of its own is WCAG 3.1.2.
  */
 export function describe(plugin: Plugin, locale: string) {
-  const translated = locale === 'en' ? null : plugin.translations?.[locale]
+  const translated = locale === SOURCE_LOCALE ? null : plugin.translations?.[locale]
   return translated
     ? { text: translated, lang: undefined }
-    : { text: plugin.description, lang: locale === 'en' ? undefined : 'en' }
+    : { text: plugin.description, lang: locale === SOURCE_LOCALE ? undefined : SOURCE_LOCALE }
 }
 
 /**
@@ -71,7 +72,9 @@ export function useContentIndex() {
 
   /** How many reference pages are still English in this locale. */
   const untranslated = (locale: string) =>
-    locale === 'en' ? 0 : counts.pages - ((counts.translated as Record<string, number>)[locale] ?? 0)
+    locale === SOURCE_LOCALE
+      ? 0
+      : counts.pages - ((counts.translated as Record<string, number>)[locale] ?? 0)
 
   return { entries, plugins, counts, core, stack, commands, groups, skillsOf, hrefOf, untranslated, sha: index.sha }
 }

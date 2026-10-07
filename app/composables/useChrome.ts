@@ -30,7 +30,7 @@ export function useChrome() {
     return localePath(other.value, stripped) + (route.hash || '')
   })
 
-  /** Prefix a path for the current locale: '/reference' -> '/es/reference'. */
+  /** Prefix a path for the current locale: '/reference' -> '/en/reference'. */
   const path = (p: string) => localePath(locale.value, p)
 
   // `null` means "no explicit choice yet", which is what lets the CSS media

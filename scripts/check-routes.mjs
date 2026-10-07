@@ -28,8 +28,10 @@ const index = JSON.parse(readFileSync(join(ROOT, 'content', 'index.json'), 'utf8
 // of this file tried to strip them with regexes and mangled
 // `(LOCALES as readonly string[])` into a syntax error. Hand-rolling a
 // TypeScript parser to run five assertions is not a trade worth making.
-const { localePath, localeOf, isLocaleParam, isKindParam, stripLocale } =
-  await import(pathToFileURL(join(ROOT, 'app', 'utils', 'routing.ts')).href);
+const {
+  localePath, localeOf, isLocaleParam, isKindParam, stripLocale,
+  DEFAULT_LOCALE, SOURCE_LOCALE, contentPrefix
+} = await import(pathToFileURL(join(ROOT, 'app', 'utils', 'routing.ts')).href);
 const { previewDescription } =
   await import(pathToFileURL(join(ROOT, 'app', 'utils', 'strings.ts')).href);
 const hrefOf = (e) => `/${e.kind}/${e.plugin}/${e.name}`;
@@ -37,19 +39,38 @@ const hrefOf = (e) => `/${e.kind}/${e.plugin}/${e.name}`;
 // What the build prerenders. Mirrors nuxt.config.ts; if that file changes shape,
 // the last assertion below is what notices.
 const pages = ['/', '/reference', ...index.entries.map(hrefOf)];
-const prerendered = new Set([...pages, ...pages.map((p) => (p === '/' ? '/es' : `/es${p}`))]);
+const prerendered = new Set([...pages, ...pages.map((p) => (p === '/' ? '/en' : `/en${p}`))]);
 
 let n = 0;
 const check = (name, fn) => {
   try { fn(); n++; } catch (e) { console.error(`FAIL ${name}\n  ${e.message}`); process.exitCode = 1; }
 };
 
+// The URL default and the content source are different locales now. Asserting
+// they disagree is not pedantry: for the whole life of the site before this
+// they were both English, so `locale === 'en'` meant either and every call site
+// read whichever one the author happened to have in mind. If someone sets them
+// back to the same value, every one of those call sites silently stops saying
+// what it means and nothing else here would catch it.
+check('the URL default and the content source are held apart', () => {
+  assert.equal(DEFAULT_LOCALE, 'es', 'Spanish is served at the root');
+  assert.equal(SOURCE_LOCALE, 'en', 'the framework files, and the fallback, stay English');
+  assert.notEqual(DEFAULT_LOCALE, SOURCE_LOCALE,
+    'these are different namespaces and must not be collapsed into one');
+
+  // The content tree did not move with the URLs. English keeps the root there.
+  assert.equal(contentPrefix(SOURCE_LOCALE), '', 'the source locale is the unprefixed tree');
+  assert.equal(contentPrefix('es'), 'es/', 'Spanish content lives under es/ whatever its URL is');
+});
+
 check('locale and kind guards accept exactly what the routes use', () => {
-  assert.equal(localeOf(undefined), 'en', 'an omitted prefix means English');
-  assert.equal(localeOf('es'), 'es');
-  assert.equal(localeOf(''), 'en');
+  assert.equal(localeOf(undefined), 'es', 'an omitted prefix now means Spanish');
+  assert.equal(localeOf(''), 'es');
+  assert.equal(localeOf('en'), 'en');
   assert.ok(isLocaleParam(''), 'an omitted lang segment is valid');
-  assert.ok(isLocaleParam('es'));
+  assert.ok(isLocaleParam('en'));
+  assert.ok(!isLocaleParam('es'),
+    '/es/* is gone — Spanish is at the root, so that prefix must 404, not soft-200');
   assert.ok(!isLocaleParam('fr'), 'an unknown locale must 404, not render a soft 200');
   assert.ok(!isLocaleParam('bogus'));
   assert.ok(isKindParam('skills') && isKindParam('commands'));
@@ -57,10 +78,10 @@ check('locale and kind guards accept exactly what the routes use', () => {
 });
 
 check('localePath produces the prerendered root, not a trailing-slash variant', () => {
-  assert.equal(localePath('en', '/'), '/');
-  assert.equal(localePath('es', '/'), '/es', 'must be /es — /es/ is not a prerendered route');
-  assert.equal(localePath('en', '/reference'), '/reference');
-  assert.equal(localePath('es', '/reference'), '/es/reference');
+  assert.equal(localePath('es', '/'), '/');
+  assert.equal(localePath('en', '/'), '/en', 'must be /en — /en/ is not a prerendered route');
+  assert.equal(localePath('es', '/reference'), '/reference');
+  assert.equal(localePath('en', '/reference'), '/en/reference');
 });
 
 check('every link the reference index renders is a route the build emits', () => {
@@ -87,13 +108,13 @@ check('the counts on screen match the content index', () => {
 // read LOCALES, so this is what catches a prefix that strips wrong — the kind
 // of bug that only shows up as a 404 after you click the switch.
 check('the language switch lands on a prerendered route from every page', () => {
-  assert.equal(stripLocale('/es'), '/', 'the Spanish root must strip to the root');
+  assert.equal(stripLocale('/en'), '/', 'the English root must strip to the root');
   assert.equal(stripLocale('/'), '/');
   assert.equal(stripLocale('/reference'), '/reference', 'an unprefixed path is untouched');
-  assert.equal(stripLocale('/essays'), '/essays', 'a path merely starting with a locale is not prefixed');
+  assert.equal(stripLocale('/entries'), '/entries', 'a path merely starting with a locale is not prefixed');
 
   for (const from of prerendered) {
-    const to = localePath(localeOf(from.split('/')[1]) === 'es' ? 'en' : 'es', stripLocale(from));
+    const to = localePath(localeOf(from.split('/')[1]) === 'en' ? 'es' : 'en', stripLocale(from));
     assert.ok(prerendered.has(to), `switching language on ${from} goes to ${to}, which is not prerendered`);
   }
 });

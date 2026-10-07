@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted } from 'vue'
-import { ALL_LOCALES, absolute, localePath, stripLocale } from '~/utils/routing'
+import { ALL_LOCALES, DEFAULT_LOCALE, absolute, localePath, stripLocale } from '~/utils/routing'
 
 const { locale, t, path, otherLocalePath, applied, toggleTheme, restoreTheme } = useChrome()
 const route = useRoute()
@@ -33,7 +33,7 @@ useHead(() => ({
       hreflang: loc,
       href: absolute(localePath(loc, base.value))
     })),
-    { rel: 'alternate', hreflang: 'x-default', href: absolute(localePath('en', base.value)) },
+    { rel: 'alternate', hreflang: 'x-default', href: absolute(localePath(DEFAULT_LOCALE, base.value)) },
 
     // The SVG mark themes itself with prefers-color-scheme; the .ico is the
     // fallback for anything that will not take an SVG. Until now the site
