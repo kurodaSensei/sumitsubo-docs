@@ -78,7 +78,9 @@ The decision splits cleanly in two: *acquisition* (above) and *transform* (`scri
 
 There is **no photography, no product shots, no logo and no illustration**, and there will be none. Visual content is made from type, rules and orthographic joint diagrams.
 
-The site is **bilingual EN/ES**, chrome and content both. Spanish runs ~20% longer and needs full diacritic coverage; measured across the 42 pages it came out between 13% and 31%. The framework's own files stay in English on purpose — models follow instructions better that way — while Claude always answers the user in their language. Translating the site does not weaken that: what Claude reads is still English.
+The site is **bilingual EN/ES**, chrome and content both, and **Spanish is the default**: it is served at `/` with no prefix and English sits at `/en/`. Spanish runs ~20% longer and needs full diacritic coverage; measured across the 42 pages it came out between 13% and 31%. The framework's own files stay in English on purpose — models follow instructions better that way — while Claude always answers the user in their language. Translating the site does not weaken that: what Claude reads is still English.
+
+The default locale and the source locale are **different locales, and the code keeps them apart**. `DEFAULT_LOCALE` is Spanish and decides URLs; `SOURCE_LOCALE` is English and decides which file under `server/assets/pages/` answers, what an untranslated page falls back to, and which body gets a `lang` of its own. They were both English until the default moved, so a single `locale === 'en'` used to mean either one — the reason a check now asserts they disagree. Spanish content keeps its `es/` folder in the content tree even though it has no prefix in a URL.
 
 ## Constraints
 
