@@ -1,3 +1,5 @@
+import { LOCALES } from '~/utils/routing'
+
 /**
  * Serves one reference page's rendered content from `server/assets/pages/`.
  *
@@ -10,9 +12,19 @@
  * It costs nothing at runtime on a static host: `nuxt generate` resolves this
  * during prerender and inlines the result into each page's payload, so client
  * navigation reads the payload and never calls this.
+ *
+ * The slug may carry a leading locale — `es/skills/sumi/workflow`. English is
+ * the source and has no prefix. A locale with no translation for that page
+ * falls back to English rather than 404ing, and the response says which locale
+ * actually answered, so the page can declare the fallback instead of presenting
+ * English as though it were Spanish.
  */
 export default defineEventHandler(async (event) => {
-  const slug = getRouterParam(event, 'slug') ?? ''
+  const raw = getRouterParam(event, 'slug') ?? ''
+
+  const parts = raw.split('/')
+  const locale = (LOCALES as readonly string[]).includes(parts[0] ?? '') ? parts.shift()! : 'en'
+  const slug = parts.join('/')
 
   // The slug lands in a filesystem key, so anything but the exact shape
   // `<kind>/<plugin>/<name>` is rejected rather than normalised.
@@ -24,8 +36,15 @@ export default defineEventHandler(async (event) => {
   // server/assets/pages/skills/sumi/workflow.json is the key
   // `pages:skills:sumi:workflow.json`. Verified against getKeys() rather than
   // assumed — the obvious guess, `assets:pages`, is empty.
-  const page = await useStorage('assets:server').getItem(`pages:${slug.replaceAll('/', ':')}.json`)
+  const store = useStorage('assets:server')
+  const key = (loc: string) =>
+    `pages:${loc === 'en' ? '' : `${loc}:`}${slug.replaceAll('/', ':')}.json`
+
+  const translated = locale === 'en' ? null : await store.getItem(key(locale))
+  const page = translated ?? await store.getItem(key('en'))
   if (!page) throw createError({ statusCode: 404, statusMessage: 'Page not found' })
 
-  return page
+  // `locale` is what answered, not what was asked for. The caller needs the
+  // difference: it is what decides whether the body gets a `lang` declaration.
+  return { ...(page as object), locale: translated ? locale : 'en' }
 })

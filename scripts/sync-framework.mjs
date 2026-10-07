@@ -15,6 +15,7 @@
 
 import { marked } from 'marked';
 import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { mkdtempSync, rmSync, readdirSync, readFileSync, writeFileSync, mkdirSync, existsSync, statSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, dirname, relative } from 'node:path';
@@ -23,6 +24,9 @@ import { fileURLToPath } from 'node:url';
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = join(ROOT, 'content');
 const PUB = join(ROOT, 'server', 'assets', 'pages');
+// Locales with a translated content tree at content/<locale>/. English is the
+// source and lives at the root of content/, so it is not listed here.
+const TRANSLATIONS = ['es'];
 const REPO = 'https://github.com/kurodaSensei/sumitsubo.git';
 const EXPECTED = { skills: 33, commands: 9, plugins: 6 };
 const dryRun = process.argv.includes('-n') || process.argv.includes('--dry-run');
@@ -94,7 +98,7 @@ function headingText(inner) {
  * All of it has to happen here rather than in the component, because the body
  * is injected with `v-html` and the SFC never sees these elements as nodes.
  */
-function postProcess(html, where) {
+function postProcess(html, where, reuseIds) {
   let n = 0;
   // Tables are the densest thing in this content (up to 6 columns) and were
   // overflowing the viewport on every detail page — 1.92x at 320px on the worst
@@ -160,12 +164,25 @@ function postProcess(html, where) {
   // shadowed in getElementById and its link would silently jump elsewhere.
   const taken = new Set(['main', 'q', 'toc-title']);
   const toc = [];
+  let h = 0;
   wrapped = wrapped.replace(/<h2>([\s\S]*?)<\/h2>/g, (_m, inner) => {
     const text = headingText(inner);
-    const id = slugify(text, taken);
+    // A translated page reuses the English ids rather than slugifying its own.
+    // An id is an identifier, not prose: keeping it means a deep link shared
+    // between locales still lands, and `/es/...#principles` under a heading
+    // reading "Principios" is correct. It also makes the count a real
+    // invariant — see the guard in emitLocale.
+    const id = reuseIds ? reuseIds[h] : slugify(text, taken);
+    h += 1;
     toc.push({ id, text });
     return `<h2 id="${id}">${inner}</h2>`;
   });
+  if (reuseIds && h !== reuseIds.length) {
+    die(`${where}: the translation has ${h} h2 headings, the English source has ` +
+        `${reuseIds.length}.\n` +
+        `     Headings are what the contents and every deep link are built from, so a\n` +
+        `     translation that merges, splits or drops a section cannot be rendered.`);
+  }
 
   return { html: wrapped, toc };
 }
@@ -191,11 +208,22 @@ function writeAbs(full, text) {
   return prev === text ? 'same' : prev === null ? 'added' : 'changed';
 }
 
-/** Every file currently under a managed tree, as absolute paths. */
+/**
+ * Every file currently under a managed tree, as absolute paths.
+ *
+ * `content/<locale>/` is excluded: those are the hand-written translations, the
+ * one thing under content/ the sync reads rather than writes. Without this they
+ * are absent from the plan, so the orphan sweep below treats every one of them
+ * as garbage and deletes it — which it did, on the first translation that
+ * existed, before this guard.
+ */
+const OWNED_ELSEWHERE = TRANSLATIONS.map((l) => join(OUT, l));
+
 const tree = (dir) =>
   (existsSync(dir) ? readdirSync(dir, { recursive: true, withFileTypes: true }) : [])
     .filter((d) => d.isFile() && d.name !== '.gitkeep')
-    .map((d) => join(d.parentPath, d.name));
+    .map((d) => join(d.parentPath, d.name))
+    .filter((f) => !OWNED_ELSEWHERE.some((dir) => f.startsWith(dir + '/')));
 
 function flush() {
   // Orphans go first: a sync that renamed a page should not leave both names
@@ -217,6 +245,49 @@ function flush() {
 
 const write = (path, text) => writeAbs(join(OUT, path), text);
 
+/**
+ * Spanish (and any future locale's) plugin descriptions for the landing cards.
+ * Read once; absent file means nothing is translated yet, which is not an error.
+ */
+const pluginDict = Object.fromEntries(TRANSLATIONS.map((loc) => {
+  const f = join(OUT, loc, 'plugins.json');
+  return [loc, existsSync(f) ? JSON.parse(readFileSync(f, 'utf8')) : {}];
+}));
+
+function pluginTranslations(name, english) {
+  const hash = sourceHash(english);
+  const out = {};
+  for (const loc of TRANSLATIONS) {
+    const t = pluginDict[loc][name];
+    if (!t) { translations.pluginsMissing += 1; continue; }
+    if (t['source-hash'] !== hash) { translations.stale.push(`${loc}/plugins.json: ${name}`); continue; }
+    out[loc] = t.description;
+    translations.pluginsDone += 1;
+  }
+  return Object.keys(out).length ? { translations: out } : {};
+}
+
+/** What a translation was made from, so the sync can tell when it drifts. */
+const sourceHash = (body) => createHash('sha256').update(body).digest('hex').slice(0, 16);
+
+/** Translations seen this run, for the report at the end. */
+const translations = { done: 0, stale: [], missing: 0, pluginsDone: 0, pluginsMissing: 0 };
+
+/**
+ * Render one locale's copy of a page.
+ *
+ * English is the source: it slugifies its own heading ids and passes them here,
+ * so every locale's anchors are the same strings.
+ */
+function emitLocale(locale, path, meta, body, ids) {
+  const { heading, rest } = splitHeading(body);
+  const { html, toc } = postProcess(marked.parse(rest), `${locale}/${path}`, ids);
+  return writeAbs(
+    join(PUB, locale, path.replace(/\.md$/, '.json')),
+    JSON.stringify({ ...meta, heading, toc, html })
+  );
+}
+
 function emit(path, meta, body) {
   const fm = Object.entries(meta).map(([k, v]) => `${k}: ${esc(v)}`).join('\n');
 
@@ -234,7 +305,38 @@ function emit(path, meta, body) {
   // The .md keeps the body intact — it is the reviewable mirror of upstream,
   // not the render input.
   const md = write(path, `---\n${fm}\n---\n\n${body}\n`);
-  return md === 'same' && page === 'same' ? 'same' : md === 'added' ? 'added' : 'changed';
+
+  // --- translations ---------------------------------------------------------
+  // A translation lives at content/<locale>/<same path>, is written by hand (or
+  // by a model, reviewed as a diff) and is never generated from upstream. The
+  // sync only renders it and reports on it.
+  //
+  // `source-hash` in its frontmatter records the English body it was made from.
+  // When upstream moves, the hashes disagree and the page is stale: it is still
+  // served — throwing away a good translation over an upstream typo helps
+  // nobody — but it says so, and it is listed here.
+  const hash = sourceHash(body);
+  let pages = [page, md];
+
+  for (const locale of TRANSLATIONS) {
+    const src = join(OUT, locale, path);
+    if (!existsSync(src)) { translations.missing += 1; continue; }
+
+    const t = parse(readFileSync(src, 'utf8'), `${locale}/${path}`);
+    const stale = t.meta['source-hash'] !== hash;
+    if (stale) translations.stale.push(`${locale}/${path}`);
+    else translations.done += 1;
+
+    pages.push(emitLocale(locale, path, {
+      ...meta,
+      title: t.meta.title ?? meta.title,
+      description: t.meta.description ?? meta.description,
+      stale
+    }, t.body, toc.map((x) => x.id)));
+  }
+
+  return pages.every((r) => r === 'same') ? 'same'
+    : pages.some((r) => r === 'added') ? 'added' : 'changed';
 }
 
 // --- clone -------------------------------------------------------------------
@@ -330,6 +432,11 @@ try {
     plugins.push({
       name: p.name,
       description: p.description ?? '',
+      // Translations live in content/<locale>/plugins.json, hand-written and
+      // hashed against the English they were made from, exactly like a page.
+      // A plugin with no entry, or a stale one, keeps English on the card and
+      // the card declares `lang`.
+      ...pluginTranslations(p.name, p.description ?? ''),
       commands,
       skills: entries.filter((e) => e.kind === 'skills' && e.plugin === p.name).length,
       // Derived, not declared: the two plugins that ship commands are the ones
@@ -379,4 +486,16 @@ console.log(`  index.json ${kb.toFixed(1)} KB`);
 console.log(`${dryRun ? 'would sync' : 'synced'} ${meta.pages} pages from ${sha.slice(0, 7)}`);
 console.log(`  ${nSkills} skills · ${nCommands} commands`);
 console.log(`  ${tally.added} added · ${tally.changed} changed · ${tally.same} unchanged · ${removed} removed`);
+
+// Translations are the one thing here a person has to act on, so they get their
+// own lines rather than a number folded into the tally above.
+const wanted = meta.pages * TRANSLATIONS.length;
+console.log(`  translations: ${translations.done}/${wanted} pages current · ` +
+            `${translations.pluginsDone}/${plugins.length * TRANSLATIONS.length} plugin cards · ` +
+            `${translations.stale.length} stale · ${translations.missing + translations.pluginsMissing} missing`);
+for (const f of translations.stale) console.log(`    stale  content/${f}`);
+if (translations.stale.length) {
+  console.log('  A stale page is still served, marked as behind its source.');
+  console.log('  Re-translate it and update `source-hash` in its frontmatter.');
+}
 if (dryRun && (tally.added || tally.changed)) console.log('  (dry run — nothing written)');
