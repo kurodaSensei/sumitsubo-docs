@@ -76,5 +76,5 @@ export function useContentIndex() {
       ? 0
       : counts.pages - ((counts.translated as Record<string, number>)[locale] ?? 0)
 
-  return { entries, plugins, counts, core, stack, commands, groups, skillsOf, hrefOf, untranslated, sha: index.sha }
+  return { entries, plugins, counts, core, stack, commands, groups, skillsOf, hrefOf, untranslated, sha: index.sha, version: index.version }
 }

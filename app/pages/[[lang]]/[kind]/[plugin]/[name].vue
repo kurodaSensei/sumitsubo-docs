@@ -6,6 +6,7 @@ definePageMeta({
   validate: (route) => isLocaleParam(route.params.lang) && isKindParam(route.params.kind)
 })
 
+const { version } = useContentIndex()
 const route = useRoute()
 const { t, path, locale } = useChrome()
 
@@ -83,7 +84,7 @@ useSeoMeta({
       <span aria-current="page">{{ page.title }}</span>
     </nav>
 
-    <p class="u-label doc__kind">{{ page.kind }} · {{ page.plugin }} · v0.4.0</p>
+    <p class="u-label doc__kind">{{ page.kind }} · {{ page.plugin }} · v{{ version }}</p>
     <!-- Skills carry a prose heading lifted from their body; commands fall back
          to the slug, which is an identifier and is set in mono. -->
     <h1 :class="page.heading ? 'doc__title' : 'doc__title doc__title--id'">
