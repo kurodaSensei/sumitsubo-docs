@@ -133,6 +133,27 @@ check('every translation keeps its English anchors', () => {
   console.log(`  (${checked} translated page${checked === 1 ? '' : 's'} compared)`);
 });
 
+// The Spanish frontmatter is double-quoted, the English is not, so an escape
+// the parser failed to undo only ever showed up on one side -- and in prose,
+// where the code-parity check above does not look. Five descriptions shipped
+// reading `\"feature\"`, on the page and in og:description. A backslash in a
+// title or a description has never been correct here.
+check('no page title or description carries a stray escape', () => {
+  const PUB = join(ROOT, 'server', 'assets', 'pages');
+  for (const e of index.entries) {
+    const rel = join(e.kind, e.plugin, `${e.name}.json`);
+    for (const dir of [PUB, join(PUB, 'es')]) {
+      const file = join(dir, rel);
+      if (!existsSync(file)) continue;
+      const page = JSON.parse(readFileSync(file, 'utf8'));
+      for (const key of ['title', 'description']) {
+        assert.ok(!page[key]?.includes('\\'),
+          `${rel}: ${key} contains a backslash -- an unparsed frontmatter escape`);
+      }
+    }
+  }
+});
+
 check('the route list is the size the site claims', () => {
   assert.equal(prerendered.size, (index.counts.pages + 2) * 2,
     'landing + reference + every page, in both locales');
