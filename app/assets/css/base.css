@@ -224,34 +224,43 @@
    * A module slides 24px along its interlock axis into place, once, on first
    * entry into the viewport. `useReveal()` adds `.is-revealed`.
    *
-   * Gated on `scripting: enabled` rather than applied unconditionally: without
-   * the gate, a reader with no JavaScript would get a blank page, because the
-   * starting state is invisible and nothing would ever clear it. A browser that
-   * does not understand the query skips the animation and shows the content,
-   * which is the right direction to fail in.
+   * Transform only. The reveal used to fade opacity 0 → 1 as well, and that
+   * one declaration was the source of a long-running defect: a module waiting
+   * to reveal was *invisible*, not merely displaced. On a throttled phone that
+   * is a real window with nothing on screen, and to any tool measuring
+   * contrast it is text that cannot be measured — Lighthouse reported
+   * `color-contrast` on the landing for exactly that reason, intermittently,
+   * through two failed attempts to fix it from the JavaScript side.
+   *
+   * Sliding without fading is also the truer reading of the metaphor. A
+   * kumiko piece slides into its slot; it does not materialise. Nothing is
+   * lost by removing the fade, and what is gained is that text on this site is
+   * never transparent.
+   *
+   * With no opacity in play, the `scripting: enabled` gate is no longer load
+   * bearing — a reader without JavaScript now sees a module offset by 24px
+   * rather than a blank page — but it stays, because an offset that never
+   * resolves is still wrong.
    *
    * The direction is set per side by `--reveal-shift`, so each module enters
    * along the axis it interlocks on — and along the vertical once the interlock
    * has collapsed. */
   @media (scripting: enabled) {
     [data-reveal] {
-      opacity: 0;
       transform: var(--reveal-shift, translateY(24px));
-      transition:
-        opacity var(--motion-slot) var(--ease-enter),
-        transform var(--motion-slot) var(--ease-enter);
+      transition: transform var(--motion-slot) var(--ease-enter);
     }
 
     [data-reveal].is-revealed {
-      opacity: 1;
       transform: none;
     }
   }
 
   /* --- Reduced motion ------------------------------------------------------
-   * DESIGN.md §7: slot reveals become opacity-only, transforms are dropped,
-   * theme and language transitions become instant. A media query, not a JS
-   * flag, so it holds before hydration. */
+   * DESIGN.md §7: the slot reveal is dropped outright — it is a transform and
+   * nothing else, so there is no reduced version of it to keep — and theme and
+   * language transitions become instant. A media query, not a JS flag, so it
+   * holds before hydration. */
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
@@ -262,10 +271,12 @@
       scroll-behavior: auto !important;
     }
 
-    /* Transform is the part that causes trouble, so it is dropped outright
-     * rather than merely shortened. */
+    /* The transform is the whole animation now, so reduced motion means there
+     * is no reveal at all — the module is simply in place. That is the honest
+     * reading of the preference, not a shortened version of the same movement. */
     [data-reveal] {
       transform: none !important;
+      transition: none !important;
     }
   }
 }
