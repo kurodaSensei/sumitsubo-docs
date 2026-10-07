@@ -158,3 +158,40 @@ const es: Strings = {
 }
 
 export const STRINGS: Record<Locale, Strings> = { en, es }
+
+/* --- Preview descriptions ----------------------------------------------------
+ * A skill description is written for a model deciding whether to load the
+ * skill, not for a person looking at a link. It runs 319-848 characters, all
+ * 33 of them past 200, and ends in a clause listing the words that should
+ * trigger it. Pasted into a `description` or an `og:description` it came out
+ * cut mid-word by whatever was rendering it, at a different point on every
+ * platform.
+ *
+ * Two things happen here, in order:
+ *
+ * 1. The trigger clause goes. `Use when ... / Úsala al ...` is addressed to a
+ *    model and tells a reader nothing about the page. It is what makes these
+ *    long in the first place, and dropping it brings the median from 504 to 292
+ *    (en) and 588 to 332 (es). The openers are matched explicitly because they
+ *    are the framework's own convention, and only ever applied to its own
+ *    descriptions.
+ *
+ * 2. What is left is capped. The descriptions are shaped `Label: a, long,
+ *    comma, list.`, so a sentence boundary almost never falls in range -- there
+ *    is nothing to cut cleanly at and the ellipsis is honest about that.
+ *
+ * The full description still renders in the lede on the page. This is the
+ * snippet, not a replacement for it. */
+const TRIGGER_CLAUSE = /\.\s+(?:Use|Úsal[ao])\b[\s\S]*$/
+
+/** Capped at `limit` INCLUDING the ellipsis, so the result is never longer. */
+export function previewDescription(text: string, limit = 200): string {
+  const prose = text.replace(TRIGGER_CLAUSE, '.')
+  if (prose.length <= limit) return prose
+
+  const head = prose.slice(0, limit - 1)
+  const space = head.lastIndexOf(' ')
+  // Trailing punctuation left by the cut would read as a typo before the
+  // ellipsis -- `scripts,…` rather than `scripts…`.
+  return `${(space > 0 ? head.slice(0, space) : head).replace(/[\s,;:.·—–-]+$/, '')}…`
+}
