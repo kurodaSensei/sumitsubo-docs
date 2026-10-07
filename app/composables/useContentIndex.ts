@@ -69,5 +69,9 @@ export function useContentIndex() {
 
   const hrefOf = (e: Entry) => `/${e.kind}/${e.plugin}/${e.name}`
 
-  return { entries, plugins, counts, core, stack, commands, groups, skillsOf, hrefOf, sha: index.sha }
+  /** How many reference pages are still English in this locale. */
+  const untranslated = (locale: string) =>
+    locale === 'en' ? 0 : counts.pages - ((counts.translated as Record<string, number>)[locale] ?? 0)
+
+  return { entries, plugins, counts, core, stack, commands, groups, skillsOf, hrefOf, untranslated, sha: index.sha }
 }

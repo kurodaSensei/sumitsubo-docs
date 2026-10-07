@@ -1,8 +1,8 @@
 import type { Locale } from './routing'
 
-/* Chrome strings only. The 42 reference pages are English by design — a reader
- * on the Spanish site gets Spanish navigation around English reference text.
- * See PRODUCT.md "Content truth". */
+/* Chrome strings only. The 42 reference pages carry their own translations in
+ * content/<locale>/ and are rendered by the sync, not by anything here; these
+ * are the strings the site itself speaks. See PRODUCT.md "Content truth". */
 
 export interface Strings {
   skip: string
@@ -43,7 +43,10 @@ export interface Strings {
   noResults: (q: string) => string
   commands: string
 
+  /** Shown when every reference page has been translated into this locale. */
   protoNote: string
+  /** Shown when some have not: takes how many are still English. */
+  protoNotePartial: (n: number) => string
   /** Shown on a page whose body is still English because no translation exists. */
   untranslated: string
   /** Shown on a translation whose English source has moved since it was made. */
@@ -93,7 +96,10 @@ const en: Strings = {
   noResults: (q) => `No results for «${q}»`,
   commands: 'Commands',
 
-  protoNote: 'Reference content is generated from the framework repo. Pages not yet translated are shown in English and say so.',
+  protoNote: 'Reference content is generated from the framework repo.',
+  protoNotePartial: (n) =>
+    `Reference content is generated from the framework repo. ${n} page${n === 1 ? '' : 's'} ` +
+    `${n === 1 ? 'is' : 'are'} not translated yet and ${n === 1 ? 'is' : 'are'} shown in English, marked as such.`,
   untranslated: 'This page has not been translated yet. It is shown in English.',
   staleTranslation: 'The English source of this page changed after this translation was made, so parts of it may be out of date.'
 }
@@ -143,7 +149,10 @@ const es: Strings = {
   noResults: (q) => `Sin resultados para «${q}»`,
   commands: 'Comandos',
 
-  protoNote: 'El contenido de referencia se genera desde el repo del framework. Las páginas que aún no están traducidas se muestran en inglés y lo indican.',
+  protoNote: 'El contenido de referencia se genera desde el repo del framework.',
+  protoNotePartial: (n) =>
+    `El contenido de referencia se genera desde el repo del framework. ${n} página${n === 1 ? '' : 's'} ` +
+    `${n === 1 ? 'sigue' : 'siguen'} sin traducir y se ${n === 1 ? 'muestra' : 'muestran'} en inglés, señalada${n === 1 ? '' : 's'} como tal.`,
   untranslated: 'Esta página todavía no está traducida. Se muestra en inglés.',
   staleTranslation: 'La fuente en inglés de esta página cambió después de hacerse esta traducción, así que puede haber partes desactualizadas.'
 }

@@ -74,11 +74,11 @@ Rejected: an **npm git dependency** (the framework has no `package.json`, and ad
 
 The decision splits cleanly in two: *acquisition* (above) and *transform* (`scripts/sync-framework.mjs`). The transform is the real work and is identical under any acquisition strategy, so swapping the strategy later costs almost nothing.
 
-**The 42 reference pages are English only.** The framework's files are written in English on purpose; the site chrome is bilingual, the generated content is not. A reader on the Spanish site gets Spanish navigation around English reference text. `references/*.md` are inlined into their parent skill page rather than getting routes of their own.
+**The 42 reference pages are translated.** The framework's own files are written in English on purpose and stay that way — that constraint is on the *source*, not on how the site presents it. A translation lives beside the English mirror at `content/<locale>/`, is written by hand rather than generated, and records a hash of the English body it was made from, so the sync reports when upstream has moved under it. A page with no translation yet falls back to English, declares `lang` on the body and says so on the page; the reference index states how many are in that state, derived from the count rather than from a sentence someone has to remember. Heading anchors stay English in every locale, so a deep link shared between them still lands. `references/*.md` are inlined into their parent skill page rather than getting routes of their own.
 
 There is **no photography, no product shots, no logo and no illustration**, and there will be none. Visual content is made from type, rules and orthographic joint diagrams.
 
-The site is **bilingual EN/ES**. Spanish runs ~20% longer and needs full diacritic coverage. The framework's own files stay in English on purpose — models follow instructions better that way — while Claude always answers the user in their language.
+The site is **bilingual EN/ES**, chrome and content both. Spanish runs ~20% longer and needs full diacritic coverage; measured across the 42 pages it came out between 13% and 31%. The framework's own files stay in English on purpose — models follow instructions better that way — while Claude always answers the user in their language. Translating the site does not weaken that: what Claude reads is still English.
 
 ## Constraints
 
