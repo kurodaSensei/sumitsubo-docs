@@ -13,3 +13,5 @@ Objetivo: $ARGUMENTS (por defecto: los archivos visuales cambiados desde la base
 5. Corrige los bloqueantes y los majors usando solo tokens. Si una corrección necesita un token nuevo, añádelo primero a DESIGN.md.
 6. Vuelve a pasar la lente sobre las correcciones. Después, una pasada de pulido (el `polish` de Impeccable si está instalado): alineación, ritmo del espaciado, estados y texto.
 7. Informa en el idioma del usuario: qué cambió y qué queda como detalle menor.
+
+
