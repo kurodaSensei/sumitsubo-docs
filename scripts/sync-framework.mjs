@@ -271,7 +271,10 @@ function pluginTranslations(name, english) {
 const sourceHash = (body) => createHash('sha256').update(body).digest('hex').slice(0, 16);
 
 /** Translations seen this run, for the report at the end. */
-const translations = { done: 0, stale: [], missing: 0, pluginsDone: 0, pluginsMissing: 0 };
+// `done` is per locale, because the note the reference index shows is derived
+// from it: a claim about how much is translated must come from the count, not
+// from a sentence somebody remembers to update.
+const translations = { done: {}, stale: [], missing: 0, pluginsDone: 0, pluginsMissing: 0 };
 
 /**
  * Render one locale's copy of a page.
@@ -325,7 +328,7 @@ function emit(path, meta, body) {
     const t = parse(readFileSync(src, 'utf8'), `${locale}/${path}`);
     const stale = t.meta['source-hash'] !== hash;
     if (stale) translations.stale.push(`${locale}/${path}`);
-    else translations.done += 1;
+    else translations.done[locale] = (translations.done[locale] ?? 0) + 1;
 
     pages.push(emitLocale(locale, path, {
       ...meta,
@@ -467,7 +470,16 @@ const index = {
   repo: REPO,
   sha,
   plugins,
-  counts: { plugins: plugins.length, skills: nSkills, commands: nCommands, pages: nSkills + nCommands },
+  counts: {
+    plugins: plugins.length,
+    skills: nSkills,
+    commands: nCommands,
+    pages: nSkills + nCommands,
+    // Per locale, so the reference index can say what is actually true rather
+    // than carrying a sentence that goes stale the moment a page is added
+    // upstream or translated here.
+    translated: Object.fromEntries(TRANSLATIONS.map((l) => [l, translations.done[l] ?? 0]))
+  },
   entries: entries.sort((a, b) => a.kind.localeCompare(b.kind) || a.plugin.localeCompare(b.plugin) || a.name.localeCompare(b.name))
 };
 const indexJson = JSON.stringify(index);
@@ -490,7 +502,8 @@ console.log(`  ${tally.added} added · ${tally.changed} changed · ${tally.same}
 // Translations are the one thing here a person has to act on, so they get their
 // own lines rather than a number folded into the tally above.
 const wanted = meta.pages * TRANSLATIONS.length;
-console.log(`  translations: ${translations.done}/${wanted} pages current · ` +
+const doneTotal = Object.values(translations.done).reduce((a, b) => a + b, 0);
+console.log(`  translations: ${doneTotal}/${wanted} pages current · ` +
             `${translations.pluginsDone}/${plugins.length * TRANSLATIONS.length} plugin cards · ` +
             `${translations.stale.length} stale · ${translations.missing + translations.pluginsMissing} missing`);
 for (const f of translations.stale) console.log(`    stale  content/${f}`);

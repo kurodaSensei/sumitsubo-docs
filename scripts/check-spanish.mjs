@@ -46,9 +46,14 @@ for (const f of files) {
     .replace(/`[^`]*`/g, ' ');
 
   for (const word of VOSEO) {
+    // Not `\b`: JavaScript word boundaries only know [A-Za-z0-9_], so `á` reads
+    // as a non-word character and `\bpasá\b` matches inside `pasándole`. Every
+    // voseo form here ends in an accented vowel, so `\b` was wrong for all of
+    // them — it reported the first page it was run against, falsely. Unicode
+    // letter lookarounds are the boundary that actually applies to Spanish.
     const re = AMBIGUOUS.has(word)
-      ? new RegExp(`(^|\\n)[-*\\d.\\s]*${word}\\b`, 'gi')
-      : new RegExp(`\\b${word}\\b`, 'gi');
+      ? new RegExp(`(^|\\n)[-*\\d.\\s]*${word}(?![\\p{L}])`, 'giu')
+      : new RegExp(`(?<![\\p{L}])${word}(?![\\p{L}])`, 'giu');
     const found = text.match(re);
     if (found) {
       console.error(`  voseo in content/es/${f}: ${[...new Set(found.map((s) => s.trim()))].join(', ')}`);
