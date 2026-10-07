@@ -33,16 +33,34 @@ export function useReveal() {
       return
     }
 
+    // Anything already on screen is revealed synchronously, before the observer
+    // exists. IntersectionObserver fires its first callback asynchronously even
+    // for elements that already intersect, so above-the-fold modules spent at
+    // least a frame at opacity 0 — and on a throttled CPU, many frames. There
+    // is nothing to animate in for content the reader is already looking at.
+    //
+    // Found by Lighthouse: axe cannot compute contrast on transparent text, so
+    // it reported color-contrast on 7 nodes of the landing whenever the audit
+    // ran before the first callback. The score was the symptom; the invisible
+    // first paint was the thing worth fixing.
+    const pending = targets.filter((el) => {
+      const r = el.getBoundingClientRect()
+      const onScreen = r.top < window.innerHeight && r.bottom > 0
+      if (onScreen) el.classList.add('is-revealed')
+      return !onScreen
+    })
+    if (!pending.length) return
+
     observer = new IntersectionObserver(
       (entries) => entries.forEach((e) => e.isIntersecting && reveal(e.target)),
       { threshold: 0.12 }
     )
-    targets.forEach((el) => observer!.observe(el))
+    pending.forEach((el) => observer!.observe(el))
 
     // If anything goes wrong — a mis-measured threshold, an element that never
     // intersects — content must still appear. Silence is worse than an
     // un-animated page.
-    fallback = setTimeout(() => targets.forEach(reveal), 2500)
+    fallback = setTimeout(() => pending.forEach(reveal), 2500)
   })
 
   onBeforeUnmount(() => {
