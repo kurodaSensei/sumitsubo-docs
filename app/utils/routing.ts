@@ -102,3 +102,18 @@ export const SITE = 'https://sumitsubo-docs.vercel.app'
 export function absolute(path: string): string {
   return SITE + path
 }
+
+/**
+ * The framework's own repository. The site documents an MIT-licensed public
+ * repo and had no link to it anywhere — the landing offered the install command
+ * and nothing else, so reading the source meant guessing the URL.
+ *
+ * The root, not a blob path. `blobOf()` builds the deep links the detail pages
+ * use, which is what this constant replaced a hardcoded copy of.
+ */
+export const REPO = 'https://github.com/kurodaSensei/sumitsubo'
+
+/** A file's page in the repo: blobOf('plugins/sumi/skills/workflow/SKILL.md'). */
+export function blobOf(path: string): string {
+  return `${REPO}/blob/main/${path}`
+}
