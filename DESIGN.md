@@ -230,6 +230,8 @@ Chamfer implementation: `corner-shape: bevel` with `border-radius: 0 var(--chamf
 
 The slot-home reveal: module translates `24px` along its interlock axis into place over `--motion-slot` with `--ease-enter`, opacity 0 → 1. **Landing page only, once per module, on first entry into the viewport.** Never on reference pages. Never re-triggered on scroll back.
 
+**A module that is on screen when the page paints does not reveal at all** — it never *enters* the viewport, so the rule does not apply to it, and the first interlock carries no `data-reveal` for that reason. This is not a detail. The start state is `opacity: 0` set in CSS at parse time and cleared only once the observer runs after hydration, so a module that begins above the fold is genuinely invisible from first paint until the JS lands — bounded only by the 2.5 s fallback, and long enough on a throttled phone that Lighthouse's axe pass reported `color-contrast` on it. Animate what arrives; never animate in the thing the reader is already looking at.
+
 Everything else uses `--motion-quick` at most: hover/active on controls, theme toggle, language switch, disclosure. No hover scaling. No scroll-linked animation.
 
 Reduced motion (`prefers-reduced-motion: reduce`): slot reveals become opacity-only at `--motion-instant`, all transforms are dropped, and the theme/language transitions become instant. Honoured, not faked — the hook is a media query in CSS, not a JS flag.
