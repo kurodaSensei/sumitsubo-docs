@@ -30,6 +30,8 @@ const index = JSON.parse(readFileSync(join(ROOT, 'content', 'index.json'), 'utf8
 // TypeScript parser to run five assertions is not a trade worth making.
 const { localePath, localeOf, isLocaleParam, isKindParam, stripLocale } =
   await import(pathToFileURL(join(ROOT, 'app', 'utils', 'routing.ts')).href);
+const { previewDescription } =
+  await import(pathToFileURL(join(ROOT, 'app', 'utils', 'strings.ts')).href);
 const hrefOf = (e) => `/${e.kind}/${e.plugin}/${e.name}`;
 
 // What the build prerenders. Mirrors nuxt.config.ts; if that file changes shape,
@@ -152,6 +154,37 @@ check('no page title or description carries a stray escape', () => {
       }
     }
   }
+});
+
+// The snippet a platform shows. Asserted against the real descriptions rather
+// than invented inputs, because what broke was not the function -- there was
+// none -- it was 33 descriptions written for a model and handed to a social
+// card untouched. If upstream adds a page whose description does not follow the
+// convention, this is what notices.
+check('every page gets a preview snippet a platform can show whole', () => {
+  const PUB = join(ROOT, 'server', 'assets', 'pages');
+  const LIMIT = 200;
+  let longest = 0;
+  for (const e of index.entries) {
+    const rel = join(e.kind, e.plugin, `${e.name}.json`);
+    for (const [loc, dir] of [['en', PUB], ['es', join(PUB, 'es')]]) {
+      const file = join(dir, rel);
+      if (!existsSync(file)) continue;
+      const { description } = JSON.parse(readFileSync(file, 'utf8'));
+      const snippet = previewDescription(description);
+      const where = `${loc}/${rel}`;
+
+      assert.ok(snippet.length <= LIMIT,
+        `${where}: snippet is ${snippet.length} characters, over ${LIMIT}`);
+      assert.ok(snippet.length > 0, `${where}: snippet is empty`);
+      assert.ok(!/\s[,;:]|[,;:]…|\s…/.test(snippet),
+        `${where}: snippet ends on dangling punctuation — ${JSON.stringify(snippet.slice(-24))}`);
+      assert.ok(!/(?:\.|^)\s*(?:Use|Úsal[ao])\s/.test(snippet),
+        `${where}: the trigger clause survived into the snippet`);
+      longest = Math.max(longest, snippet.length);
+    }
+  }
+  console.log(`  (longest snippet ${longest} of ${LIMIT} characters)`);
 });
 
 check('the route list is the size the site claims', () => {

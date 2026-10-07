@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { isKindParam, isLocaleParam } from '~/utils/routing'
+import { previewDescription } from '~/utils/strings'
 
 definePageMeta({
   validate: (route) => isLocaleParam(route.params.lang) && isKindParam(route.params.kind)
@@ -58,11 +59,18 @@ const foreign = computed(() =>
 
 const REPO = 'https://github.com/kurodaSensei/sumitsubo/blob/main/'
 
+// The snippet, not the description. A skill description is written for a model
+// choosing whether to load the skill; every one of the 33 ran past what a
+// search result or a social card shows, so each platform truncated it at its
+// own point, mid-word. `previewDescription` drops the trigger clause and caps
+// what is left. The page's own lede still carries the whole thing.
+const snippet = computed(() => previewDescription(page.value?.description ?? ''))
+
 useSeoMeta({
   title: () => `${page.value?.title ?? ''} — Sumitsubo`,
-  description: () => page.value?.description ?? '',
+  description: () => snippet.value,
   ogTitle: () => `${page.value?.title ?? ''} — Sumitsubo`,
-  ogDescription: () => page.value?.description ?? ''
+  ogDescription: () => snippet.value
 })
 </script>
 
