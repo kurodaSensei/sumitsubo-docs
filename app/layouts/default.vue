@@ -33,9 +33,39 @@ useHead(() => ({
       hreflang: loc,
       href: absolute(localePath(loc, base.value))
     })),
-    { rel: 'alternate', hreflang: 'x-default', href: absolute(localePath('en', base.value)) }
+    { rel: 'alternate', hreflang: 'x-default', href: absolute(localePath('en', base.value)) },
+
+    // The SVG mark themes itself with prefers-color-scheme; the .ico is the
+    // fallback for anything that will not take an SVG. Until now the site
+    // shipped the Nuxt default favicon from the scaffold commit — somebody
+    // else's logo in the tab.
+    { rel: 'icon', type: 'image/svg+xml', href: '/mark.svg' },
+    { rel: 'icon', sizes: '16x16 32x32 48x48', href: '/favicon.ico' },
+    { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' }
   ]
 }))
+
+// Social metadata. The site had none at all: posting the link anywhere
+// produced a bare title and no image. The card is per locale because the
+// manifesto printed on it is.
+//
+// Only the invariants live here. Each page sets its own ogTitle and
+// ogDescription beside the title and description it already declares, because
+// the layout cannot see them.
+useSeoMeta({
+  ogType: 'website',
+  ogSiteName: 'Sumitsubo',
+  ogUrl: () => absolute(localePath(locale.value, base.value)),
+  ogLocale: () => (locale.value === 'es' ? 'es_ES' : 'en_US'),
+  ogImage: () => absolute(`/og/${locale.value}.png`),
+  ogImageWidth: 1200,
+  ogImageHeight: 630,
+  ogImageType: 'image/png',
+  ogImageAlt: () => t.value.manifesto,
+  twitterCard: 'summary_large_image',
+  twitterImage: () => absolute(`/og/${locale.value}.png`),
+  twitterImageAlt: () => t.value.manifesto
+})
 </script>
 
 <template>

@@ -1,0 +1,104 @@
+- generic [ref=f7e4]:
+  - link "Saltar al contenido" [ref=f7e5] [cursor=pointer]:
+    - /url: "#main"
+  - banner [ref=f7e6]:
+    - link "SUMITSUBO" [ref=f7e7] [cursor=pointer]:
+      - /url: /es
+      - generic [aria-hidden] [ref=f7e9]: 墨壺
+    - navigation "Principal" [ref=f7e10]:
+      - link "Inicio" [ref=f7e11] [cursor=pointer]:
+        - /url: /es
+      - link "Referencia" [ref=f7e12] [cursor=pointer]:
+        - /url: /es/reference
+      - link "EN View in English" [ref=f7e13] [cursor=pointer]:
+        - /url: /
+        - text: EN
+        - generic [ref=f7e14]: View in English
+      - button "Cambiar a tema claro" [ref=f7e15] [cursor=pointer]
+  - main [ref=f7e18]:
+    - generic [ref=f7e19]:
+      - region [ref=f7e20]:
+        - paragraph [ref=f7e21]: v0.4.0 · MIT · 6 plugins · 9 comandos · 33 skills
+        - heading "Marca la línea antes de cortar." [level=1] [ref=f7e22]
+        - generic [ref=f7e24]:
+          - paragraph [ref=f7e27]: "Sumitsubo es el cordel de tinta del carpintero japonés: se marca una vez, antes de cortar. Este framework funciona igual. Un arreglo de una línea no se lleva un plan escrito; una migración no se improvisa. La accesibilidad y el rendimiento hay que aprobarlos, no se añaden al final. Y el aspecto se decide antes de dibujar nada, para que no acabe pareciéndose a todo lo demás que ha hecho un modelo."
+          - generic [ref=f7e29]:
+            - generic [ref=f7e30]:
+              - button "Copiar el comando de instalación" [ref=f7e31] [cursor=pointer]: Instalar el plugin
+              - link "Ver los skills" [ref=f7e32] [cursor=pointer]:
+                - /url: /es/reference
+            - generic [ref=f7e33]:
+              - code [ref=f7e34]: /plugin marketplace add kurodaSensei/sumitsubo
+              - button "Copiar" [ref=f7e35] [cursor=pointer]
+            - status [ref=f7e39]
+      - region [ref=f7e40]:
+        - paragraph [ref=f7e41]: Cómo se compone
+        - heading "Núcleo y dirección siempre, un paquete de stack encima" [level=2] [ref=f7e42]
+        - paragraph [ref=f7e43]: "Cada skill pertenece a un solo plugin. Lo que decides no es qué skills quieres, sino qué stack usas: el núcleo y la dirección van en todos los proyectos, y encima encaja una pieza."
+        - generic [ref=f7e44]:
+          - figure [ref=f7e46]:
+            - paragraph [ref=f7e47]: Siempre
+            - paragraph [ref=f7e48]: En todos los proyectos, sea cual sea el stack.
+            - generic [ref=f7e49]:
+              - paragraph [ref=f7e50]:
+                - generic [ref=f7e51]: sumi
+                - generic [ref=f7e52]: 8 skills
+              - paragraph [ref=f7e53]: a11y · code-quality · css-architecture · html · js-ts · model-routing · performance · workflow
+            - generic [ref=f7e54]:
+              - paragraph [ref=f7e55]:
+                - generic [ref=f7e56]: sumi-design
+                - generic [ref=f7e57]: 6 skills
+              - paragraph [ref=f7e58]: anti-slop · claude-design-bridge · design-direction · design-ledger · design-tokens · motion
+          - figure [ref=f7e60]:
+            - paragraph [ref=f7e61]: Elige uno
+            - paragraph [ref=f7e62]: La pieza que encaja con el stack del proyecto.
+            - generic [ref=f7e63]:
+              - paragraph [ref=f7e64]:
+                - generic [ref=f7e65]: sumi-nuxt
+                - generic [ref=f7e66]: 5 skills
+              - paragraph [ref=f7e67]: firebase-firestore · nuxt-architecture · nuxt-data-ssr · tailwind-craft · vue-components
+            - generic [ref=f7e68]:
+              - paragraph [ref=f7e69]:
+                - generic [ref=f7e70]: sumi-react
+                - generic [ref=f7e71]: 5 skills
+              - paragraph [ref=f7e72]: next-app-router · next-data-caching · react-components · react-performance · react-testing
+            - generic [ref=f7e73]:
+              - paragraph [ref=f7e74]:
+                - generic [ref=f7e75]: sumi-shopify
+                - generic [ref=f7e76]: 5 skills
+              - paragraph [ref=f7e77]: shopify-liquid · shopify-performance-a11y · shopify-sections-blocks · shopify-storefront-js · shopify-theme-architecture
+            - generic [ref=f7e78]:
+              - paragraph [ref=f7e79]:
+                - generic [ref=f7e80]: sumi-wordpress
+                - generic [ref=f7e81]: 4 skills
+              - paragraph [ref=f7e82]: wp-block-theme · wp-custom-blocks · wp-native-features · wp-performance-audit
+      - region [ref=f7e83]:
+        - heading "Seis plugins que encajan entre sí" [level=2] [ref=f7e84]
+        - generic [ref=f7e85]:
+          - article [ref=f7e87]:
+            - paragraph [ref=f7e88]: 01 · 6 comandos · 8 skills
+            - heading "sumi" [level=3] [ref=f7e89]
+            - paragraph [ref=f7e90]: "Núcleo de ingeniería: flujo de trabajo adaptable (trivial → delegado → expediente de funcionalidad), presupuestos de líneas, controles de riesgo, lentes de revisión sin contexto, estándares de HTML/CSS/JS/accesibilidad/rendimiento y hooks de seguridad."
+          - article [ref=f7e92]:
+            - paragraph [ref=f7e93]: 02 · 3 comandos · 6 skills
+            - heading "sumi-design" [level=3] [ref=f7e94]
+            - paragraph [ref=f7e95]: "Dirección de diseño contra el relleno genérico: brief, anti-referencias, tres direcciones divergentes, registro de repeticiones entre proyectos, tokens de DESIGN.md y reglas de movimiento. Orquesta las skills de Impeccable, Taste y Emil Kowalski."
+          - article [ref=f7e97]:
+            - paragraph [ref=f7e98]: 03 · 5 skills
+            - heading "sumi-nuxt" [level=3] [ref=f7e99]
+            - paragraph [ref=f7e100]: "Paquete de stack Nuxt 3/4 + Vue 3 + Firebase/Firestore: composables, seguridad en SSR e hidratación, modelado de datos, reglas de seguridad y Tailwind."
+          - article [ref=f7e102]:
+            - paragraph [ref=f7e103]: 04 · 5 skills
+            - heading "sumi-react" [level=3] [ref=f7e104]
+            - paragraph [ref=f7e105]: "Paquete de stack React 19 + App Router de Next.js: fronteras entre servidor y cliente, obtención y caché de datos, formularios y acciones, arquitectura de componentes."
+          - article [ref=f7e107]:
+            - paragraph [ref=f7e108]: 05 · 5 skills
+            - heading "sumi-shopify" [level=3] [ref=f7e109]
+            - paragraph [ref=f7e110]: "Paquete de stack Shopify Online Store 2.0: Liquid, secciones, bloques, esquemas, fragmentos, rendimiento del tema y flujo con la CLI."
+          - article [ref=f7e112]:
+            - paragraph [ref=f7e113]: 06 · 4 skills
+            - heading "sumi-wordpress" [level=3] [ref=f7e114]
+            - paragraph [ref=f7e115]: "Temas de bloques nativos de WordPress (FSE, Gutenberg) sin paso de compilación: theme.json como sistema de diseño, plantillas HTML y patrones en PHP, bloques dinámicos propios (block.json + render.php) con editores en JavaScript plano, APIs del núcleo antes que plugins, y auditorías de rendimiento y de tokens."
+  - contentinfo [ref=f7e116]:
+    - generic [ref=f7e117]: SUMITSUBO 墨壺 · MIT
+    - generic [ref=f7e118]: v0.4.0
