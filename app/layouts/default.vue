@@ -42,7 +42,14 @@ useHead(() => ({
     { rel: 'icon', type: 'image/svg+xml', href: '/mark.svg' },
     { rel: 'icon', sizes: '16x16 32x32 48x48', href: '/favicon.ico' },
     { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' }
-  ]
+  ],
+
+  // Not in the Open Graph spec and read by no major platform — Facebook, X,
+  // Slack and LinkedIn all ignore it. It is here because validators ask for it
+  // and the answer is a file that already exists, so declining costs more
+  // words than complying. Lives in useHead, not useSeoMeta: unhead's typed
+  // schema has no `ogLogo` key.
+  meta: [{ property: 'og:logo', content: absolute('/apple-touch-icon.png') }]
 }))
 
 // Social metadata. The site had none at all: posting the link anywhere
