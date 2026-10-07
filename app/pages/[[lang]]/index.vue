@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref } from 'vue'
+import { onBeforeUnmount, ref } from 'vue'
 import { isLocaleParam } from '~/utils/routing'
+import { describe, type Plugin } from '~/composables/useContentIndex'
 
 definePageMeta({ validate: (route) => isLocaleParam(route.params.lang) })
 
@@ -9,11 +10,11 @@ const { t, path, locale } = useChrome()
 // DESIGN.md §7, landing only. The reference and detail pages get none of it.
 useReveal()
 
-// Plugin descriptions come from the framework's marketplace manifest and are
-// English only. Declaring that is the honest fix — silently inventing Spanish
-// for them would be worse than labelling the run.
-const foreign = computed(() => (locale.value === 'en' ? undefined : 'en'))
+// Plugin descriptions are translated per locale when one exists; `describe()`
+// hands back the text and the language to declare on it together, so a card
+// that fell back to English cannot end up unlabelled under `<html lang="es">`.
 const { counts, core, stack, plugins, skillsOf } = useContentIndex()
+const card = (p: Plugin) => describe(p, locale.value)
 
 const INSTALL = '/plugin marketplace add kurodaSensei/sumitsubo'
 
@@ -166,7 +167,7 @@ useHead({
               · {{ p.skills }} {{ t.skills }}
             </p>
             <h3 class="card__name">{{ p.name }}</h3>
-            <p :lang="foreign">{{ p.description }}</p>
+            <p :lang="card(p).lang">{{ card(p).text }}</p>
           </article>
         </div>
       </div>
