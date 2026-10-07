@@ -43,7 +43,12 @@ onBeforeUnmount(() => clearTimeout(timer))
 
 useSeoMeta({
   title: () => t.value.seoTitle,
-  description: () => t.value.seoDescription
+  description: () => t.value.seoDescription,
+  // The layout owns the invariants (image, type, locale); a page owns what is
+  // its own. Nuxt does not derive og:title from title, so a page that sets
+  // only `title` shares a card with whatever the layout last said.
+  ogTitle: () => t.value.seoTitle,
+  ogDescription: () => t.value.seoDescription
 })
 
 // The manifesto is this route's LCP element and the only place the display face

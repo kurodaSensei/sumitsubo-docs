@@ -51,7 +51,9 @@ const counter = computed(() =>
 // neither would have followed a locale change.
 useSeoMeta({
   title: () => `${t.value.refTitle} — Sumitsubo`,
-  description: () => t.value.refSeoDescription(counts)
+  description: () => t.value.refSeoDescription(counts),
+  ogTitle: () => `${t.value.refTitle} — Sumitsubo`,
+  ogDescription: () => t.value.refSeoDescription(counts)
 })
 </script>
 

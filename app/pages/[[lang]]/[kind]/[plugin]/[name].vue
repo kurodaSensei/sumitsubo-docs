@@ -60,7 +60,9 @@ const REPO = 'https://github.com/kurodaSensei/sumitsubo/blob/main/'
 
 useSeoMeta({
   title: () => `${page.value?.title ?? ''} — Sumitsubo`,
-  description: () => page.value?.description ?? ''
+  description: () => page.value?.description ?? '',
+  ogTitle: () => `${page.value?.title ?? ''} — Sumitsubo`,
+  ogDescription: () => page.value?.description ?? ''
 })
 </script>
 

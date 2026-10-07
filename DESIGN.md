@@ -245,6 +245,20 @@ Reduced motion (`prefers-reduced-motion: reduce`): the slot reveal is dropped ou
 - **The composition figure** is the hero of the landing page and replaces the screenshot the site does not have. It states the one rule written nowhere else: `sumi` and `sumi-design` ship in every project, and exactly one stack pack fits on top. Each row carries its plugin's real skill names, so the figure doubles as the wall chart of the framework's whole surface.
 - **Illustration style:** orthographic, no perspective, no fills, no gradients. A technical drawing, not an illustration.
 
+### The mark
+
+`design/mark/mark.svg` — **not a new symbol.** PRODUCT.md states there is no logo and there will be none, and this does not reverse that: it is the signature element of §1 drawn small. Two modules overlapping on a shared column, the one in front carrying the single top-right chamfer, the pair in different tones because the depth model is tonal and there are no shadows.
+
+Its proportions are deliberately **not** the token values. `--chamfer-module` is 20 px on a module hundreds of pixels wide; at 64 units that ratio disappears, so the chamfer is `15/64` and the overlap `7/64`. Both were settled by rasterising to 16 px and looking, which is the only test a favicon answers to. The pair is `--color-accent` + `--color-seam` rather than two surface tones: surfaces are near-invisible at icon scale, where the mark has to survive on whatever colour a browser puts behind a tab.
+
+The SVG carries its own `prefers-color-scheme` block, so the mark themes in the tab without the site being open.
+
+### The social card
+
+`scripts/build-og.mjs` renders `public/og/<locale>.png` at 1200×630, one per locale because the manifesto printed on it differs. It is the same interlock: back module low and left holding the wordmark, front module chamfered holding the manifesto, and **the seam drawn over both** at the 5/12 column — under them it vanishes behind the front module and reads as a stray tick.
+
+The card is a real HTML page rendered by headless Chromium, so it uses the site's own woff2 faces and its own `oklch()` tokens. Nothing is hand-converted to hex and nothing can drift. The type size is set for the **longer** of the two manifestos: English runs three lines where Spanish runs two, and the card has to hold both without the meta line colliding.
+
 ## 9. Accessibility rules
 
 - **Focus ring:** `2px solid var(--color-focus)` at `2px` offset, on every focusable element, in both themes. Never removed, never replaced by a color change alone. Verified ≥3:1 on all four surface layers. Watch for `clip-path` clipping it — see §5.
