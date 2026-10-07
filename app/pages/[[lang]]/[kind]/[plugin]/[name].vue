@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { contentPrefix, isKindParam, isLocaleParam } from '~/utils/routing'
+import { blobOf, contentPrefix, isKindParam, isLocaleParam } from '~/utils/routing'
 import { previewDescription } from '~/utils/strings'
 
 definePageMeta({
@@ -58,8 +58,6 @@ if (!page.value) throw createError({ statusCode: 404, statusMessage: 'Page not f
 const foreign = computed(() =>
   page.value && page.value.locale !== locale.value ? page.value.locale : undefined)
 
-const REPO = 'https://github.com/kurodaSensei/sumitsubo/blob/main/'
-
 // The snippet, not the description. A skill description is written for a model
 // choosing whether to load the skill; every one of the 33 ran past what a
 // search result or a social card shows, so each platform truncated it at its
@@ -111,7 +109,7 @@ useSeoMeta({
           <dt class="u-label">{{ page.kind }}</dt>
           <dd>{{ page.title }}</dd>
           <dt class="u-label">source</dt>
-          <dd><a :href="REPO + page.source" rel="noopener">{{ page.source }}</a></dd>
+          <dd><a :href="blobOf(page.source)" rel="noopener">{{ page.source }}</a></dd>
         </dl>
       </div>
     </div>

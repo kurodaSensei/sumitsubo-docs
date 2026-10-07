@@ -21,6 +21,10 @@ export interface Strings {
   /** What activating the install button actually does (2.4.6). */
   installAction: string
   seeSkills: string
+  /** Nav label for the repository. Short — it sits in the header. */
+  navSource: string
+  /** The landing's third action, beside install and the index. */
+  seeSource: string
   copy: string
   copied: string
   figLabel: string
@@ -71,6 +75,8 @@ const en: Strings = {
   install: 'Install the plugin',
   installAction: 'Copy the install command',
   seeSkills: 'See the skills',
+  navSource: 'Source',
+  seeSource: 'Read the source',
   copy: 'Copy',
   copied: 'Copied',
 
@@ -124,6 +130,8 @@ const es: Strings = {
   install: 'Instalar el plugin',
   installAction: 'Copiar el comando de instalación',
   seeSkills: 'Ver los skills',
+  navSource: 'Código',
+  seeSource: 'Ver el código',
   copy: 'Copiar',
   copied: 'Copiado',
 

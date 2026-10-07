@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onBeforeUnmount, ref } from 'vue'
-import { isLocaleParam } from '~/utils/routing'
+import { REPO, isLocaleParam } from '~/utils/routing'
 import { describe, type Plugin } from '~/composables/useContentIndex'
 
 definePageMeta({ validate: (route) => isLocaleParam(route.params.lang) })
@@ -103,6 +103,9 @@ useHead({
                 {{ t.install }}
               </button>
               <NuxtLink :to="path('/reference')" class="btn-ghost">{{ t.seeSkills }}</NuxtLink>
+              <!-- The actual complaint this answers: the landing offered an
+                   install command for an open repo and no way to go read it. -->
+              <a :href="REPO" class="btn-ghost" rel="noopener">{{ t.seeSource }}</a>
             </div>
 
             <div class="code">

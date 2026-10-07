@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted } from 'vue'
-import { ALL_LOCALES, DEFAULT_LOCALE, absolute, localePath, stripLocale } from '~/utils/routing'
+import { ALL_LOCALES, DEFAULT_LOCALE, REPO, absolute, localePath, stripLocale } from '~/utils/routing'
 
 const { locale, t, path, otherLocalePath, applied, toggleTheme, restoreTheme } = useChrome()
 const route = useRoute()
@@ -89,6 +89,12 @@ useSeoMeta({
         <NuxtLink :to="path('/')" class="nav__link">{{ t.navHome }}</NuxtLink>
         <NuxtLink :to="path('/reference')" class="nav__link">{{ t.navRef }}</NuxtLink>
 
+        <!-- A plain <a>, not NuxtLink: an external href through the router
+             would be prefetched and prerendered as if it were a route.
+             `rel="noopener"` without `target` matches the source links on the
+             detail pages — leaving the tab choice to the reader. -->
+        <a :href="REPO" class="nav__link" rel="noopener">{{ t.navSource }}</a>
+
         <!-- A real link to the translated route, not a JS toggle: it works
              without script and search engines can follow it. -->
         <!-- The visible label is part of the accessible name (2.5.3), and the
@@ -121,6 +127,7 @@ useSeoMeta({
 
     <footer class="footer">
       <span>SUMITSUBO <span lang="ja">墨壺</span> · MIT</span>
+      <a :href="REPO" class="footer__link" rel="noopener">github.com/kurodaSensei/sumitsubo</a>
       <span>v0.4.0</span>
     </footer>
   </div>
@@ -263,6 +270,21 @@ useSeoMeta({
   margin-inline: auto;
   padding-inline: var(--space-gutter);
   padding-block-end: var(--space-section-block);
+}
+
+/* The footer is the conventional place to look for a repo, so the URL is
+   spelled out here rather than hidden behind a word. */
+.footer__link {
+  color: inherit;
+  text-decoration: none;
+  border-block-end: var(--border-width) solid transparent;
+  transition: color var(--motion-quick) var(--ease-move),
+              border-color var(--motion-quick) var(--ease-move);
+}
+
+.footer__link:hover {
+  color: var(--color-accent);
+  border-block-end-color: var(--color-accent);
 }
 
 .footer {
