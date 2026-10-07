@@ -1,7 +1,7 @@
 ---
 title: "/sumi:init"
 description: "Instala Sumitsubo en el proyecto actual: detecta el stack y los comandos, escribe el bloque gestionado de CLAUDE.md, crea .sumi/ (config, tasks, reviews) y recomienda los plugins de stack y de diseño."
-source-hash: "97c0430e55b5c864"
+source-hash: "91c9d510a0cbec9f"
 ---
 
 Inicializa el framework Sumitsubo en este repositorio. Argumentos (sustitución opcional del stack): $ARGUMENTS
@@ -19,4 +19,4 @@ Inicializa el framework Sumitsubo en este repositorio. Argumentos (sustitución 
 5. **Modelos**: pon `modelProfile` en `balanced` salvo que el usuario pida otro perfil explícitamente (`economy` para sitios pequeños o límites de plan ajustados; `performance` solo si lo pide, porque tira mucho de Opus). Después, con una sola confirmación, escribe `"model": "opusplan"` (o el modelo de sesión del perfil) en `.claude/settings.local.json` (personal, sin versionar), creando el archivo si hace falta y sin tocar nunca otras claves.
    Las carpetas generadas que produzca el proyecto (por ejemplo un paso de compilación de contenido) van a `review.exclude` dentro de `.sumi/config.json`.
 6. **Nota sobre la línea de estado**: si Ponytail pide añadir su línea de estado a `~/.claude/settings.json` y la edición queda bloqueada, explica que es opcional y cosmética; la ruta que sugiere incluye un número de versión y se rompería al actualizar.
-7. **Informa** en el idioma del usuario: stack detectado, archivos creados o modificados, y el siguiente paso (normalmente `/sumi-design:direction` para proyectos de interfaz nuevos, o `/sumi:feature` para una funcionalidad nueva).
+7. **Informa** siguiendo `sumi:output`. Asunto: el stack detectado y el gestor de paquetes. Cuerpo: una tabla de archivos creados o modificados, y los plugins recomendados del paso 4 con sus comandos de instalación exactos. Siguiente paso: `/sumi-design:direction` para un proyecto de interfaz nuevo, `/sumi:feature` en caso contrario.

@@ -1,7 +1,7 @@
 ---
 title: "/sumi:review"
 description: "Revisión con recibo de la rebanada actual: dimensiona el riesgo, congela el diff y los chequeos una sola vez, ejecuta solo las lentes que el riesgo exige (nunca todas), cada una con un presupuesto estricto, consolida los hallazgos y emite un recibo de revisión."
-source-hash: "ff33fbc4eb42c789"
+source-hash: "20f43555200ce84b"
 ---
 
 Objetivo de la revisión: $ARGUMENTS
@@ -25,4 +25,4 @@ El orquestador hace UNA SOLA VEZ el trabajo compartido caro (diff, chequeos) y l
 6. **Consolida.** Elimina duplicados, verifica tú mismo cada bloqueante y cada major contra el código (descarta lo que puedas refutar, y dilo), y ordena por severidad. Usa el acompañante de recepción de revisiones cuando esté disponible.
 7. **Recibo.** `.sumi/reviews/<id>.md`: rango, linaje, lentes ejecutadas (con sus modelos), veredicto y hallazgos con su estado (abierto, corregido, o no se corregirá más el motivo). `approved` solo si no queda ningún bloqueante ni major abierto.
 8. **Ciclo de corrección.** Corrige los bloqueantes y los majors dentro de la misma rebanada; vuelve a ejecutar SOLO las lentes que los levantaron, y solo sobre el diff nuevo. Cuando quede aprobado, pon `burned: true` con el sha del commit.
-9. Informa en el idioma del usuario: veredicto, correcciones, detalles menores que quedan, y el coste de las lentes (lentes × modelo) para que el usuario vea en qué se gastó la revisión.
+9. **Informa** siguiendo `sumi:output`. Asunto: el rango y el sha de HEAD congelados en el paso 1. Resultado: el veredicto. Cuerpo: una tabla de hallazgos (severidad · archivo · estado), y debajo el coste de las lentes (lentes × modelo) para que el usuario vea en qué se gastó la revisión. Todo lo que hayas descartado en el paso 5 va listado con la evidencia que lo refutó. Siguiente paso: `/sumi:ship` cuando esté aprobado; si no, el bloqueante concreto que hay que corregir.
