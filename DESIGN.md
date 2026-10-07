@@ -228,13 +228,15 @@ Chamfer implementation: `corner-shape: bevel` with `border-radius: 0 var(--chamf
 | `--ease-exit` | `cubic-bezier(0.7, 0, 0.84, 0)` |
 | `--ease-move` | `cubic-bezier(0.4, 0, 0.2, 1)` |
 
-The slot-home reveal: module translates `24px` along its interlock axis into place over `--motion-slot` with `--ease-enter`, opacity 0 → 1. **Landing page only, once per module, on first entry into the viewport.** Never on reference pages. Never re-triggered on scroll back.
+The slot-home reveal: module translates `24px` along its interlock axis into place over `--motion-slot` with `--ease-enter`. **Transform only — no opacity fade.** **Landing page only, once per module, on first entry into the viewport.** Never on reference pages. Never re-triggered on scroll back.
+
+The fade was in this section and has been removed, which is worth recording because it looked harmless. A module waiting to reveal was *invisible*, not merely displaced: on a throttled phone a real window with nothing on screen, and to any tool measuring contrast, text that cannot be measured at all. Lighthouse reported `color-contrast` on the landing for exactly that reason, intermittently, and survived two attempts to fix it from the JavaScript side — both of which treated the symptom's timing rather than its cause. Sliding without fading is also the truer reading of the metaphor: a kumiko piece slides into its slot, it does not materialise. **Text on this site is never transparent.**
 
 **A module that is on screen when the page paints does not reveal at all** — it never *enters* the viewport, so the rule does not apply to it, and the first interlock carries no `data-reveal` for that reason. This is not a detail. The start state is `opacity: 0` set in CSS at parse time and cleared only once the observer runs after hydration, so a module that begins above the fold is genuinely invisible from first paint until the JS lands — bounded only by the 2.5 s fallback, and long enough on a throttled phone that Lighthouse's axe pass reported `color-contrast` on it. Animate what arrives; never animate in the thing the reader is already looking at.
 
 Everything else uses `--motion-quick` at most: hover/active on controls, theme toggle, language switch, disclosure. No hover scaling. No scroll-linked animation.
 
-Reduced motion (`prefers-reduced-motion: reduce`): slot reveals become opacity-only at `--motion-instant`, all transforms are dropped, and the theme/language transitions become instant. Honoured, not faked — the hook is a media query in CSS, not a JS flag.
+Reduced motion (`prefers-reduced-motion: reduce`): the slot reveal is dropped outright — it is a transform and nothing else, so there is no reduced version of it to keep — and the theme/language transitions become instant. Honoured, not faked — the hook is a media query in CSS, not a JS flag.
 
 ## 8. Iconography & imagery
 
