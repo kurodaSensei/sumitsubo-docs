@@ -4,8 +4,13 @@ import { isLocaleParam } from '~/utils/routing'
 
 definePageMeta({ validate: (route) => isLocaleParam(route.params.lang) })
 
-const { t, path } = useChrome()
-const { counts, groups, hrefOf } = useContentIndex()
+const { t, path, locale } = useChrome()
+const { counts, groups, hrefOf, untranslated } = useContentIndex()
+
+// Derived from the count the sync emits, not from a sentence someone has to
+// remember to update. The note was wrong within a day of the first translation
+// landing, and would have gone wrong again the next time upstream adds a page.
+const pending = computed(() => untranslated(locale.value))
 
 // Empty on the server, so the prerendered HTML carries the full list and the
 // page is complete without JavaScript. The filter is an enhancement on top.
@@ -111,7 +116,9 @@ useSeoMeta({
       </div>
     </div>
 
-    <p class="reference__note u-prose">{{ t.protoNote }}</p>
+    <p class="reference__note u-prose">
+      {{ pending ? t.protoNotePartial(pending) : t.protoNote }}
+    </p>
   </section>
 </template>
 

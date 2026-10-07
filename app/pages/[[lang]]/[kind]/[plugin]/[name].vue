@@ -125,17 +125,17 @@ useSeoMeta({
         </ol>
       </nav>
 
-      <!-- The language goes on a wrapper, not into <PageBody>'s props. The
-           reference content is English in both locales (PRODUCT.md), so on /es/
-           this subtree is the better part of a thousand English words inside
-           `<html lang="es">`, and a screen reader reads every one of them with
-           Spanish phonetics — WCAG 2.2 AA 3.1.2, Language of Parts. The
-           description and the contents links already declared it; the body, by
-           far the largest block on the page, did not.
-           On the wrapper because <PageBody> is a server island cached by its
-           props: adding `lang` to them split one cached render per page into
-           two, one per locale, for markup that is byte-identical. `lang`
-           inherits through the DOM, so the wrapper reaches the same subtree. -->
+      <!-- `foreign` is set only when the body came back in a language other
+           than the page's — a page with no translation yet, which the server
+           route answers in English. Then this subtree is the better part of a
+           thousand English words inside `<html lang="es">`, and a screen reader
+           says every one of them with Spanish phonetics: WCAG 2.2 AA 3.1.2,
+           Language of Parts. A translated page sets nothing here, so no
+           redundant attribute is emitted.
+           On a wrapper rather than in <PageBody>'s props because it is a server
+           island cached by them: adding `lang` split one cached render per page
+           into two. `lang` inherits through the DOM, so the wrapper reaches the
+           same subtree for none of that cost. -->
       <div>
         <!-- One note or the other, never both: a page is either still English
              or a translation that has drifted. Both are facts about the text
