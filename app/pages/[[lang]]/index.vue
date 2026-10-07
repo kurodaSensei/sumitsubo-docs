@@ -70,11 +70,20 @@ useHead({
       <h1 id="manifesto" class="hero__line">{{ t.manifesto }}</h1>
       <div class="rule" />
 
+      <!-- The first interlock carries no `data-reveal`. DESIGN.md §7 reveals a
+           module "on first entry into the viewport", and these two never enter
+           it — they are on screen when the page paints. Animating them in is
+           not the rule, it is the rule misapplied.
+           It also costs. The start state is `opacity: 0` from CSS at parse
+           time, cleared only once `useReveal` runs after hydration, so on a
+           throttled phone there is a real window with the hero invisible —
+           which is what Lighthouse saw when it scored the Spanish landing 96
+           on accessibility against 100 for the English one. -->
       <div class="interlock">
         <div class="seam" aria-hidden="true" />
 
         <div class="interlock__a">
-          <div data-reveal class="module module--raised u-chamfer pad-seam">
+          <div class="module module--raised u-chamfer pad-seam">
             <!-- No .u-prose: `pad-seam` already caps the measure here, and the
                  two compounded to a ~38-character column at 820 px. One rule
                  owns the measure. -->
@@ -83,7 +92,7 @@ useHead({
         </div>
 
         <div class="interlock__b">
-          <div data-reveal class="module module--raised-2 u-chamfer install">
+          <div class="module module--raised-2 u-chamfer install">
             <div class="install__actions">
               <button type="button" class="btn u-chamfer-control" :aria-label="t.installAction" @click="copyInstall">
                 {{ t.install }}
