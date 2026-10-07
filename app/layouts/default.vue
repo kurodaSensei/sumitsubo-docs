@@ -3,6 +3,7 @@ import { computed, onBeforeUnmount, onMounted } from 'vue'
 import { ALL_LOCALES, DEFAULT_LOCALE, REPO, absolute, localePath, stripLocale } from '~/utils/routing'
 
 const { locale, t, path, otherLocalePath, applied, toggleTheme, restoreTheme } = useChrome()
+const { version } = useContentIndex()
 const route = useRoute()
 
 let stopThemeTracking: (() => void) | undefined
@@ -128,7 +129,7 @@ useSeoMeta({
     <footer class="footer">
       <span>SUMITSUBO <span lang="ja">墨壺</span> · MIT</span>
       <a :href="REPO" class="footer__link" rel="noopener">github.com/kurodaSensei/sumitsubo</a>
-      <span>v0.4.0</span>
+      <span>v{{ version }}</span>
     </footer>
   </div>
 </template>

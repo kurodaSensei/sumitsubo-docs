@@ -388,6 +388,11 @@ try {
 
 const tally = { added: 0, changed: 0, same: 0 };
 const bump = (r) => { tally[r]++; };
+// The framework's released version. It used to be typed into three components
+// by hand and was two releases stale: the site said v0.4.0 while upstream was
+// at v0.5.1. Same class of bug as the translation note that was wrong the day
+// after it was written — so it comes from the manifest, like the counts do.
+let version;
 let nSkills = 0, nCommands = 0;
 const entries = [];
 const plugins = [];
@@ -446,6 +451,10 @@ try {
   // manifest rather than being retyped here. Owned plugins are the ones with a
   // local `source`; the rest are companions referenced from upstream.
   const manifest = JSON.parse(readFileSync(join(tmp, '.claude-plugin', 'marketplace.json'), 'utf8'));
+  version = manifest.metadata?.version;
+  if (!/^\d+\.\d+\.\d+/.test(version ?? '')) {
+    die(`marketplace.json has no usable metadata.version (got ${JSON.stringify(version)})`);
+  }
   for (const p of manifest.plugins ?? []) {
     if (typeof p.source !== 'string' || !p.source.startsWith('./plugins/')) continue;
     const commands = entries.filter((e) => e.kind === 'commands' && e.plugin === p.name).length;
@@ -486,6 +495,7 @@ if (nSkills !== EXPECTED.skills || nCommands !== EXPECTED.commands || plugins.le
 const index = {
   repo: REPO,
   sha,
+  version,
   plugins,
   counts: {
     plugins: plugins.length,

@@ -13,7 +13,7 @@ useReveal()
 // Plugin descriptions are translated per locale when one exists; `describe()`
 // hands back the text and the language to declare on it together, so a card
 // that fell back to English cannot end up unlabelled under `<html lang="es">`.
-const { counts, core, stack, plugins, skillsOf } = useContentIndex()
+const { counts, core, stack, plugins, skillsOf, version } = useContentIndex()
 const card = (p: Plugin) => describe(p, locale.value)
 
 const INSTALL = '/plugin marketplace add kurodaSensei/sumitsubo'
@@ -69,7 +69,7 @@ useHead({
   <div class="landing">
     <section class="hero" aria-labelledby="manifesto">
       <p class="u-label hero__meta">
-        v0.4.0 · MIT · {{ counts.plugins }} plugins · {{ counts.commands }} {{ t.commandsLabel }} ·
+        v{{ version }} · MIT · {{ counts.plugins }} plugins · {{ counts.commands }} {{ t.commandsLabel }} ·
         {{ counts.skills }} {{ t.skills }}
       </p>
       <h1 id="manifesto" class="hero__line">{{ t.manifesto }}</h1>
