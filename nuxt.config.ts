@@ -8,7 +8,7 @@ const index = JSON.parse(
   readFileSync(fileURLToPath(new URL('./content/index.json', import.meta.url)), 'utf8')
 ) as { entries: { kind: string, plugin: string, name: string }[] }
 
-const pages = ['/', '/reference', ...index.entries.map((e) => `/${e.kind}/${e.plugin}/${e.name}`)]
+const pages = ['/', '/install', '/reference', ...index.entries.map((e) => `/${e.kind}/${e.plugin}/${e.name}`)]
 // Spanish sits at `/`, English at `/en/`. Both are prerendered. Mirrors
 // DEFAULT_LOCALE in app/utils/routing.ts — the last assertion in
 // scripts/check-routes.mjs is what notices if the two drift apart.

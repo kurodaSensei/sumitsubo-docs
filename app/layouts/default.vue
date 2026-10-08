@@ -88,6 +88,7 @@ useSeoMeta({
 
       <nav class="nav" :aria-label="t.navAria">
         <NuxtLink :to="path('/')" class="nav__link">{{ t.navHome }}</NuxtLink>
+        <NuxtLink :to="path('/install')" class="nav__link">{{ t.navInstall }}</NuxtLink>
         <NuxtLink :to="path('/reference')" class="nav__link">{{ t.navRef }}</NuxtLink>
 
         <!-- A plain <a>, not NuxtLink: an external href through the router
@@ -276,6 +277,11 @@ useSeoMeta({
 /* The footer is the conventional place to look for a repo, so the URL is
    spelled out here rather than hidden behind a word. */
 .footer__link {
+  /* The full URL is 309px at a 320px viewport, which pushed every page 20px
+     wide — the footer is in the layout, so this was site-wide. Breaking a URL
+     mid-string is ugly; a horizontal scrollbar on every page is worse. */
+  overflow-wrap: anywhere;
+  min-width: 0;
   color: inherit;
   text-decoration: none;
   border-block-end: var(--border-width) solid transparent;

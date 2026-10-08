@@ -38,7 +38,7 @@ const hrefOf = (e) => `/${e.kind}/${e.plugin}/${e.name}`;
 
 // What the build prerenders. Mirrors nuxt.config.ts; if that file changes shape,
 // the last assertion below is what notices.
-const pages = ['/', '/reference', ...index.entries.map(hrefOf)];
+const pages = ['/', '/install', '/reference', ...index.entries.map(hrefOf)];
 const prerendered = new Set([...pages, ...pages.map((p) => (p === '/' ? '/en' : `/en${p}`))]);
 
 let n = 0;
@@ -82,6 +82,8 @@ check('localePath produces the prerendered root, not a trailing-slash variant', 
   assert.equal(localePath('en', '/'), '/en', 'must be /en — /en/ is not a prerendered route');
   assert.equal(localePath('es', '/reference'), '/reference');
   assert.equal(localePath('en', '/reference'), '/en/reference');
+  assert.equal(localePath('es', '/install'), '/install');
+  assert.equal(localePath('en', '/install'), '/en/install');
 });
 
 check('every link the reference index renders is a route the build emits', () => {
@@ -209,8 +211,8 @@ check('every page gets a preview snippet a platform can show whole', () => {
 });
 
 check('the route list is the size the site claims', () => {
-  assert.equal(prerendered.size, (index.counts.pages + 2) * 2,
-    'landing + reference + every page, in both locales');
+  assert.equal(prerendered.size, (index.counts.pages + 3) * 2,
+    'landing + install + reference + every page, in both locales');
 });
 
 if (!process.exitCode) {

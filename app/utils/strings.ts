@@ -23,6 +23,34 @@ export interface Strings {
   seeSkills: string
   /** Nav label for the repository. Short — it sits in the header. */
   navSource: string
+  /** Nav label for the install page. */
+  navInstall: string
+
+  /* --- The install page (DESIGN.md §6 grid, one module per route) --------- */
+  instTitle: string
+  instLede: string
+  instNeeds: string
+  instNeedsBody: string
+  instWay1: string
+  instWay1Note: string
+  instWay2: string
+  instWay2Note: string
+  instWay3: string
+  instWay3Note: string
+  instRestart: string
+  instTry: string
+  instTryNote: string
+  instSandbox: string
+  instNoSsh: string
+  instMaintain: string
+  instMaintainNote: string
+  instDoctor: string
+  instUpdate: string
+  instUninstall: string
+  instTrouble: string
+  instTroubleBody: string
+  instNpmNote: string
+  instAllWays: string
   /** The landing's third action, beside install and the index. */
   seeSource: string
   copy: string
@@ -72,10 +100,36 @@ const en: Strings = {
   seoTitle: 'Sumitsubo — direction first, then the work',
   seoDescription:
     'A framework for building websites with Claude Code. Direction gets decided first, then the work. Accessibility and performance are requirements, not polish.',
-  install: 'Install the plugin',
+  install: 'Install Sumitsubo',
   installAction: 'Copy the install command',
   seeSkills: 'See the skills',
   navSource: 'Source',
+  navInstall: 'Install',
+
+  instTitle: 'Install',
+  instLede: 'Three ways in. The first is one command; the others exist for when you cannot or would rather not run it.',
+  instNeeds: 'What you need',
+  instNeedsBody: 'Claude Code and git. Node 18 or newer only for the first way — the other two do not use it.',
+  instWay1: 'One command',
+  instWay1Note: 'Run it inside the project. It installs the core, the design layer, the companions and the stack pack it detects, then checks the files really landed on disk.',
+  instWay2: 'Inside Claude Code',
+  instWay2Note: 'No Node. The third line is the stack pack — swap it for sumi-react, sumi-shopify or sumi-wordpress.',
+  instWay3: 'From a clone',
+  instWay3Note: 'The plugins load in place from the checkout, so your edits are live and `git pull` is the update.',
+  instRestart: 'Restart Claude Code afterwards. Plugins apply on the next session, not this one.',
+  instTry: 'Try it without touching your setup',
+  instTryNote: 'A throwaway profile through CLAUDE_CONFIG_DIR. Your real configuration is never read or written, and deleting the folder undoes everything.',
+  instSandbox: 'Install into a disposable profile',
+  instNoSsh: 'Same, simulating a machine with no GitHub SSH keys',
+  instMaintain: 'Afterwards',
+  instMaintainNote: 'The same command maintains the install. `update` also repairs a broken one.',
+  instDoctor: 'Read-only check of what is installed',
+  instUpdate: 'Pull the latest version of every plugin',
+  instUninstall: 'Remove every plugin from the marketplace',
+  instTrouble: 'If something fails',
+  instTroubleBody: '`Permission denied (publickey)` means an old copy of the marketplace or of Claude Code, not a missing key. Re-run the first way, or `claude update`.',
+  instNpmNote: 'The package is not published to npm yet, so the command installs straight from the repository. It becomes `npx sumitsubo` once it is.',
+  instAllWays: 'All the ways to install',
   seeSource: 'Read the source',
   copy: 'Copy',
   copied: 'Copied',
@@ -127,10 +181,36 @@ const es: Strings = {
   seoTitle: 'Sumitsubo — primero la dirección, después el trabajo',
   seoDescription:
     'Un framework para construir sitios web con Claude Code. Primero se decide la dirección, después se trabaja. La accesibilidad y el rendimiento son requisitos, no retoques.',
-  install: 'Instalar el plugin',
+  install: 'Instalar Sumitsubo',
   installAction: 'Copiar el comando de instalación',
   seeSkills: 'Ver los skills',
   navSource: 'Código',
+  navInstall: 'Instalación',
+
+  instTitle: 'Instalación',
+  instLede: 'Tres formas de entrar. La primera es un solo comando; las otras existen para cuando no puedes ejecutarlo o prefieres no hacerlo.',
+  instNeeds: 'Qué hace falta',
+  instNeedsBody: 'Claude Code y git. Node 18 o más nuevo solo para la primera forma — las otras dos no lo usan.',
+  instWay1: 'Un comando',
+  instWay1Note: 'Ejecútalo dentro del proyecto. Instala el núcleo, la capa de diseño, los compañeros y el stack pack que detecte, y después comprueba que los archivos llegaron de verdad al disco.',
+  instWay2: 'Dentro de Claude Code',
+  instWay2Note: 'Sin Node. La tercera línea es el stack pack: cámbiala por sumi-react, sumi-shopify o sumi-wordpress.',
+  instWay3: 'Desde un clon',
+  instWay3Note: 'Los plugins cargan en el sitio desde el clon, así que tus ediciones van en vivo y `git pull` es la actualización.',
+  instRestart: 'Reinicia Claude Code después. Los plugins se aplican en la sesión siguiente, no en la actual.',
+  instTry: 'Pruébalo sin tocar tu configuración',
+  instTryNote: 'Un perfil desechable a través de CLAUDE_CONFIG_DIR. Tu configuración real no se lee ni se escribe, y borrar la carpeta deshace todo.',
+  instSandbox: 'Instalar en un perfil desechable',
+  instNoSsh: 'Lo mismo, simulando una máquina sin llaves SSH de GitHub',
+  instMaintain: 'Después',
+  instMaintainNote: 'El mismo comando mantiene la instalación. `update` además repara una que esté dañada.',
+  instDoctor: 'Revisión de solo lectura de lo instalado',
+  instUpdate: 'Traer la última versión de cada plugin',
+  instUninstall: 'Quitar todos los plugins del marketplace',
+  instTrouble: 'Si algo falla',
+  instTroubleBody: '`Permission denied (publickey)` significa una copia vieja del marketplace o de Claude Code, no que falte una llave. Vuelve a ejecutar la primera forma, o `claude update`.',
+  instNpmNote: 'El paquete todavía no está publicado en npm, así que el comando instala directo desde el repositorio. Pasará a ser `npx sumitsubo` cuando lo esté.',
+  instAllWays: 'Todas las formas de instalar',
   seeSource: 'Ver el código',
   copy: 'Copiar',
   copied: 'Copiado',
