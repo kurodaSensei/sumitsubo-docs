@@ -78,8 +78,14 @@ jobs:
           # wins when it exists.
           OUT=$(git ls-remote -- https://github.com/kurodaSensei/sumitsubo.git \
                   "refs/tags/$REF^{}" "refs/tags/$REF" "refs/heads/$REF")
-          SHA=$(echo "$OUT" | grep '\^{}$' | cut -f1 | head -1)
-          [ -n "$SHA" ] || SHA=$(echo "$OUT" | cut -f1 | head -1)
+
+          # awk, not `grep | cut | head`. "Finds nothing" is the NORMAL case
+          # here — every lightweight tag misses the `^{}` pattern — and grep
+          # answers that with exit 1. Under this job's `-e -o pipefail` that
+          # ended the step instantly, with no message, which is exactly how the
+          # first run of this workflow failed. awk reports no match as success.
+          SHA=$(printf '%s\n' "$OUT" | awk -F'\t' '/\^\{\}$/ { print $1; exit }')
+          [ -n "$SHA" ] || SHA=$(printf '%s\n' "$OUT" | awk -F'\t' 'NR == 1 { print $1 }')
           [ -n "$SHA" ] || { echo "::error::$REF does not exist in the framework repo"; exit 1; }
 
           echo "sha=$SHA" >> "$GITHUB_OUTPUT"
@@ -165,7 +171,7 @@ jobs:
           # Re-running for the same ref should move the existing PR, not stack
           # a second one on the same branch.
           if [ -n "$(gh pr list --head "$BRANCH" --state open --json number --jq '.[].number')" ]; then
-            echo "Updated the open PR for $BRANCH." >> "$GITHUB_STEP_SUMMARY"
+            echo "Updated the open PR for \`$BRANCH\`." >> "$GITHUB_STEP_SUMMARY"
           else
             # Built with printf rather than a multi-line string: a continuation
             # line at column zero closes the YAML block scalar, which is a
@@ -177,6 +183,25 @@ jobs:
               "" \
               "Read the diff before merging: a translation that went stale is still" \
               "served, marked as behind its source, and the run log says which.")
-            gh pr create --base main --head "$BRANCH" \
-              --title "content: sync to $REF" --body "$BODY"
+            # Opening the PR needs Settings -> Actions -> General -> Workflow
+            # permissions -> "Allow GitHub Actions to create and approve pull
+            # requests", which is OFF by default and is how the first real run
+            # of this workflow ended. The branch is pushed either way, so a
+            # repository without that setting still gets the work — it just
+            # gets a link instead of a pull request, and the run stays green
+            # because nothing actually went wrong.
+            if ! gh pr create --base main --head "$BRANCH" \
+                   --title "content: sync to $REF" --body "$BODY"; then
+              {
+                echo "### Branch pushed, pull request not opened"
+                echo
+                echo "\`$BRANCH\` is on the remote with the synced content and passing checks."
+                echo "Actions is not allowed to open pull requests in this repository, so open it:"
+                echo
+                echo "<https://github.com/${GITHUB_REPOSITORY}/compare/main...${BRANCH}?expand=1>"
+                echo
+                echo "To let the workflow do it: Settings -> Actions -> General ->"
+                echo "Workflow permissions -> _Allow GitHub Actions to create and approve pull requests_."
+              } >> "$GITHUB_STEP_SUMMARY"
+            fi
           fi
