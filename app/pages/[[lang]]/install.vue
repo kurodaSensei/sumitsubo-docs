@@ -32,7 +32,6 @@ useSeoMeta({
                selectable and copyable with the shell characters intact. -->
           <pre class="cmd"><code>{{ INSTALL.primary }}</code></pre>
           <p class="way__note u-prose">{{ t.instWay1Note }}</p>
-          <p class="way__fine">{{ t.instNpmNote }}</p>
         </div>
       </li>
 

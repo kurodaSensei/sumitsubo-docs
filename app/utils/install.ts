@@ -2,19 +2,14 @@
  * The install commands, in one place because the landing and the install page
  * both print them and must not drift.
  *
- * `npx github:…` rather than `npx sumitsubo`: the package is not on npm yet
- * (`npm view sumitsubo version` is a 404 as of v0.6.0's release). The GitHub
- * form is verified to run and prints `sumitsubo 0.6.0 — install and maintain…`.
- *
- * ponytail: swap PRIMARY to `npx sumitsubo` after the first publish; nothing
- * else here changes. The reference page for /sumi:init already says the short
- * form, because it is vendored verbatim from the framework, so the two disagree
- * on the site until then — a visible inconsistency is better than a headline
- * command that 404s.
+ * `npx sumitsubo` now that the package is published: `npm view sumitsubo
+ * version` answers 0.6.1 and the command prints its own banner. This file
+ * briefly pointed at the repository instead, while npm was still a 404 — which
+ * is the argument for having it. Switching back was one line, in one place.
  */
 export const INSTALL = {
   /** One command, inside the project. Needs Node 18+. */
-  primary: 'npx github:kurodaSensei/sumitsubo',
+  primary: 'npx sumitsubo',
   /** Inside Claude Code, no Node required. */
   claudeCode: [
     '/plugin marketplace add kurodaSensei/sumitsubo',
@@ -28,12 +23,12 @@ export const INSTALL = {
     'claude plugin install sumi-design@sumitsubo',
   ],
   /** Throwaway profile via CLAUDE_CONFIG_DIR; the real configuration is untouched. */
-  sandbox: 'npx github:kurodaSensei/sumitsubo --sandbox',
+  sandbox: 'npx sumitsubo --sandbox',
   /** Simulates a machine with no GitHub SSH keys. */
-  noSsh: 'npx github:kurodaSensei/sumitsubo --sandbox --no-ssh',
+  noSsh: 'npx sumitsubo --sandbox --no-ssh',
   maintain: [
-    ['doctor', 'npx github:kurodaSensei/sumitsubo doctor'],
-    ['update', 'npx github:kurodaSensei/sumitsubo update'],
-    ['uninstall', 'npx github:kurodaSensei/sumitsubo uninstall'],
+    ['doctor', 'npx sumitsubo doctor'],
+    ['update', 'npx sumitsubo update'],
+    ['uninstall', 'npx sumitsubo uninstall'],
   ] as const,
 } as const
