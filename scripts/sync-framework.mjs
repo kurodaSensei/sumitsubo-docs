@@ -28,7 +28,7 @@ const PUB = join(ROOT, 'server', 'assets', 'pages');
 // source and lives at the root of content/, so it is not listed here.
 const TRANSLATIONS = ['es'];
 const REPO = 'https://github.com/kurodaSensei/sumitsubo.git';
-const EXPECTED = { skills: 34, commands: 9, plugins: 6 };
+const EXPECTED = { skills: 34, commands: 10, plugins: 6 };
 const dryRun = process.argv.includes('-n') || process.argv.includes('--dry-run');
 
 // Without --ref this clones the default branch tip, so a run made to regenerate
