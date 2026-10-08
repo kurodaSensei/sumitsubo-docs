@@ -49,7 +49,6 @@ export interface Strings {
   instUninstall: string
   instTrouble: string
   instTroubleBody: string
-  instNpmNote: string
   instAllWays: string
   /** The landing's third action, beside install and the index. */
   seeSource: string
@@ -128,7 +127,6 @@ const en: Strings = {
   instUninstall: 'Remove every plugin from the marketplace',
   instTrouble: 'If something fails',
   instTroubleBody: '`Permission denied (publickey)` means an old copy of the marketplace or of Claude Code, not a missing key. Re-run the first way, or `claude update`.',
-  instNpmNote: 'The package is not published to npm yet, so the command installs straight from the repository. It becomes `npx sumitsubo` once it is.',
   instAllWays: 'All the ways to install',
   seeSource: 'Read the source',
   copy: 'Copy',
@@ -209,7 +207,6 @@ const es: Strings = {
   instUninstall: 'Quitar todos los plugins del marketplace',
   instTrouble: 'Si algo falla',
   instTroubleBody: '`Permission denied (publickey)` significa una copia vieja del marketplace o de Claude Code, no que falte una llave. Vuelve a ejecutar la primera forma, o `claude update`.',
-  instNpmNote: 'El paquete todavía no está publicado en npm, así que el comando instala directo desde el repositorio. Pasará a ser `npx sumitsubo` cuando lo esté.',
   instAllWays: 'Todas las formas de instalar',
   seeSource: 'Ver el código',
   copy: 'Copiar',
