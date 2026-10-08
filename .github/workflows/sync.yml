@@ -78,8 +78,14 @@ jobs:
           # wins when it exists.
           OUT=$(git ls-remote -- https://github.com/kurodaSensei/sumitsubo.git \
                   "refs/tags/$REF^{}" "refs/tags/$REF" "refs/heads/$REF")
-          SHA=$(echo "$OUT" | grep '\^{}$' | cut -f1 | head -1)
-          [ -n "$SHA" ] || SHA=$(echo "$OUT" | cut -f1 | head -1)
+
+          # awk, not `grep | cut | head`. "Finds nothing" is the NORMAL case
+          # here — every lightweight tag misses the `^{}` pattern — and grep
+          # answers that with exit 1. Under this job's `-e -o pipefail` that
+          # ended the step instantly, with no message, which is exactly how the
+          # first run of this workflow failed. awk reports no match as success.
+          SHA=$(printf '%s\n' "$OUT" | awk -F'\t' '/\^\{\}$/ { print $1; exit }')
+          [ -n "$SHA" ] || SHA=$(printf '%s\n' "$OUT" | awk -F'\t' 'NR == 1 { print $1 }')
           [ -n "$SHA" ] || { echo "::error::$REF does not exist in the framework repo"; exit 1; }
 
           echo "sha=$SHA" >> "$GITHUB_OUTPUT"
