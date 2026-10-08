@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { onBeforeUnmount, ref } from 'vue'
 import { REPO, isLocaleParam } from '~/utils/routing'
+import { INSTALL as INSTALL_COMMANDS } from '~/utils/install'
+const PRIMARY_INSTALL = INSTALL_COMMANDS.primary
 import { describe, type Plugin } from '~/composables/useContentIndex'
 
 definePageMeta({ validate: (route) => isLocaleParam(route.params.lang) })
@@ -16,7 +18,9 @@ useReveal()
 const { counts, core, stack, plugins, skillsOf, version } = useContentIndex()
 const card = (p: Plugin) => describe(p, locale.value)
 
-const INSTALL = '/plugin marketplace add kurodaSensei/sumitsubo'
+// One command now, not a marketplace add. The string lives in utils/install
+// so this and /install cannot drift, and so the note about npm has one home.
+const INSTALL = PRIMARY_INSTALL
 
 const copied = ref(false)
 let timer: ReturnType<typeof setTimeout> | undefined
@@ -105,6 +109,7 @@ useHead({
               <NuxtLink :to="path('/reference')" class="btn-ghost">{{ t.seeSkills }}</NuxtLink>
               <!-- The actual complaint this answers: the landing offered an
                    install command for an open repo and no way to go read it. -->
+              <NuxtLink :to="path('/install')" class="btn-ghost">{{ t.instAllWays }}</NuxtLink>
               <a :href="REPO" class="btn-ghost" rel="noopener">{{ t.seeSource }}</a>
             </div>
 

@@ -32,7 +32,7 @@ jobs:
 
       - name: Every indexed page was emitted
         run: |
-          expected=$(node -p "require('./content/index.json').counts.pages * 2 + 4")
+          expected=$(node -p "require('./content/index.json').counts.pages * 2 + 6")
           actual=$(find .output/public -name index.html | wc -l | tr -d ' ')
           echo "expected $expected HTML pages, found $actual"
           [ "$actual" -eq "$expected" ]
