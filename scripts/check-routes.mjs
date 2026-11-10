@@ -38,7 +38,7 @@ const hrefOf = (e) => `/${e.kind}/${e.plugin}/${e.name}`;
 
 // What the build prerenders. Mirrors nuxt.config.ts; if that file changes shape,
 // the last assertion below is what notices.
-const pages = ['/', '/install', '/reference', ...index.entries.map(hrefOf)];
+const pages = ['/', '/install', '/band', '/reference', ...index.entries.map(hrefOf)];
 const prerendered = new Set([...pages, ...pages.map((p) => (p === '/' ? '/en' : `/en${p}`))]);
 
 let n = 0;
@@ -211,8 +211,8 @@ check('every page gets a preview snippet a platform can show whole', () => {
 });
 
 check('the route list is the size the site claims', () => {
-  assert.equal(prerendered.size, (index.counts.pages + 3) * 2,
-    'landing + install + reference + every page, in both locales');
+  assert.equal(prerendered.size, (index.counts.pages + 4) * 2,
+    'landing + install + band + reference + every page, in both locales');
 });
 
 if (!process.exitCode) {

@@ -89,6 +89,7 @@ useSeoMeta({
       <nav class="nav" :aria-label="t.navAria">
         <NuxtLink :to="path('/')" class="nav__link">{{ t.navHome }}</NuxtLink>
         <NuxtLink :to="path('/install')" class="nav__link">{{ t.navInstall }}</NuxtLink>
+        <NuxtLink :to="path('/band')" class="nav__link">{{ t.navBand }}</NuxtLink>
         <NuxtLink :to="path('/reference')" class="nav__link">{{ t.navRef }}</NuxtLink>
 
         <!-- A plain <a>, not NuxtLink: an external href through the router

@@ -20,7 +20,7 @@ npm run dev        # http://localhost:3000
 
 ```bash
 npm run check      # 10 assertions — routes, tokens, translation fidelity
-npm run generate   # the static build, 94 routes
+npm run generate   # the static build, 96 routes
 npm run sync       # re-vendor the reference content from the framework
 ```
 
